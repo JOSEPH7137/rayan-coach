@@ -166,7 +166,7 @@
     <footer class="main-footer" id="main-footer">
       <div class="footer-container">
         
-        <!-- Top Footer Grid -->
+        <!-- Top Footer Grid - 3 Columns (No Quick Links) -->
         <div class="footer-grid">
           
           <!-- Company Info -->
@@ -186,19 +186,6 @@
               <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
               <a href="#" class="social-icon" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
             </div>
-          </div>
-          
-          <!-- Quick Links -->
-          <div class="footer-col">
-            <h4>Quick Links</h4>
-            <div class="footer-divider"></div>
-            <ul class="footer-links-list">
-              <li><a href="#" onclick="showPage('welcome')">Home</a></li>
-              <li><a href="#" onclick="showAboutModal()">About Us</a></li>
-              <li><a href="#" onclick="scrollToFooter()">Contact Us</a></li>
-              <li><a href="#" onclick="showToast('FAQs - Coming Soon','info')">FAQs</a></li>
-              <li><a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a></li>
-            </ul>
           </div>
           
           <!-- Contacts -->
@@ -456,7 +443,6 @@ function scrollToFooter() {
   if (footer) {
     footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    // If on dashboard page, scroll to dashboard footer
     const dashboardFooter = document.querySelector('.dashboard-footer');
     if (dashboardFooter) {
       dashboardFooter.scrollIntoView({ behavior: 'smooth', block: 'start' });
