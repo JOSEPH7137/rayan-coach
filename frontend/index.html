@@ -42,28 +42,48 @@
     
     <!-- Hero Carousel Images -->
     <div class="hero-carousel" style="width:100%;max-width:900px;margin-bottom:30px;position:relative;border-radius:20px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-      <div class="carousel-container" style="position:relative;width:100%;height:400px;overflow:hidden;">
-        <div class="carousel-slides" id="carouselSlides" style="display:flex;transition:transform 0.5s ease-in-out;height:100%;">
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image1.jpg" alt="Rayan Coach Luxury Bus" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Premium VIP Coaches</p>
-            </div>
-          </div>
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image2.jpg" alt="Rayan Coach Comfortable Seats" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Luxury Recliner Seats</p>
-            </div>
-          </div>
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image3.jpg" alt="Rayan Coach Interior" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Modern Amenities & WiFi</p>
-            </div>
-          </div>
+  <div class="carousel-container" style="position:relative;width:100%;height:400px;overflow:hidden;">
+    <div class="carousel-slides" id="carouselSlides" style="display:flex;transition:transform 0.5s ease-in-out;height:100%;">
+      
+      <!-- Slide 1 - Using working online image -->
+      <div class="carousel-slide" style="min-width:100%;height:100%;">
+        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&h=400&fit=crop" alt="Rayan Coach Luxury Bus" style="width:100%;height:100%;object-fit:cover;">
+        <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
+          <p style="color:var(--gold);font-weight:700;margin:0;">Premium VIP Coaches</p>
         </div>
-        
+      </div>
+      
+      <!-- Slide 2 - Using working online image -->
+      <div class="carousel-slide" style="min-width:100%;height:100%;">
+        <img src="https://images.unsplash.com/photo-1587145826462-73c2c3a2a3f1?w=1200&h=400&fit=crop" alt="Rayan Coach Comfortable Seats" style="width:100%;height:100%;object-fit:cover;">
+        <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
+          <p style="color:var(--gold);font-weight:700;margin:0;">Luxury Recliner Seats</p>
+        </div>
+      </div>
+      
+      <!-- Slide 3 - Using working online image -->
+      <div class="carousel-slide" style="min-width:100%;height:100%;">
+        <img src="https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=1200&h=400&fit=crop" alt="Rayan Coach Interior" style="width:100%;height:100%;object-fit:cover;">
+        <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
+          <p style="color:var(--gold);font-weight:700;margin:0;">Modern Amenities & WiFi</p>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Navigation Dots -->
+    <div class="carousel-dots" style="position:absolute;bottom:20px;right:20px;display:flex;gap:10px;z-index:10;">
+      <div class="dot" data-index="0" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;"></div>
+      <div class="dot" data-index="1" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;"></div>
+      <div class="dot" data-index="2" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;"></div>
+    </div>
+    
+    <!-- Navigation Arrows -->
+    <button class="carousel-prev" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;z-index:10;">←</button>
+    <button class="carousel-next" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;z-index:10;">→</button>
+    
+  </div>
+</div>
         <!-- Carousel Navigation Dots -->
         <div class="carousel-dots" style="position:absolute;bottom:20px;right:20px;display:flex;gap:10px;z-index:10;">
           <div class="dot" data-index="0" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;"></div>
