@@ -1,8 +1,8 @@
 // ==================== REACT SETUP ====================
+// At the VERY TOP of app.js
 const { useState, useEffect, createContext, useContext } = React;
 const { createRoot } = ReactDOM;
 const { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } = ReactRouterDOM;
-
 // API Base URL - Change this to your backend URL when deploying
 const API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api' 
