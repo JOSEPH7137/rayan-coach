@@ -566,9 +566,14 @@ body.light-mode .main-footer {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 40px;
   margin-bottom: 50px;
+}
+
+/* Company Info Column */
+.footer-col:first-child {
+  grid-column: span 1;
 }
 
 .footer-logo {
@@ -628,6 +633,11 @@ body.light-mode .main-footer {
   transform: translateY(-3px);
 }
 
+/* Contact Us Column */
+.footer-col:nth-child(2) {
+  grid-column: span 1;
+}
+
 .footer-col h4 {
   color: var(--text);
   font-size: 16px;
@@ -642,34 +652,6 @@ body.light-mode .main-footer {
   width: 40px;
   background: var(--gold);
   margin-bottom: 20px;
-}
-
-.social-media-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.social-media-list li {
-  margin-bottom: 12px;
-}
-
-.social-media-link {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  transition: color 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.social-media-link i {
-  width: 20px;
-}
-
-.social-media-link:hover {
-  color: var(--gold);
 }
 
 .contact-item {
@@ -696,6 +678,11 @@ body.light-mode .main-footer {
   color: var(--muted);
   font-size: 12px;
   margin: 0;
+}
+
+/* Operating Hours Column */
+.footer-col:nth-child(3) {
+  grid-column: span 1;
 }
 
 .hours-item {
@@ -978,7 +965,14 @@ body.light-mode .main-footer {
   }
   
   .footer-grid {
-    gap: 30px;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .footer-col:first-child,
+  .footer-col:nth-child(2),
+  .footer-col:nth-child(3) {
+    grid-column: span 1;
   }
   
   .footer-bottom {
@@ -1023,6 +1017,7 @@ body.light-mode .main-footer {
     display: flex !important;
   }
 }
+
 /* About Us Section */
 .about-section {
   margin: 60px auto;
@@ -1087,28 +1082,6 @@ body.light-mode .main-footer {
   color: var(--text);
 }
 
-/* Footer Links List */
-.footer-links-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links-list li {
-  margin-bottom: 12px;
-}
-
-.footer-links-list li a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  transition: color 0.3s ease;
-}
-
-.footer-links-list li a:hover {
-  color: var(--gold);
-}
-
 @media (max-width: 768px) {
   .about-section {
     margin: 40px 16px;
@@ -1135,7 +1108,6 @@ body.light-mode .main-footer {
     font-size: 12px;
   }
 }
-/* Add to your CSS file */
 
 /* Navigation Links */
 .nav-links {
