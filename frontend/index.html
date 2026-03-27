@@ -34,8 +34,8 @@
     </div>
     <div class="nav-links">
       <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
-      <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="nav-link">About Us</a>
-      <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="nav-link">Contact Us</a>
+      <a href="#" onclick="showAboutModal()" class="nav-link">About Us</a>
+      <a href="#" onclick="scrollToFooter()" class="nav-link">Contact Us</a>
     </div>
     <div class="nav-actions">
       <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
@@ -128,6 +128,34 @@
       <div><div class="stat-number">24/7</div><div class="stat-label">Support</div></div>
     </div>
 
+    <!-- About Us Section -->
+    <div class="about-section" id="about-section">
+      <div class="about-container">
+        <h2 class="about-title">About Rayan Coach</h2>
+        <div class="about-content">
+          <p>More than just transport! Rayan Coach Limited provide travelers with genuine comfort they deserve from booking to when the passengers board the bus. Travelers will not need to go all the way to booking offices. They can either make phone call or use the Rayan Coach app to book. Payment after booking can be done via M-Pesa.</p>
+          <div class="about-features">
+            <div class="about-feature">
+              <i class="fas fa-mobile-alt"></i>
+              <span>Easy Mobile Booking</span>
+            </div>
+            <div class="about-feature">
+              <i class="fas fa-phone-alt"></i>
+              <span>Phone Reservations</span>
+            </div>
+            <div class="about-feature">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>M-Pesa Payments</span>
+            </div>
+            <div class="about-feature">
+              <i class="fas fa-chair"></i>
+              <span>Premium Comfort</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Road animation -->
     <div class="road-container">
       <div class="road-surface"></div>
@@ -135,7 +163,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="main-footer">
+    <footer class="main-footer" id="main-footer">
       <div class="footer-container">
         
         <!-- Top Footer Grid -->
@@ -160,22 +188,22 @@
             </div>
           </div>
           
-          <!-- Follow Us -->
+          <!-- Quick Links -->
           <div class="footer-col">
-            <h4>Follow Us</h4>
+            <h4>Quick Links</h4>
             <div class="footer-divider"></div>
-            <ul class="social-media-list">
-              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i> Facebook</a></li>
-              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on X (Twitter)','info')"><i class="fab fa-x-twitter"></i> X (Twitter)</a></li>
-              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i> Instagram</a></li>
-              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i> TikTok</a></li>
-              <li><a href="#" class="social-media-link" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+            <ul class="footer-links-list">
+              <li><a href="#" onclick="showPage('welcome')">Home</a></li>
+              <li><a href="#" onclick="showAboutModal()">About Us</a></li>
+              <li><a href="#" onclick="scrollToFooter()">Contact Us</a></li>
+              <li><a href="#" onclick="showToast('FAQs - Coming Soon','info')">FAQs</a></li>
+              <li><a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a></li>
             </ul>
           </div>
           
           <!-- Contacts -->
-          <div class="footer-col">
-            <h4>Contacts</h4>
+          <div class="footer-col" id="contact-section">
+            <h4>Contact Us</h4>
             <div class="footer-divider"></div>
             <div class="contact-item">
               <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
@@ -240,10 +268,10 @@
             <p class="footer-tagline">Comfort. Safety. Reliability. Since 2020</p>
           </div>
           <div class="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Refund Policy</a>
-            <a href="#">FAQs</a>
+            <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
+            <a href="#" onclick="showToast('Terms of Service','info')">Terms of Service</a>
+            <a href="#" onclick="showToast('Refund Policy','info')">Refund Policy</a>
+            <a href="#" onclick="showToast('FAQs','info')">FAQs</a>
           </div>
           <div class="footer-kenya">
             <span>🇰🇪</span>
@@ -268,11 +296,11 @@
       </div>
       <div class="auth-nav-links">
         <a href="#" onclick="showPage('welcome')" class="auth-nav-link">Home</a>
-        <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="auth-nav-link">About Us</a>
-        <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="auth-nav-link">Contact Us</a>
+        <a href="#" onclick="showAboutModal()" class="auth-nav-link">About Us</a>
+        <a href="#" onclick="scrollToFooter()" class="auth-nav-link">Contact Us</a>
       </div>
       <div class="theme-toggle-small" onclick="toggleTheme()">
-        <i class="fas fa-moon" id="themeIconSmall"></i>
+        <i class="fas fa-moon"></i>
       </div>
     </div>
 
@@ -370,8 +398,8 @@
         <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
         <div class="topbar-nav-links">
           <a href="#" onclick="showPage('welcome')" class="topbar-nav-link">Home</a>
-          <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="topbar-nav-link">About Us</a>
-          <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="topbar-nav-link">Contact Us</a>
+          <a href="#" onclick="showAboutModal()" class="topbar-nav-link">About Us</a>
+          <a href="#" onclick="scrollToFooter()" class="topbar-nav-link">Contact Us</a>
         </div>
         <h3 id="page-title">Dashboard</h3>
       </div>
@@ -396,8 +424,8 @@
       <div class="dashboard-footer-content">
         <div class="dashboard-footer-links">
           <a href="#" onclick="showPage('welcome')">Home</a>
-          <a href="#" onclick="showToast('About Us - Coming Soon','info')">About Us</a>
-          <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')">Contact Us</a>
+          <a href="#" onclick="showAboutModal()">About Us</a>
+          <a href="#" onclick="scrollToFooter()">Contact Us</a>
           <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
           <a href="#" onclick="showToast('Terms of Service','info')">Terms</a>
         </div>
@@ -420,6 +448,60 @@
 <div id="modal-container"></div>
 
 <script src="app.js"></script>
+
+<script>
+// Scroll to footer function
+function scrollToFooter() {
+  const footer = document.getElementById('main-footer');
+  if (footer) {
+    footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // If on dashboard page, scroll to dashboard footer
+    const dashboardFooter = document.querySelector('.dashboard-footer');
+    if (dashboardFooter) {
+      dashboardFooter.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}
+
+// Show About Us Modal
+function showAboutModal() {
+  showModal(`
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>About Rayan Coach</h3>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div class="about-icon" style="font-size: 48px;">🚌</div>
+        </div>
+        <p style="margin-bottom: 16px; line-height: 1.6;"><strong>More than just transport!</strong> Rayan Coach Limited provide travelers with genuine comfort they deserve from booking to when the passengers board the bus.</p>
+        <p style="margin-bottom: 16px; line-height: 1.6;">Travelers will not need to go all the way to booking offices. They can either make phone call or use the Rayan Coach app to book. Payment after booking can be done via M-Pesa.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
+            <i class="fas fa-mobile-alt" style="color: var(--gold);"></i>
+            <span style="font-size: 13px;">Easy Mobile Booking</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
+            <i class="fas fa-phone-alt" style="color: var(--gold);"></i>
+            <span style="font-size: 13px;">Phone Reservations</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
+            <i class="fas fa-money-bill-wave" style="color: var(--gold);"></i>
+            <span style="font-size: 13px;">M-Pesa Payments</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
+            <i class="fas fa-chair" style="color: var(--gold);"></i>
+            <span style="font-size: 13px;">Premium Comfort</span>
+          </div>
+        </div>
+        <button class="btn btn-gold btn-full mt-20" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+</script>
 
 </body>
 </html>
