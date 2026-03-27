@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Rayan Coach | Premium Intercity Travel Kenya</title>
+    <!-- Google Fonts & Tailwind + FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Maps API (simulated tracking with static map + dynamic markers) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbV6arttYQ&libraries=places&callback=Function.prototype" async defer></script>
+    <style>
+        /* custom smooth transitions & glassmorphism */
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; scroll-behavior: smooth; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-radius: 2rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
+        .orange-glow { transition: all 0.2s ease; }
+        .orange-glow:hover { box-shadow: 0 8px 20px rgba(249,115,22,0.3); transform: translateY(-2px); }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2); }
+        .animate-pulse-slow { animation: pulseSlow 2s infinite; }
+        @keyframes pulseSlow { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        input, select, textarea { transition: all 0.2s; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+<script type="text/babel">
+    // --------------------------------------------------------------
+    // REACT APP – Rayan Coach (Full featured with role-based panels)
+    // --------------------------------------------------------------
+    const { useState, useEffect } = React;
+
+    // ---- Mock Data & Helpers ----
+    const locations = ["Nairobi", "Mombasa", "Garissa", "Thika", "Mwingi"];
+    const busFleet = [
+        { id: 1, name: "Safari Supreme", image: "https://placehold.co/600x400/1e1e2f/orange?text=VIP+Coach", type: "VIP Comfort", amenities: ["WiFi", "Charging", "Recliner"], seats: 32, price: 1800 },
+        { id: 2, name: "Executive Cruiser", image: "https://placehold.co/600x400/1e1e2f/white?text=Standard+Plus", type: "Standard", amenities: ["WiFi", "Power Outlets"], seats: 44, price: 1200 },
+        { id: 3, name: "Royal Class", image: "https://placehold.co/600x400/1e1e2f/orange?text=VIP+Luxury", type: "VIP Comfort", amenities: ["WiFi", "Charging", "Meal", "Entertainment"], seats: 28, price: 2400 }
+    ];
+    // Simulated trips for search
+    const generateTrips = (from, to, date, isVip) => [{ id: 101, bus: busFleet[isVip?0:1], departure: "07:30 AM", arrival: "02:15 PM", fare: isVip?2100:1350, availableSeats: 12 }];
+
+    // Helper: PDF & QR dummy (simulate download)
+    const downloadTicketPDF = (booking) => { alert(`🎫 PDF Ticket Generated for ${booking.passengerName}\nReference: ${booking.ref}\nQR Code would be embedded. (Simulated download)`); };
+
+    // ---------- AUTH CONTEXT (Mock role-based) ----------
+    const AuthContext = React.createContext();
+    const AuthProvider = ({ children }) => {
+        const [user, setUser] = useState(null);
+        const login = (role, name) => setUser({ role, name, id: Math.random().toString(36) });
+        const logout = () => setUser(null);
+        return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+    };
+
+    // ---------- MAIN APP WITH ROUTER SIMULATION ----------
+    const App = () => {
+        const [currentView, setCurrentView] = useState("home");
+        const { user, logout } = React.useContext(AuthContext);
+        const [showBooking, setShowBooking] = useState(false);
+        const [showParcel, setShowParcel] = useState(false);
+        
+        useEffect(() => {
+            if(user && currentView !== "dashboard") setCurrentView("dashboard");
+        }, [user]);
+
+        const renderNav = () => (
+            <nav className="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-orange-500/20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => {setCurrentView("home"); setShowBooking(false); setShowParcel(false);}}>
+                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">RC</div>
+                        <span className="text-white font-bold text-xl tracking-tight">RAYAN COACH</span>
+                    </div>
+                    <div className="hidden md:flex space-x-6 text-white">
+                        <button onClick={() => {setCurrentView("home"); setShowBooking(false); setShowParcel(false);}} className="hover:text-orange-400 transition">Home</button>
+                        <button onClick={() => {setCurrentView("home"); setShowBooking(true); setShowParcel(false);}} className="hover:text-orange-400">Book Trip</button>
+                        <button onClick={() => {setCurrentView("home"); setShowParcel(true); setShowBooking(false);}} className="hover:text-orange-400">Send Parcel</button>
+                        <button onClick={() => setCurrentView("fleet")} className="hover:text-orange-400">Fleet</button>
+                        <button onClick={() => setCurrentView("tracking")} className="hover:text-orange-400">Live Tracking</button>
+                        {user ? <button onClick={logout} className="bg-orange-600 px-3 py-1 rounded-full text-sm">Logout ({user.role})</button> : <button onClick={() => document.getElementById('authModal').classList.remove('hidden')} className="bg-orange-600 px-4 py-1 rounded-full">Login</button>}
+                    </div>
+                </div>
+            </nav>
+        );
+
+        const renderHome = () => (
+            <div className="bg-gradient-to-br from-gray-50 to-white">
+                {/* Hero */}
+                <div className="relative overflow-hidden bg-black text-white py-20 px-4">
+                    <div className="absolute inset-0 bg-[url('https://placehold.co/1600x900/111111/orange?text=Premium+Bus')] bg-cover opacity-20"></div>
+                    <div className="relative max-w-6xl mx-auto text-center">
+                        <div className="flex justify-center mb-4"><div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center text-3xl font-bold">RC</div></div>
+                        <h1 className="text-4xl md:text-6xl font-extrabold">Comfortable, Safe & Reliable Travel Across Kenya</h1>
+                        <p className="text-xl text-gray-300 mt-4">Book your journey or send parcels with ease</p>
+                        <div className="flex flex-wrap justify-center gap-5 mt-8">
+                            <button onClick={() => {setShowBooking(true); setShowParcel(false);}} className="bg-orange-600 px-8 py-3 rounded-full font-bold text-lg shadow-lg orange-glow">Book Ticket</button>
+                            <button onClick={() => {setShowParcel(true); setShowBooking(false);}} className="bg-white text-black px-8 py-3 rounded-full font-bold shadow-lg">Send Parcel</button>
+                        </div>
+                    </div>
+                </div>
+                {/* Booking/Parcel Toggle Form */}
+                {(showBooking || showParcel) && (
+                    <div className="max-w-5xl mx-auto -mt-12 relative z-20 px-4">
+                        <div className="glass-card p-6 md:p-8">
+                            {showBooking && <BookingForm onSuccess={() => setCurrentView("dashboard")} />}
+                            {showParcel && <ParcelModule />}
+                        </div>
+                    </div>
+                )}
+                {/* Amenities Section */}
+                <div className="max-w-7xl mx-auto py-16 px-4">
+                    <h2 className="text-3xl font-bold text-center mb-12">Premium Amenities</h2>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[{icon:"fa-wifi",title:"High-Speed WiFi",desc:"Stream & work seamlessly"},{icon:"fa-plug",title:"Power Outlets",desc:"Stay charged"},{icon:"fa-couch",title:"Comfort Seating",desc:"Spacious recliner seats"}].map((a,i)=>(
+                            <div key={i} className="bg-white rounded-2xl p-6 shadow-lg text-center card-hover"><i className={`fas ${a.icon} text-4xl text-orange-500 mb-3`}></i><h3 className="text-xl font-bold">{a.title}</h3><p className="text-gray-600">{a.desc}</p></div>
+                        ))}
+                    </div>
+                </div>
+                {/* Testimonials + FAQ */}
+                <div className="bg-gray-100 py-16 px-4">
+                    <div className="max-w-6xl mx-auto"><h2 className="text-3xl font-bold text-center mb-10">What Travelers Say</h2>
+                    <div className="grid md:grid-cols-2 gap-6"><div className="bg-white p-6 rounded-2xl shadow"><i className="fas fa-star text-orange-400"></i> "Clean buses and on-time! VIP is superb." - Jane, Nairobi</div><div className="bg-white p-6 rounded-2xl shadow"><i className="fas fa-star text-orange-400"></i> "Best parcel delivery, same day Mombasa." - Ahmed, Mombasa</div></div>
+                    <div className="mt-12"><h3 className="text-2xl font-bold">FAQs</h3><div className="mt-4 space-y-3"><p><strong>❓ How to track bus?</strong> Use Live Tracking page or traveler panel.</p><p><strong>❓ M-Pesa payment?</strong> After booking you'll get Till/Paybill.</p></div></div></div>
+                </div>
+                {/* Contact */}
+                <div className="bg-black text-white py-12 px-4"><div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8"><div><i className="fas fa-map-marker-alt text-orange-400"></i> Head Office: Second St, Nairobi, Kenya<br/><i className="fas fa-building"></i> Branch: Mombasa, Kenya</div><div><i className="fas fa-phone"></i> +254 745 129233<br/><i className="fas fa-envelope"></i> info@rayan.co.ke</div></div></div>
+            </div>
+        );
+        
+        // ---- Booking Component (with fare, passenger type, conditional return) ----
+        const BookingForm = ({ onSuccess }) => {
+            const [tripType, setTripType] = useState("one-way");
+            const [pickup, setPickup] = useState(locations[0]); const [dest, setDest] = useState(locations[1]); const [departDate, setDepartDate] = useState("2025-05-10"); const [returnDate, setReturnDate] = useState("2025-05-12"); const [passClass, setPassClass] = useState("Standard"); const [selectedBus, setSelectedBus] = useState(busFleet[1]); const [fare, setFare] = useState(1200); const [showPay, setShowPay] = useState(false); const [phoneMpesa, setPhoneMpesa] = useState("+254"); const [bookingRef, setBookingRef] = useState("");
+            useEffect(() => { const price = passClass === "VIP Comfort" ? (selectedBus.price+400) : selectedBus.price; setFare(price); }, [passClass, selectedBus]);
+            const handleSearch = () => { alert(`Trips found: ${pickup} → ${dest} on ${departDate}`); setShowPay(true); };
+            const handlePayment = () => { if(!phoneMpesa.includes("254")) return alert("Valid M-Pesa number required"); const ref = "RC"+Math.floor(Math.random()*100000); setBookingRef(ref); alert(`Payment confirmed via M-Pesa ${phoneMpesa}. Ticket ready.`); downloadTicketPDF({ passengerName: "Guest", ref, fare, pickup, dest }); onSuccess && onSuccess(); };
+            return (<div><h2 className="text-2xl font-bold mb-4">Book Your Trip</h2><div className="flex gap-4 mb-4"><button className={`px-4 py-2 rounded-full ${tripType==="one-way"?"bg-orange-600 text-white":"bg-gray-200"}`} onClick={()=>setTripType("one-way")}>One-way</button><button className={`px-4 py-2 rounded-full ${tripType==="return"?"bg-orange-600 text-white":"bg-gray-200"}`} onClick={()=>setTripType("return")}>Return</button></div><div className="grid md:grid-cols-2 gap-4"><select className="border p-3 rounded-xl" value={pickup} onChange={e=>setPickup(e.target.value)}>{locations.map(l=><option key={l}>{l}</option>)}</select><select className="border p-3 rounded-xl" value={dest} onChange={e=>setDest(e.target.value)}>{locations.map(l=><option key={l}>{l}</option>)}</select><input type="date" className="border p-3 rounded-xl" value={departDate} onChange={e=>setDepartDate(e.target.value)} />{tripType==="return" && <input type="date" className="border p-3 rounded-xl" value={returnDate} onChange={e=>setReturnDate(e.target.value)} />}<select className="border p-3 rounded-xl" value={passClass} onChange={e=>setPassClass(e.target.value)}><option>Standard</option><option>VIP Comfort</option></select></div><div className="mt-4"><p className="font-semibold">Select Bus:</p><div className="flex flex-wrap gap-3 mt-2">{busFleet.map(b=> (<div key={b.id} onClick={()=>setSelectedBus(b)} className={`border p-3 rounded-xl cursor-pointer ${selectedBus.id===b.id?"border-orange-500 bg-orange-50":"border-gray-200"}`}><img src={b.image} className="w-24 h-16 object-cover rounded" /><p className="text-sm font-bold">{b.name}</p><p className="text-xs">{b.amenities.join(", ")}</p></div>))}</div></div><div className="mt-5 bg-gray-100 p-4 rounded-xl flex justify-between"><span>Fare Preview: KES {fare}</span><button onClick={handleSearch} className="bg-orange-600 text-white px-5 py-2 rounded-full">Search Trips</button></div>{showPay && (<div className="mt-5 border-t pt-4"><h3>Payment (M-Pesa / Bank)</h3><div className="flex gap-3 mt-2"><button className="bg-green-600 text-white px-4 py-2 rounded">M-Pesa</button><button className="bg-blue-600 text-white px-4 py-2 rounded">Bank</button></div><div className="mt-2"><label>M-Pesa Number (+254)</label><input className="border p-2 rounded w-full" value={phoneMpesa} onChange={e=>setPhoneMpesa(e.target.value)} placeholder="+2547XXXXXXXX"/><button onClick={handlePayment} className="bg-orange-600 mt-3 text-white px-5 py-2 rounded-full">Confirm & Pay</button></div></div>)}</div>);
+        };
+        
+        const ParcelModule = () => (<div><h2 className="text-2xl font-bold">Send Parcel</h2><div className="grid gap-3 mt-3"><input placeholder="Sender name" className="border p-2 rounded"/><input placeholder="Receiver name" className="border p-2 rounded"/><select className="border p-2 rounded"><option>Pickup Nairobi</option><option>Pickup Mombasa</option></select><select className="border p-2 rounded"><option>Destination Garissa</option></select><select className="border p-2 rounded"><option>Parcel size: Small (5kg)</option><option>Medium</option><option>Large</option></select><div className="flex gap-2"><button className="bg-orange-600 text-white px-4 py-2 rounded">Same day delivery</button><button className="bg-gray-700 text-white px-4 py-2 rounded">Next day</button></div><button className="bg-black text-white py-2 rounded-full mt-2">Quote & Book Parcel</button></div></div>);
+        
+        // ---- LIVE TRACKING MAP SIMULATION ----
+        const TrackingMap = () => {
+            const [busStatus, setBusStatus] = useState("En route"); const [eta, setEta] = useState("1h 20min");
+            useEffect(()=>{ const interval = setInterval(()=>{ setBusStatus(prev=>prev==="En route"?"Idle":"En route"); }, 8000); return ()=>clearInterval(interval);}, []);
+            return (<div className="p-6"><h2 className="text-2xl font-bold">Live Bus Tracking</h2><div className="bg-gray-200 h-64 rounded-2xl mt-4 relative flex items-center justify-center"><i className="fas fa-map-marker-alt text-5xl text-orange-500 animate-pulse"></i><p className="absolute bottom-2 bg-white p-2 rounded shadow">📍 Current Location: Thika Road, Nairobi</p></div><div className="mt-4 flex gap-4"><span className={`px-3 py-1 rounded-full ${busStatus==="En route"?"bg-green-500":"bg-yellow-500"} text-white`}>Status: {busStatus}</span><span>Estimated arrival: {eta}</span></div></div>);
+        };
+        
+        // -------------------- TRAVELLER PANEL (Dashboard) --------------------
+        const TravelerDashboard = () => (<div className="max-w-6xl mx-auto p-6"><h1 className="text-3xl font-bold">✈️ Traveler Hub</h1><div className="grid md:grid-cols-3 gap-5 mt-6"><div className="bg-white rounded-2xl shadow p-5"><i className="fas fa-bus text-orange-500 text-2xl"></i><h3 className="font-bold">Upcoming Trip</h3><p>Nairobi → Mombasa, 12 May 2025</p><p>Driver: James Otieno | Bus: RC 234A</p><button className="mt-2 text-orange-600">Share Trip <i className="fas fa-share-alt"></i></button><button className="ml-2 bg-red-600 text-white px-2 py-1 rounded"><i className="fas fa-exclamation-triangle"></i> SOS</button></div><div className="bg-white rounded-2xl shadow p-5"><i className="fas fa-history"></i><h3 className="font-bold">Booking History</h3><ul><li>#RC4589 - 1200 KES - 02 May</li><li>#RC6721 - 2400 KES - 18 Apr</li></ul><button className="text-orange-500">View receipts</button></div><div className="bg-white rounded-2xl shadow p-5"><i className="fas fa-star"></i><h3>Rate your last trip</h3><div className="flex gap-1 text-orange-400"><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="far fa-star"></i></div><textarea placeholder="Write review" className="border w-full mt-2 p-1 rounded"></textarea></div></div><div className="mt-8"><h3>Notifications</h3><div className="bg-blue-50 p-3 rounded">✅ Booking confirmed: Nairobi to Garissa, Driver assigned. SMS sent.</div><div className="bg-green-50 p-3 mt-2">🚌 Bus arriving in 10 mins.</div></div><div className="mt-6"><iframe className="w-full h-48 rounded-xl" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.29716123521!2d36.821946!3d-1.286389!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d49a7%3A0xf7cf2054b2b8b8e2!2sNairobi!5e0!3m2!1sen!2ske!4v1650000000000!5m2!1sen!2ske" allowFullScreen="" loading="lazy"></iframe></div></div>);
+        
+        // -------------------- DRIVER PANEL --------------------
+        const DriverDashboard = () => (<div className="p-6 max-w-5xl mx-auto"><h2 className="text-3xl font-bold">🚛 Driver Panel</h2><div className="grid md:grid-cols-2 gap-5 mt-6"><div className="bg-white shadow rounded-xl p-5"><p><strong>License:</strong> DL 7823K (Exp: 12/2025)</p><p><strong>PSV Badge:</strong> PSV-3456 (Valid)</p><button className="bg-red-500 text-white px-3 py-1 rounded">Expiry Alerts</button></div><div className="bg-white shadow rounded-xl p-5"><h3 className="font-bold">Assigned Trip</h3><p>Route: Mombasa → Nairobi | Depart 08:00 AM</p><div className="flex gap-2 mt-2"><button className="bg-green-600 text-white px-3 py-1 rounded">Start Trip</button><button className="bg-blue-600 text-white px-3 py-1 rounded">En route</button><button className="bg-gray-600 text-white px-3 py-1 rounded">Complete</button></div><button className="mt-2 bg-orange-500 w-full py-2 rounded">Report Incident (Accident/Breakdown)</button></div><div><div className="bg-white shadow rounded-xl p-5"><i className="fas fa-money-bill"></i> Earnings this month: KES 45,200</div></div><div><div className="bg-white shadow rounded-xl p-5"><i className="fas fa-comments"></i> Messaging with Admin: "Trip update" <input className="border p-1 mt-1 w-full"/><button className="bg-black text-white w-full mt-1 rounded">Send</button></div></div></div><div className="mt-4"><button className="bg-gray-800 text-white py-2 px-6 rounded-full">Clock In / Out</button><span className="ml-4 text-sm text-gray-500">GPS active</span></div></div>);
+        
+        // -------------------- ADMIN DASHBOARD (Advanced) --------------------
+        const AdminDashboard = () => (<div className="p-6 max-w-7xl mx-auto"><h1 className="text-3xl font-bold">🔧 Admin Command Center</h1><div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-5"><div className="bg-black text-white p-4 rounded-xl"><i className="fas fa-route"></i> Active Trips: 8</div><div className="bg-orange-600 text-white p-4 rounded-xl"><i className="fas fa-users"></i> Drivers: 14 (5 online)</div><div className="bg-green-700 text-white p-4 rounded-xl"><i className="fas fa-chart-line"></i> Revenue Today: KES 124,500</div><div className="bg-blue-700 text-white p-4 rounded-xl"><i className="fas fa-tachometer-alt"></i> Fleet Utilization: 82%</div></div><div className="grid lg:grid-cols-2 gap-6 mt-8"><div className="bg-white shadow rounded-2xl p-4"><h3 className="font-bold">Driver Management</h3><table className="w-full text-sm"><thead><tr><th>Name</th><th>License Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr><td>John M.</td><td>2025-08-01</td><td className="text-green-600">Verified</td><td><button className="text-orange-500">Edit</button></td></tr><tr><td>Peter O.</td><td>2024-12-20</td><td className="text-red-600">Expiring soon</td><td><button>Renew</button></td></tr></tbody></table><button className="bg-orange-600 text-white mt-2 px-3 py-1 rounded">+ Add Driver</button></div><div className="bg-white shadow rounded-2xl p-4"><h3>Vehicle Maintenance</h3><div>KCE 123A - Next service 5000km</div><div>KCD 456B - OK</div><button className="mt-2 bg-gray-800 text-white px-3 py-1 rounded">Assign Vehicle</button></div></div><div className="mt-8"><h3>Live Fleet Map</h3><div className="bg-gray-300 h-48 rounded-xl flex items-center justify-center"><i className="fas fa-map"></i> All buses tracked: 3 en route, 2 idle</div><div className="flex gap-2 mt-2"><button className="bg-purple-600 text-white px-4 py-1 rounded">Broadcast Alert to Drivers</button><button className="bg-emerald-600 text-white px-4 py-1 rounded">Generate Revenue Report</button></div></div></div>);
+        
+        // Role based router inside dashboard
+        const DashboardRouter = () => {
+            const { user } = React.useContext(AuthContext);
+            if(!user) return <div className="p-10 text-center">Please login to access dashboard. <button onClick={()=>document.getElementById('authModal').classList.remove('hidden')} className="text-orange-600">Login</button></div>;
+            if(user.role === "traveler") return <TravelerDashboard />;
+            if(user.role === "driver") return <DriverDashboard />;
+            if(user.role === "admin") return <AdminDashboard />;
+            return <div>Unknown role</div>;
+        };
+        
+        // Fleet Section component
+        const FleetSection = () => (<div className="max-w-7xl mx-auto py-12 px-4"><h2 className="text-4xl font-bold text-center">Our Premium Fleet</h2><div className="grid md:grid-cols-3 gap-8 mt-10">{busFleet.map(b=> (<div key={b.id} className="bg-white rounded-2xl shadow-xl overflow-hidden card-hover"><img src={b.image} className="h-48 w-full object-cover"/><div className="p-5"><h3 className="text-2xl font-bold">{b.name}</h3><p>Seating: {b.seats} | {b.type}</p><div className="flex gap-2 mt-2">{b.amenities.map(a=><span key={a} className="bg-gray-100 px-2 py-1 rounded text-sm">{a}</span>)}</div><p className="mt-2 text-orange-600 font-bold">From KES {b.price}</p></div></div>))}</div></div>);
+        
+        // Login Modal
+        const AuthModal = () => {
+            const { login } = React.useContext(AuthContext);
+            const [role, setRole] = useState("traveler");
+            return (<div id="authModal" className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden" onClick={e=>{if(e.target.id==='authModal') e.target.classList.add('hidden');}}><div className="bg-white p-6 rounded-2xl w-80"><h3 className="text-xl font-bold">Sign in as</h3><select className="border p-2 w-full mt-2" value={role} onChange={e=>setRole(e.target.value)}><option>traveler</option><option>driver</option><option>admin</option></select><input placeholder="Name" className="border w-full p-2 mt-2"/><button onClick={()=>{login(role, "Demo User"); document.getElementById('authModal').classList.add('hidden');}} className="bg-orange-600 text-white w-full py-2 rounded-full mt-4">Continue</button></div></div>);
+        };
+        
+        return (<AuthProvider><div className="min-h-screen bg-gray-50"><AuthModal /><div>{renderNav()}{currentView === "home" && renderHome()}{currentView === "fleet" && <FleetSection />}{currentView === "tracking" && <TrackingMap />}{currentView === "dashboard" && <DashboardRouter />}</div></div></AuthProvider>);
+    };
+    
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
