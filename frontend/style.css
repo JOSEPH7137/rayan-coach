@@ -651,22 +651,27 @@ body.light-mode .main-footer {
   grid-column: span 1;
 }
 
-.footer-col h4 {
+.contact-header {
+  margin-bottom: 20px;
+}
+
+.contact-header h4 {
   color: var(--text);
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 20px;
-  position: relative;
-  display: inline-block;
+  margin-bottom: 12px;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 0.05em;
 }
 
-.footer-divider {
+.contact-divider {
   height: 2px;
   width: 50px;
   background: var(--gold);
-  margin-bottom: 25px;
+}
+
+.contact-items {
+  margin-top: 20px;
 }
 
 .contact-item {
@@ -683,21 +688,26 @@ body.light-mode .main-footer {
   margin-top: 2px;
 }
 
+.contact-details {
+  flex: 1;
+}
+
 .contact-title {
   color: var(--text);
   font-size: 14px;
   margin: 0;
   font-weight: 600;
   letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.contact-phone,
-.contact-email {
+.contact-value {
   color: var(--muted);
   font-size: 13px;
   margin: 4px 0 0;
   font-family: monospace;
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 
 /* Operating Hours Column */
@@ -705,28 +715,54 @@ body.light-mode .main-footer {
   grid-column: span 1;
 }
 
+.hours-header {
+  margin-bottom: 20px;
+}
+
+.hours-header h4 {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.hours-divider {
+  height: 2px;
+  width: 50px;
+  background: var(--gold);
+}
+
+.hours-items {
+  margin-top: 20px;
+}
+
 .hours-item {
   margin-bottom: 20px;
 }
 
-.hours-item p:first-child {
+.hours-day {
   color: var(--text);
   font-size: 14px;
   margin: 0;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .hours-time {
   color: var(--muted);
   font-size: 13px;
   margin: 4px 0 0;
+  font-weight: 500;
 }
 
 .support-badge {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 10px 0;
 }
 
@@ -805,6 +841,134 @@ body.light-mode .main-footer {
   font-size: 11px;
 }
 
+/* ==================== RESPONSIVE FOOTER ==================== */
+@media (max-width: 992px) {
+  .footer-grid {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-footer {
+    padding: 50px 24px 30px;
+    margin-top: 60px;
+  }
+  
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+  
+  .footer-col:first-child,
+  .footer-col:nth-child(2),
+  .footer-col:nth-child(3) {
+    grid-column: span 1;
+    text-align: center;
+  }
+  
+  .footer-logo {
+    justify-content: center;
+  }
+  
+  .footer-description {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .social-links {
+    justify-content: center;
+  }
+  
+  .contact-header {
+    text-align: center;
+  }
+  
+  .contact-divider {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .contact-item {
+    justify-content: center;
+    text-align: left;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hours-header {
+    text-align: center;
+  }
+  
+  .hours-divider {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hours-item {
+    text-align: center;
+  }
+  
+  .support-badge {
+    justify-content: center;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .footer-links {
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .footer-kenya {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-logo-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  
+  .footer-logo-text {
+    font-size: 16px;
+  }
+  
+  .footer-description {
+    font-size: 13px;
+  }
+  
+  .contact-title {
+    font-size: 13px;
+  }
+  
+  .contact-value {
+    font-size: 12px;
+  }
+  
+  .hours-day {
+    font-size: 13px;
+  }
+  
+  .hours-time {
+    font-size: 12px;
+  }
+  
+  .footer-links {
+    gap: 15px;
+  }
+  
+  .footer-links a {
+    font-size: 11px;
+  }
+}
 /* ==================== HERO CAROUSEL ==================== */
 .hero-carousel {
   border-radius: 20px;
