@@ -1,17 +1,1 @@
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "app.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "style.css",
-      "use": "@vercel/static"
-    }
-  ]
-}
+{ "version": 2, "buildCommand": "echo 'No build needed'", "installCommand": "echo 'No install needed'", "outputDirectory": "." } 
