@@ -77,6 +77,42 @@ function miniChart(data,h=60){
     </div>`).join('')}</div>`;
 }
 
+/* ==================== THEME TOGGLE ==================== */
+function toggleTheme() {
+  const body = document.body;
+  const themeIcon = document.getElementById('themeIcon');
+  const themeText = document.getElementById('themeText');
+  
+  STATE.darkMode = !STATE.darkMode;
+  
+  if (STATE.darkMode) {
+    body.classList.remove('light-mode');
+    if (themeIcon) themeIcon.className = 'fas fa-moon';
+    if (themeText) themeText.textContent = 'Dark';
+  } else {
+    body.classList.add('light-mode');
+    if (themeIcon) themeIcon.className = 'fas fa-sun';
+    if (themeText) themeText.textContent = 'Light';
+  }
+  
+  localStorage.setItem('theme', STATE.darkMode ? 'dark' : 'light');
+}
+
+function loadTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    STATE.darkMode = false;
+    document.body.classList.add('light-mode');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    if (themeIcon) themeIcon.className = 'fas fa-sun';
+    if (themeText) themeText.textContent = 'Light';
+  } else {
+    STATE.darkMode = true;
+    document.body.classList.remove('light-mode');
+  }
+}
+
 /* ══════════════════════════════════════════════
    ROUTING
 ══════════════════════════════════════════════ */
@@ -98,8 +134,9 @@ function gotoLogin(role){
 }
 
 function authTab(t){
+  const target = event.target;
   document.querySelectorAll('#auth-tabs .tab').forEach(x=>x.classList.remove('active'));
-  event.target.classList.add('active');
+  target.classList.add('active');
   $('auth-login-form').style.display = t==='login'?'block':'none';
   $('auth-signup-form').style.display= t==='signup'?'block':'none';
 }
@@ -386,11 +423,100 @@ function renderSettings(){
   return `<div class="card card-pad"><h3>Settings</h3><button class="btn btn-gold" onclick="showToast('Settings saved','success')">Save Changes</button></div>`;
 }
 
+// ==================== CAROUSEL FUNCTIONALITY ====================
+function initCarousel() {
+  const slides = document.querySelector('.carousel-slides');
+  const dots = document.querySelectorAll('.dot');
+  const prevBtn = document.querySelector('.carousel-prev');
+  const nextBtn = document.querySelector('.carousel-next');
+  let currentIndex = 0;
+  const totalSlides = 3;
+  let autoSlideInterval;
+
+  function updateCarousel() {
+    if (slides) {
+      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+    dots.forEach((dot, index) => {
+      if (index === currentIndex) {
+        dot.classList.add('active');
+        dot.style.background = 'var(--gold)';
+        dot.style.transform = 'scale(1.2)';
+      } else {
+        dot.classList.remove('active');
+        dot.style.background = 'rgba(255,255,255,0.5)';
+        dot.style.transform = 'scale(1)';
+      }
+    });
+  }
+
+  function nextSlide() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateCarousel();
+  }
+
+  function prevSlide() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateCarousel();
+  }
+
+  function startAutoSlide() {
+    autoSlideInterval = setInterval(nextSlide, 4000);
+  }
+
+  function stopAutoSlide() {
+    if (autoSlideInterval) {
+      clearInterval(autoSlideInterval);
+    }
+  }
+
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', () => {
+      stopAutoSlide();
+      prevSlide();
+      startAutoSlide();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      stopAutoSlide();
+      nextSlide();
+      startAutoSlide();
+    });
+  }
+
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      stopAutoSlide();
+      currentIndex = index;
+      updateCarousel();
+      startAutoSlide();
+    });
+  });
+
+  startAutoSlide();
+
+  const carouselContainer = document.querySelector('.carousel-container');
+  if (carouselContainer) {
+    carouselContainer.addEventListener('mouseenter', stopAutoSlide);
+    carouselContainer.addEventListener('mouseleave', startAutoSlide);
+  }
+}
+
 // ==================== NOTIFICATIONS ====================
 function openNotifPanel(){
   showModal(`<div class="modal-box"><div class="modal-header"><h3>Notifications</h3><button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button></div><div class="modal-body"><p>You have 3 new notifications</p></div></div>`);
 }
 
-// Initialize
+// ==================== INITIALIZE ====================
+// Load theme on page load
+loadTheme();
+
+// Initialize carousel when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  initCarousel();
+});
+
+// Show welcome page
 showPage('welcome');
+
 console.log('%c RAYAN COACH TRANSPORT SYSTEM ', 'background:#E8A020;color:#08080F;font-weight:bold;font-size:14px;padding:4px 8px;');

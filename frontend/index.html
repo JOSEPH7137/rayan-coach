@@ -1,3 +1,8 @@
+Here are the three separate files with proper icons, dark/light mode toggle, and all styles moved to CSS:
+
+## **File 1: `index.html`**
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +12,7 @@
 <title>Rayan Coach – Kenya's Premier Intercity Transport</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -17,228 +23,233 @@
 <!-- Welcome Page -->
 <div id="welcome-page">
   <div class="welcome-bg">
-    <div class="bg-orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(232,160,32,0.06),transparent);top:-200px;left:-200px;"></div>
-    <div class="bg-orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(74,142,245,0.04),transparent);bottom:-100px;right:-100px;"></div>
-    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(232,160,32,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(232,160,32,0.02) 1px,transparent 1px);background-size:60px 60px;"></div>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="grid-overlay"></div>
   </div>
 
   <!-- Nav -->
-  <nav style="position:relative;z-index:10;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(37,37,53,0.5);">
-    <div class="flex items-center gap-12">
-      <div style="width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#08080F;letter-spacing:0.05em;">Rc</div>
+  <nav class="main-nav">
+    <div class="nav-logo">
+      <div class="logo-icon">Rc</div>
       <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.05em;color:var(--text);">RAYAN COACH</div>
-        <div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.07em;">KENYA'S PREMIER TRANSPORT</div>
+        <div class="logo-text">RAYAN COACH</div>
+        <div class="logo-sub">KENYA'S PREMIER TRANSPORT</div>
       </div>
     </div>
-    <div class="flex gap-8">
+    <div class="nav-actions">
       <button class="btn btn-ghost btn-sm" onclick="setLang('en')">EN</button>
       <button class="btn btn-ghost btn-sm" onclick="setLang('sw')">SW</button>
+      <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeText">Dark</span>
+      </div>
     </div>
   </nav>
 
   <!-- Hero Section with Carousel -->
-  <div style="position:relative;z-index:10;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+  <div class="hero-section">
     
     <!-- Hero Carousel Images -->
-    <div class="hero-carousel" style="width:100%;max-width:900px;margin-bottom:30px;position:relative;border-radius:20px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-      <div class="carousel-container" style="position:relative;width:100%;height:400px;overflow:hidden;">
-        <div class="carousel-slides" id="carouselSlides" style="display:flex;transition:transform 0.5s ease-in-out;height:100%;">
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image1.jpg" alt="Rayan Coach Luxury Bus" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Premium VIP Coaches</p>
+    <div class="hero-carousel">
+      <div class="carousel-container">
+        <div class="carousel-slides" id="carouselSlides">
+          <div class="carousel-slide">
+            <img src="images/image1.jpg" alt="Rayan Coach Luxury Bus">
+            <div class="carousel-caption">
+              <p>Premium VIP Coaches</p>
             </div>
           </div>
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image2.jpg" alt="Rayan Coach Comfortable Seats" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Luxury Recliner Seats</p>
+          <div class="carousel-slide">
+            <img src="images/image2.jpg" alt="Rayan Coach Comfortable Seats">
+            <div class="carousel-caption">
+              <p>Luxury Recliner Seats</p>
             </div>
           </div>
-          <div class="carousel-slide" style="min-width:100%;height:100%;">
-            <img src="images/image3.jpg" alt="Rayan Coach Interior" style="width:100%;height:100%;object-fit:cover;">
-            <div class="carousel-caption" style="position:absolute;bottom:20px;left:20px;background:linear-gradient(90deg,rgba(0,0,0,0.7),transparent);padding:12px 24px;border-radius:8px;">
-              <p style="color:var(--gold);font-weight:700;margin:0;">Modern Amenities & WiFi</p>
+          <div class="carousel-slide">
+            <img src="images/image3.jpg" alt="Rayan Coach Interior">
+            <div class="carousel-caption">
+              <p>Modern Amenities & WiFi</p>
             </div>
           </div>
         </div>
         
         <!-- Carousel Navigation Dots -->
-        <div class="carousel-dots" style="position:absolute;bottom:20px;right:20px;display:flex;gap:10px;z-index:10;">
-          <div class="dot" data-index="0" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;"></div>
-          <div class="dot" data-index="1" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;"></div>
-          <div class="dot" data-index="2" style="width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;"></div>
+        <div class="carousel-dots">
+          <div class="dot" data-index="0"></div>
+          <div class="dot" data-index="1"></div>
+          <div class="dot" data-index="2"></div>
         </div>
         
         <!-- Carousel Arrows -->
-        <button class="carousel-prev" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;transition:all 0.3s;z-index:10;">←</button>
-        <button class="carousel-next" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);color:white;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;transition:all 0.3s;z-index:10;">→</button>
+        <button class="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
       </div>
     </div>
 
-    <div style="background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.08em;margin-bottom:20px;display:inline-block;" class="fade-up">● LIVE &nbsp;·&nbsp; TRUSTED BY 50,000+ KENYANS</div>
+    <div class="trust-badge">● LIVE &nbsp;·&nbsp; TRUSTED BY 50,000+ KENYANS</div>
 
-    <h1 class="display fade-up" style="font-size:clamp(52px,8vw,100px);line-height:0.95;margin-bottom:14px;animation-delay:0.05s;">
-      <span style="color:var(--text);">WELCOME TO</span><br/>
-      <span style="background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">RAYAN COACH</span>
+    <h1 class="hero-title">
+      <span>WELCOME TO</span><br/>
+      <span class="gradient-text">RAYAN COACH</span>
     </h1>
-    <p class="fade-up" style="font-size:clamp(14px,2vw,18px);color:var(--muted);max-width:480px;line-height:1.7;animation-delay:0.1s;">Comfortable, Safe &amp; Reliable Travel Across Kenya</p>
+    <p class="hero-subtitle">Comfortable, Safe &amp; Reliable Travel Across Kenya</p>
 
     <!-- Role Cards -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;width:100%;max-width:860px;margin-top:50px;" class="fade-up">
+    <div class="role-cards">
       <div class="role-card" onclick="gotoLogin('user')">
-        <div class="role-icon" style="background:rgba(74,142,245,0.12);color:var(--blue);">🧳</div>
-        <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.1em;margin-bottom:6px;">TRAVELLER</div>
-        <h3 style="font-size:20px;margin-bottom:10px;">User Portal</h3>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Book tickets, track buses live, send parcels & manage your journeys.</p>
-        <button class="btn btn-gold btn-full" style="background:linear-gradient(135deg,var(--blue),#2563EB);color:#fff;">Sign In →</button>
+        <div class="role-icon user-icon">🧳</div>
+        <div class="role-label user-label">TRAVELLER</div>
+        <h3>User Portal</h3>
+        <p>Book tickets, track buses live, send parcels & manage your journeys.</p>
+        <button class="btn btn-gold btn-full user-btn">Sign In →</button>
       </div>
 
       <div class="role-card" onclick="gotoLogin('driver')">
-        <div class="role-icon" style="background:rgba(15,207,125,0.12);color:var(--green);">🚗</div>
-        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:0.1em;margin-bottom:6px;">OPERATOR</div>
-        <h3 style="font-size:20px;margin-bottom:10px;">Driver Portal</h3>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Manage your trips, track earnings, communicate & report incidents.</p>
+        <div class="role-icon driver-icon">🚗</div>
+        <div class="role-label driver-label">OPERATOR</div>
+        <h3>Driver Portal</h3>
+        <p>Manage your trips, track earnings, communicate & report incidents.</p>
         <button class="btn btn-green btn-full">Sign In →</button>
       </div>
 
       <div class="role-card" onclick="gotoLogin('admin')">
-        <div class="role-icon" style="background:var(--gold-bg);color:var(--gold);">🛡️</div>
-        <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.1em;margin-bottom:6px;">MANAGEMENT</div>
-        <h3 style="font-size:20px;margin-bottom:10px;">Admin Portal</h3>
-        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
+        <div class="role-icon admin-icon">🛡️</div>
+        <div class="role-label admin-label">MANAGEMENT</div>
+        <h3>Admin Portal</h3>
+        <p>Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
         <button class="btn btn-gold btn-full">Sign In →</button>
       </div>
     </div>
 
     <!-- Stats -->
-    <div style="display:flex;gap:48px;margin-top:56px;flex-wrap:wrap;justify-content:center;" class="fade-up">
-      <div><div class="display text-gold" style="font-size:36px;">50K+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Happy Travellers</div></div>
-      <div><div class="display text-gold" style="font-size:36px;">120+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Daily Routes</div></div>
-      <div><div class="display text-gold" style="font-size:36px;">98%</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">On-time Rate</div></div>
-      <div><div class="display text-gold" style="font-size:36px;">24/7</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Support</div></div>
+    <div class="stats-container">
+      <div><div class="stat-number">50K+</div><div class="stat-label">Happy Travellers</div></div>
+      <div><div class="stat-number">120+</div><div class="stat-label">Daily Routes</div></div>
+      <div><div class="stat-number">98%</div><div class="stat-label">On-time Rate</div></div>
+      <div><div class="stat-number">24/7</div><div class="stat-label">Support</div></div>
     </div>
 
     <!-- Road animation -->
-    <div class="road-container" style="width:100%;max-width:500px;margin-top:40px;">
+    <div class="road-container">
       <div class="road-surface"></div>
       <div class="road-bus">🚌</div>
     </div>
 
-    <!-- ==================== FOOTER ==================== -->
-    <footer style="background: linear-gradient(135deg, #0A0A0F, #11111A); border-top: 1px solid #2A2A3A; margin-top: 80px; padding: 60px 40px 30px; position: relative; z-index: 10; width: 100%;">
-      <div class="container" style="max-width: 1200px; margin: 0 auto;">
+    <!-- Footer -->
+    <footer class="main-footer">
+      <div class="footer-container">
         
         <!-- Top Footer Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 50px;">
+        <div class="footer-grid">
           
           <!-- Company Info -->
-          <div>
-            <div class="flex items-center gap-12" style="margin-bottom: 20px;">
-              <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #E8A020, #B8801A); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #08080F;">Rc</div>
+          <div class="footer-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">Rc</div>
               <div>
-                <div style="font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.05em; color: var(--text);">RAYAN COACH</div>
-                <div style="font-size: 10px; color: var(--gold); font-weight: 600; letter-spacing: 0.07em;">KENYA'S PREMIER TRANSPORT</div>
+                <div class="footer-logo-text">RAYAN COACH</div>
+                <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
               </div>
             </div>
-            <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
-            <div style="display: flex; gap: 15px;">
-              <a href="#" style="color: var(--muted); font-size: 20px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">📘</a>
-              <a href="#" style="color: var(--muted); font-size: 20px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">🐦</a>
-              <a href="#" style="color: var(--muted); font-size: 20px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">📸</a>
-              <a href="#" style="color: var(--muted); font-size: 20px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">🔗</a>
+            <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
+            <div class="social-links">
+              <a href="#" class="social-icon" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on X (Twitter)','info')"><i class="fab fa-x-twitter"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
             </div>
           </div>
           
-          <!-- Quick Links -->
-          <div>
-            <h4 style="color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 20px; position: relative; display: inline-block;">Quick Links</h4>
-            <div style="height: 2px; width: 40px; background: var(--gold); margin-bottom: 20px;"></div>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              <li style="margin-bottom: 12px;"><a href="#" onclick="navigateTo('booking')" style="color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">🎫 Book a Trip</a></li>
-              <li style="margin-bottom: 12px;"><a href="#" onclick="navigateTo('tracking')" style="color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">📍 Live Tracking</a></li>
-              <li style="margin-bottom: 12px;"><a href="#" onclick="navigateTo('parcel')" style="color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">📦 Send Parcel</a></li>
-              <li style="margin-bottom: 12px;"><a href="#" onclick="navigateTo('rewards')" style="color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">⭐ Rewards Program</a></li>
-              <li style="margin-bottom: 12px;"><a href="#" onclick="navigateTo('safety')" style="color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">🛡️ Safety Guidelines</a></li>
+          <!-- Follow Us -->
+          <div class="footer-col">
+            <h4>Follow Us</h4>
+            <div class="footer-divider"></div>
+            <ul class="social-media-list">
+              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i> Facebook</a></li>
+              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on X (Twitter)','info')"><i class="fab fa-x-twitter"></i> X (Twitter)</a></li>
+              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i> Instagram</a></li>
+              <li><a href="#" class="social-media-link" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i> TikTok</a></li>
+              <li><a href="#" class="social-media-link" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
             </ul>
           </div>
           
-          <!-- Contact Info -->
-          <div>
-            <h4 style="color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 20px; position: relative; display: inline-block;">Contact Us</h4>
-            <div style="height: 2px; width: 40px; background: var(--gold); margin-bottom: 20px;"></div>
-            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-              <span style="color: var(--gold); font-size: 18px;">📍</span>
+          <!-- Contacts -->
+          <div class="footer-col">
+            <h4>Contacts</h4>
+            <div class="footer-divider"></div>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
               <div>
-                <p style="color: var(--text); font-size: 13px; margin: 0;">Second Street, Nairobi, Kenya</p>
-                <p style="color: var(--muted); font-size: 12px; margin: 0;">Head Office</p>
+                <p class="contact-title">NAIROBI</p>
+                <p class="contact-phone">0745 129233</p>
               </div>
             </div>
-            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-              <span style="color: var(--gold); font-size: 18px;">📍</span>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
               <div>
-                <p style="color: var(--text); font-size: 13px; margin: 0;">Mombasa Road, Mombasa, Kenya</p>
-                <p style="color: var(--muted); font-size: 12px; margin: 0;">Branch Office</p>
+                <p class="contact-title">GARISSA</p>
+                <p class="contact-phone">0745 129234</p>
               </div>
             </div>
-            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-              <span style="color: var(--gold); font-size: 18px;">📞</span>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-envelope"></i></span>
               <div>
-                <p style="color: var(--text); font-size: 13px; margin: 0;">+254 745 129233</p>
-                <p style="color: var(--muted); font-size: 12px; margin: 0;">24/7 Support</p>
+                <p class="contact-title">EMAIL</p>
+                <p class="contact-email">info@rayan.co.ke</p>
               </div>
             </div>
-            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-              <span style="color: var(--gold); font-size: 18px;">✉️</span>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fab fa-whatsapp"></i></span>
               <div>
-                <p style="color: var(--text); font-size: 13px; margin: 0;">info@rayan.co.ke</p>
-                <p style="color: var(--muted); font-size: 12px; margin: 0;">General Inquiries</p>
+                <p class="contact-title">WHATSAPP</p>
+                <p class="contact-phone">0745 129233</p>
               </div>
             </div>
           </div>
           
           <!-- Operating Hours -->
-          <div>
-            <h4 style="color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 20px; position: relative; display: inline-block;">Operating Hours</h4>
-            <div style="height: 2px; width: 40px; background: var(--gold); margin-bottom: 20px;"></div>
-            <div style="margin-bottom: 12px;">
-              <p style="color: var(--text); font-size: 13px; margin: 0;">Monday - Friday</p>
-              <p style="color: var(--muted); font-size: 12px; margin: 0;">6:00 AM - 10:00 PM</p>
+          <div class="footer-col">
+            <h4>Operating Hours</h4>
+            <div class="footer-divider"></div>
+            <div class="hours-item">
+              <p>Monday - Friday</p>
+              <p class="hours-time">6:00 AM - 10:00 PM</p>
             </div>
-            <div style="margin-bottom: 12px;">
-              <p style="color: var(--text); font-size: 13px; margin: 0;">Saturday - Sunday</p>
-              <p style="color: var(--muted); font-size: 12px; margin: 0;">7:00 AM - 9:00 PM</p>
+            <div class="hours-item">
+              <p>Saturday - Sunday</p>
+              <p class="hours-time">7:00 AM - 9:00 PM</p>
             </div>
-            <div style="margin-bottom: 12px;">
-              <p style="color: var(--text); font-size: 13px; margin: 0;">Public Holidays</p>
-              <p style="color: var(--muted); font-size: 12px; margin: 0;">8:00 AM - 8:00 PM</p>
+            <div class="hours-item">
+              <p>Public Holidays</p>
+              <p class="hours-time">8:00 AM - 8:00 PM</p>
             </div>
-            <div style="margin-top: 20px;">
-              <div class="online-dot" style="background: var(--green); width: 8px; height: 8px; display: inline-block; margin-right: 8px;"></div>
-              <span style="color: var(--muted); font-size: 12px;">24/7 Customer Support</span>
+            <div class="support-badge">
+              <div class="online-dot"></div>
+              <span>24/7 Customer Support</span>
             </div>
           </div>
         </div>
         
         <!-- Divider -->
-        <div style="height: 1px; background: linear-gradient(90deg, transparent, var(--border), var(--gold), var(--border), transparent); margin: 30px 0 25px;"></div>
+        <div class="footer-divider-full"></div>
         
         <!-- Bottom Footer -->
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+        <div class="footer-bottom">
           <div>
-            <p style="color: var(--muted); font-size: 12px; margin: 0;">© 2025 Rayan Coach Kenya. All rights reserved.</p>
-            <p style="color: var(--muted); font-size: 11px; margin: 5px 0 0;">Comfort. Safety. Reliability. Since 2020</p>
+            <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
+            <p class="footer-tagline">Comfort. Safety. Reliability. Since 2020</p>
           </div>
-          <div style="display: flex; gap: 20px;">
-            <a href="#" style="color: var(--muted); font-size: 12px; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">Privacy Policy</a>
-            <a href="#" style="color: var(--muted); font-size: 12px; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">Terms of Service</a>
-            <a href="#" style="color: var(--muted); font-size: 12px; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">Refund Policy</a>
-            <a href="#" style="color: var(--muted); font-size: 12px; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#E8A020'" onmouseout="this.style.color='#7070A0'">FAQs</a>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Refund Policy</a>
+            <a href="#">FAQs</a>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <span style="color: var(--gold); font-size: 12px;">🇰🇪</span>
-            <span style="color: var(--muted); font-size: 11px;">Made in Kenya | Serving East Africa</span>
+          <div class="footer-kenya">
+            <span>🇰🇪</span>
+            <span>Made in Kenya | Serving East Africa</span>
           </div>
         </div>
         
@@ -248,71 +259,81 @@
   </div>
 </div>
 
-<!-- Auth Page (same as before) -->
+<!-- Auth Page -->
 <div id="auth-page" style="display:none;">
   <div class="auth-panel">
-    <div class="flex items-center gap-16 mb-20">
+    <div class="auth-header">
       <button class="btn btn-ghost btn-sm" onclick="showPage('welcome')">← Back</button>
-      <div class="flex items-center gap-12">
-        <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#08080F;">Rc</div>
-        <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.05em;">RAYAN COACH</span>
+      <div class="auth-logo">
+        <div class="auth-logo-icon">Rc</div>
+        <span>RAYAN COACH</span>
       </div>
     </div>
-    <div id="auth-role-icon" style="font-size:40px;margin-bottom:16px;"></div>
-    <h2 style="font-size:28px;font-weight:800;margin-bottom:4px;" id="auth-title">Sign In</h2>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:28px;" id="auth-subtitle">Welcome back to Rayan Coach</p>
-    <div id="auth-tabs" class="tabs mb-20">
+
+    <div id="auth-role-icon" class="auth-role-icon"></div>
+    <h2 id="auth-title" class="auth-title">Sign In</h2>
+    <p id="auth-subtitle" class="auth-subtitle">Welcome back to Rayan Coach</p>
+
+    <div id="auth-tabs" class="tabs">
       <div class="tab active" onclick="authTab('login')">Sign In</div>
       <div class="tab" id="signup-tab" onclick="authTab('signup')">Create Account</div>
     </div>
+
     <div id="auth-login-form">
-      <div class="flex flex-col gap-16">
+      <div class="auth-form">
         <div class="field input-icon">
           <label>Email or Phone</label>
-          <span class="icon">📧</span>
+          <span class="icon"><i class="fas fa-envelope"></i></span>
           <input class="input" type="text" placeholder="you@example.com or 07XX XXX XXX" id="login-email"/>
         </div>
         <div class="field input-icon">
           <label>Password</label>
-          <span class="icon">🔒</span>
+          <span class="icon"><i class="fas fa-lock"></i></span>
           <input class="input" type="password" placeholder="••••••••" id="login-pw"/>
-          <button onclick="togglePw('login-pw')" style="position:absolute;right:12px;top:32px;background:none;color:var(--muted);font-size:12px;">👁</button>
+          <button onclick="togglePw('login-pw')" class="toggle-pw"><i class="fas fa-eye"></i></button>
         </div>
-        <div class="flex justify-between items-center">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--gold);"/> Remember me</label>
-          <span style="font-size:13px;color:var(--gold);cursor:pointer;">Forgot password?</span>
+        <div class="auth-options">
+          <label class="remember-me">
+            <input type="checkbox" style="accent-color:var(--gold);"/> Remember me
+          </label>
+          <span class="forgot-pw">Forgot password?</span>
         </div>
         <button class="btn btn-gold btn-full btn-lg" onclick="doLogin()" id="login-btn">Sign In</button>
-        <div style="text-align:center;font-size:13px;color:var(--muted);">Or sign in with</div>
-        <div class="flex gap-12">
-          <button class="btn btn-ghost btn-full" onclick="showToast('OTP sent to your phone','info')">📱 OTP</button>
-          <button class="btn btn-ghost btn-full" onclick="showToast('Google OAuth integration','info')">G Google</button>
+        <div class="auth-divider">Or sign in with</div>
+        <div class="social-auth">
+          <button class="btn btn-ghost btn-full" onclick="showToast('OTP sent to your phone','info')"><i class="fas fa-mobile-alt"></i> OTP</button>
+          <button class="btn btn-ghost btn-full" onclick="showToast('Google OAuth integration','info')"><i class="fab fa-google"></i> Google</button>
         </div>
       </div>
     </div>
+
     <div id="auth-signup-form" style="display:none;">
-      <div class="flex flex-col gap-14">
-        <div class="grid-2"><div class="field"><label>First Name</label><input class="input" placeholder="John" id="su-fname"/></div><div class="field"><label>Last Name</label><input class="input" placeholder="Kamau" id="su-lname"/></div></div>
-        <div class="field input-icon"><label>Email</label><span class="icon">📧</span><input class="input" type="email" placeholder="john@email.com" id="su-email"/></div>
-        <div class="field input-icon"><label>Phone (+254)</label><span class="icon">📱</span><input class="input" placeholder="+254 712 345 678" id="su-phone"/></div>
-        <div class="field input-icon"><label>Password</label><span class="icon">🔒</span><input class="input" type="password" placeholder="Min 8 characters" id="su-pw"/></div>
-        <div class="field input-icon"><label>Confirm Password</label><span class="icon">🔒</span><input class="input" type="password" placeholder="Repeat password" id="su-pw2"/></div>
+      <div class="auth-form">
+        <div class="grid-2">
+          <div class="field"><label>First Name</label><input class="input" placeholder="John" id="su-fname"/></div>
+          <div class="field"><label>Last Name</label><input class="input" placeholder="Kamau" id="su-lname"/></div>
+        </div>
+        <div class="field input-icon"><label>Email</label><span class="icon"><i class="fas fa-envelope"></i></span><input class="input" type="email" placeholder="john@email.com" id="su-email"/></div>
+        <div class="field input-icon"><label>Phone (+254)</label><span class="icon"><i class="fas fa-phone"></i></span><input class="input" placeholder="+254 712 345 678" id="su-phone"/></div>
+        <div class="field input-icon"><label>Password</label><span class="icon"><i class="fas fa-lock"></i></span><input class="input" type="password" placeholder="Min 8 characters" id="su-pw"/></div>
+        <div class="field input-icon"><label>Confirm Password</label><span class="icon"><i class="fas fa-lock"></i></span><input class="input" type="password" placeholder="Repeat password" id="su-pw2"/></div>
         <button class="btn btn-gold btn-full btn-lg" onclick="doSignup()">Create Account</button>
       </div>
     </div>
-    <div id="admin-note" style="display:none;background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:10px;padding:14px;margin-top:16px;font-size:13px;color:var(--soft);">
+
+    <div id="admin-note" class="admin-note" style="display:none;">
       🔐 Admin access is restricted. Contact your system administrator for credentials.
     </div>
   </div>
   <div class="auth-deco">
-    <div style="font-size:80px;" id="auth-deco-icon" class="float">🚌</div>
-    <h3 style="font-size:24px;font-weight:800;text-align:center;">Kenya's Premier Coach</h3>
-    <p style="color:var(--muted);text-align:center;line-height:1.7;max-width:260px;">Experience first-class intercity travel with real-time tracking &amp; digital tickets</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:260px;">
-      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">📶 WiFi</div>
-      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">⚡ Charging</div>
-      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">❄️ A/C Seats</div>
-      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">📍 GPS Track</div>
+    <div id="auth-deco-icon" class="auth-deco-icon float">🚌</div>
+    <h3>Kenya's Premier Coach</h3>
+    <p>Experience first-class intercity travel with real-time tracking &amp; digital tickets</p>
+    <div class="auth-features">
+      <div class="auth-feature"><i class="fas fa-wifi"></i> WiFi</div>
+      <div class="auth-feature"><i class="fas fa-battery-full"></i> Charging</div>
+      <div class="auth-feature"><i class="fas fa-wind"></i> A/C Seats</div>
+      <div class="auth-feature"><i class="fas fa-map-marker-alt"></i> GPS Track</div>
     </div>
   </div>
 </div>
@@ -320,14 +341,39 @@
 <!-- Main App -->
 <div id="app-page" style="display:none;" class="layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="flex items-center gap-12"><div style="width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;color:#08080F;">Rc</div><div><div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:0.05em;">RAYAN COACH</div><div style="font-size:9px;color:var(--muted);margin-top:1px;" id="sidebar-role-label">PORTAL</div></div></div></div>
+    <div class="sidebar-logo">
+      <div class="flex items-center gap-12">
+        <div class="sidebar-logo-icon">Rc</div>
+        <div>
+          <div class="sidebar-logo-text">RAYAN COACH</div>
+          <div class="sidebar-role-label" id="sidebar-role-label">PORTAL</div>
+        </div>
+      </div>
+    </div>
     <div class="sidebar-nav" id="sidebar-nav"></div>
-    <div class="sidebar-footer"><div class="nav-item text-red" onclick="doLogout()"><span class="nav-icon">🚪</span><span>Logout</span></div></div>
+    <div class="sidebar-footer">
+      <div class="nav-item text-red" onclick="doLogout()">
+        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+        <span>Logout</span>
+      </div>
+    </div>
   </aside>
   <div class="content-area">
     <header class="topbar">
-      <div class="flex items-center gap-12"><button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()" style="display:none;">☰</button><h3 style="font-size:15px;font-weight:700;" id="page-title">Dashboard</h3></div>
-      <div class="flex items-center gap-12"><div style="position:relative;cursor:pointer;" onclick="openNotifPanel()"><span style="font-size:18px;">🔔</span><div class="notif-badge"></div></div><div class="flex items-center gap-8 pointer" onclick="navigateTo('profile')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px;"><div class="avatar" id="topbar-avatar" style="background:var(--gold-bg);color:var(--gold);width:28px;height:28px;font-size:12px;">JK</div><span style="font-size:13px;font-weight:500;" id="topbar-name">John Kamau</span></div></div>
+      <div class="flex items-center gap-12">
+        <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()" style="display:none;"><i class="fas fa-bars"></i></button>
+        <h3 id="page-title">Dashboard</h3>
+      </div>
+      <div class="flex items-center gap-12">
+        <div class="notif-bell" onclick="openNotifPanel()">
+          <i class="fas fa-bell"></i>
+          <div class="notif-badge"></div>
+        </div>
+        <div class="user-profile" onclick="navigateTo('profile')">
+          <div class="avatar" id="topbar-avatar">JK</div>
+          <span id="topbar-name">John Kamau</span>
+        </div>
+      </div>
     </header>
     <div class="main-content" id="page-content"></div>
   </div>
@@ -337,87 +383,6 @@
 <div id="modal-container"></div>
 
 <script src="app.js"></script>
-
-<script>
-// Carousel Functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const slides = document.querySelector('.carousel-slides');
-  const dots = document.querySelectorAll('.dot');
-  const prevBtn = document.querySelector('.carousel-prev');
-  const nextBtn = document.querySelector('.carousel-next');
-  let currentIndex = 0;
-  const totalSlides = 3;
-  let autoSlideInterval;
-
-  function updateCarousel() {
-    if (slides) {
-      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
-    }
-    dots.forEach((dot, index) => {
-      if (index === currentIndex) {
-        dot.style.background = 'var(--gold)';
-        dot.style.transform = 'scale(1.2)';
-      } else {
-        dot.style.background = 'rgba(255,255,255,0.5)';
-        dot.style.transform = 'scale(1)';
-      }
-    });
-  }
-
-  function nextSlide() {
-    currentIndex = (currentIndex + 1) % totalSlides;
-    updateCarousel();
-  }
-
-  function prevSlide() {
-    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-    updateCarousel();
-  }
-
-  function startAutoSlide() {
-    autoSlideInterval = setInterval(nextSlide, 4000);
-  }
-
-  function stopAutoSlide() {
-    if (autoSlideInterval) {
-      clearInterval(autoSlideInterval);
-    }
-  }
-
-  if (prevBtn && nextBtn) {
-    prevBtn.addEventListener('click', () => {
-      stopAutoSlide();
-      prevSlide();
-      startAutoSlide();
-    });
-
-    nextBtn.addEventListener('click', () => {
-      stopAutoSlide();
-      nextSlide();
-      startAutoSlide();
-    });
-  }
-
-  dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
-      stopAutoSlide();
-      currentIndex = index;
-      updateCarousel();
-      startAutoSlide();
-    });
-  });
-
-  // Start auto-slide
-  startAutoSlide();
-
-  // Pause on hover
-  const carouselContainer = document.querySelector('.carousel-container');
-  if (carouselContainer) {
-    carouselContainer.addEventListener('mouseenter', stopAutoSlide);
-    carouselContainer.addEventListener('mouseleave', startAutoSlide);
-  }
-});
-</script>
 
 </body>
 </html>
