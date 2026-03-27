@@ -1,8 +1,3 @@
-Here are the three separate files with proper icons, dark/light mode toggle, and all styles moved to CSS:
-
-## **File 1: `index.html`**
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,9 +32,12 @@ Here are the three separate files with proper icons, dark/light mode toggle, and
         <div class="logo-sub">KENYA'S PREMIER TRANSPORT</div>
       </div>
     </div>
+    <div class="nav-links">
+      <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
+      <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="nav-link">About Us</a>
+      <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="nav-link">Contact Us</a>
+    </div>
     <div class="nav-actions">
-      <button class="btn btn-ghost btn-sm" onclick="setLang('en')">EN</button>
-      <button class="btn btn-ghost btn-sm" onclick="setLang('sw')">SW</button>
       <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
         <i class="fas fa-moon" id="themeIcon"></i>
         <span id="themeText">Dark</span>
@@ -268,6 +266,14 @@ Here are the three separate files with proper icons, dark/light mode toggle, and
         <div class="auth-logo-icon">Rc</div>
         <span>RAYAN COACH</span>
       </div>
+      <div class="auth-nav-links">
+        <a href="#" onclick="showPage('welcome')" class="auth-nav-link">Home</a>
+        <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="auth-nav-link">About Us</a>
+        <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="auth-nav-link">Contact Us</a>
+      </div>
+      <div class="theme-toggle-small" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="themeIconSmall"></i>
+      </div>
     </div>
 
     <div id="auth-role-icon" class="auth-role-icon"></div>
@@ -360,14 +366,22 @@ Here are the three separate files with proper icons, dark/light mode toggle, and
   </aside>
   <div class="content-area">
     <header class="topbar">
-      <div class="flex items-center gap-12">
-        <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()" style="display:none;"><i class="fas fa-bars"></i></button>
+      <div class="topbar-left">
+        <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="topbar-nav-links">
+          <a href="#" onclick="showPage('welcome')" class="topbar-nav-link">Home</a>
+          <a href="#" onclick="showToast('About Us - Coming Soon','info')" class="topbar-nav-link">About Us</a>
+          <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')" class="topbar-nav-link">Contact Us</a>
+        </div>
         <h3 id="page-title">Dashboard</h3>
       </div>
       <div class="flex items-center gap-12">
         <div class="notif-bell" onclick="openNotifPanel()">
           <i class="fas fa-bell"></i>
           <div class="notif-badge"></div>
+        </div>
+        <div class="theme-toggle-small" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
         </div>
         <div class="user-profile" onclick="navigateTo('profile')">
           <div class="avatar" id="topbar-avatar">JK</div>
@@ -376,6 +390,29 @@ Here are the three separate files with proper icons, dark/light mode toggle, and
       </div>
     </header>
     <div class="main-content" id="page-content"></div>
+    
+    <!-- Footer for Dashboard Pages -->
+    <footer class="dashboard-footer">
+      <div class="dashboard-footer-content">
+        <div class="dashboard-footer-links">
+          <a href="#" onclick="showPage('welcome')">Home</a>
+          <a href="#" onclick="showToast('About Us - Coming Soon','info')">About Us</a>
+          <a href="#" onclick="showToast('Contact Us - info@rayan.co.ke','info')">Contact Us</a>
+          <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
+          <a href="#" onclick="showToast('Terms of Service','info')">Terms</a>
+        </div>
+        <div class="dashboard-footer-social">
+          <a href="#" class="social-icon" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-icon" onclick="showToast('Follow us on X','info')"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" class="social-icon" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
+          <a href="#" class="social-icon" onclick="showToast('WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="dashboard-footer-copyright">
+          <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
   </div>
 </div>
 
