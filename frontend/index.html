@@ -1,17 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rayan Coach | Kenya's Premium Transport</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/react-router-dom@6.8.0/dist/umd/react-router-dom.development.js"></script>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0A0A0F"/>
+<title>Rayan Coach – Kenya's Premier Intercity Transport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="app.js"></script>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Welcome Page -->
+<div id="welcome-page">
+  <div class="welcome-bg">
+    <div class="bg-orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(232,160,32,0.06),transparent);top:-200px;left:-200px;"></div>
+    <div class="bg-orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(74,142,245,0.04),transparent);bottom:-100px;right:-100px;"></div>
+    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(232,160,32,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(232,160,32,0.02) 1px,transparent 1px);background-size:60px 60px;"></div>
+  </div>
+
+  <nav style="position:relative;z-index:10;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(37,37,53,0.5);">
+    <div class="flex items-center gap-12">
+      <div style="width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#08080F;letter-spacing:0.05em;">Rc</div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.05em;color:var(--text);">RAYAN COACH</div>
+        <div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.07em;">KENYA'S PREMIER TRANSPORT</div>
+      </div>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost btn-sm" onclick="setLang('en')">EN</button>
+      <button class="btn btn-ghost btn-sm" onclick="setLang('sw')">SW</button>
+    </div>
+  </nav>
+
+  <div style="position:relative;z-index:10;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+    <div style="background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.08em;margin-bottom:20px;display:inline-block;" class="fade-up">● LIVE &nbsp;·&nbsp; TRUSTED BY 50,000+ KENYANS</div>
+
+    <h1 class="display fade-up" style="font-size:clamp(52px,8vw,100px);line-height:0.95;margin-bottom:14px;animation-delay:0.05s;">
+      <span style="color:var(--text);">WELCOME TO</span><br/>
+      <span style="background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">RAYAN COACH</span>
+    </h1>
+    <p class="fade-up" style="font-size:clamp(14px,2vw,18px);color:var(--muted);max-width:480px;line-height:1.7;animation-delay:0.1s;">Comfortable, Safe &amp; Reliable Travel Across Kenya</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;width:100%;max-width:860px;margin-top:50px;" class="fade-up" style="animation-delay:0.15s;">
+      <div class="role-card" onclick="gotoLogin('user')">
+        <div class="role-icon" style="background:rgba(74,142,245,0.12);color:var(--blue);">🧳</div>
+        <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.1em;margin-bottom:6px;">TRAVELLER</div>
+        <h3 style="font-size:20px;margin-bottom:10px;">User Portal</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Book tickets, track buses live, send parcels & manage your journeys.</p>
+        <button class="btn btn-gold btn-full" style="background:linear-gradient(135deg,var(--blue),#2563EB);color:#fff;">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('driver')" style="animation-delay:0.05s;">
+        <div class="role-icon" style="background:rgba(15,207,125,0.12);color:var(--green);">🚗</div>
+        <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:0.1em;margin-bottom:6px;">OPERATOR</div>
+        <h3 style="font-size:20px;margin-bottom:10px;">Driver Portal</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Manage your trips, track earnings, communicate & report incidents.</p>
+        <button class="btn btn-green btn-full">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('admin')" style="animation-delay:0.1s;">
+        <div class="role-icon" style="background:var(--gold-bg);color:var(--gold);">🛡️</div>
+        <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.1em;margin-bottom:6px;">MANAGEMENT</div>
+        <h3 style="font-size:20px;margin-bottom:10px;">Admin Portal</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px;">Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
+        <button class="btn btn-gold btn-full">Sign In →</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:48px;margin-top:56px;flex-wrap:wrap;justify-content:center;" class="fade-up">
+      <div><div class="display text-gold" style="font-size:36px;">50K+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Happy Travellers</div></div>
+      <div><div class="display text-gold" style="font-size:36px;">120+</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Daily Routes</div></div>
+      <div><div class="display text-gold" style="font-size:36px;">98%</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">On-time Rate</div></div>
+      <div><div class="display text-gold" style="font-size:36px;">24/7</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Support</div></div>
+    </div>
+
+    <div class="road-container" style="width:100%;max-width:500px;margin-top:40px;">
+      <div class="road-surface"></div>
+      <div class="road-bus">🚌</div>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Page -->
+<div id="auth-page" style="display:none;">
+  <div class="auth-panel">
+    <div class="flex items-center gap-16 mb-20">
+      <button class="btn btn-ghost btn-sm" onclick="showPage('welcome')">← Back</button>
+      <div class="flex items-center gap-12">
+        <div style="width:30px;height:30px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#08080F;">Rc</div>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.05em;">RAYAN COACH</span>
+      </div>
+    </div>
+
+    <div id="auth-role-icon" style="font-size:40px;margin-bottom:16px;"></div>
+    <h2 style="font-size:28px;font-weight:800;margin-bottom:4px;" id="auth-title">Sign In</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:28px;" id="auth-subtitle">Welcome back to Rayan Coach</p>
+
+    <div id="auth-tabs" class="tabs mb-20">
+      <div class="tab active" onclick="authTab('login')">Sign In</div>
+      <div class="tab" id="signup-tab" onclick="authTab('signup')">Create Account</div>
+    </div>
+
+    <div id="auth-login-form">
+      <div class="flex flex-col gap-16">
+        <div class="field input-icon">
+          <label>Email or Phone</label>
+          <span class="icon">📧</span>
+          <input class="input" type="text" placeholder="you@example.com or 07XX XXX XXX" id="login-email"/>
+        </div>
+        <div class="field input-icon">
+          <label>Password</label>
+          <span class="icon">🔒</span>
+          <input class="input" type="password" placeholder="••••••••" id="login-pw"/>
+          <button onclick="togglePw('login-pw')" style="position:absolute;right:12px;top:32px;background:none;color:var(--muted);font-size:12px;">👁</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--gold);"/> Remember me
+          </label>
+          <span style="font-size:13px;color:var(--gold);cursor:pointer;">Forgot password?</span>
+        </div>
+        <button class="btn btn-gold btn-full btn-lg" onclick="doLogin()" id="login-btn">Sign In</button>
+        <div style="text-align:center;font-size:13px;color:var(--muted);">Or sign in with</div>
+        <div class="flex gap-12">
+          <button class="btn btn-ghost btn-full" onclick="showToast('OTP sent to your phone','info')">📱 OTP</button>
+          <button class="btn btn-ghost btn-full" onclick="showToast('Google OAuth integration','info')">G Google</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="auth-signup-form" style="display:none;">
+      <div class="flex flex-col gap-14">
+        <div class="grid-2">
+          <div class="field"><label>First Name</label><input class="input" placeholder="John" id="su-fname"/></div>
+          <div class="field"><label>Last Name</label><input class="input" placeholder="Kamau" id="su-lname"/></div>
+        </div>
+        <div class="field input-icon"><label>Email</label><span class="icon">📧</span><input class="input" type="email" placeholder="john@email.com" id="su-email"/></div>
+        <div class="field input-icon"><label>Phone (+254)</label><span class="icon">📱</span><input class="input" placeholder="+254 712 345 678" id="su-phone"/></div>
+        <div class="field input-icon"><label>Password</label><span class="icon">🔒</span><input class="input" type="password" placeholder="Min 8 characters" id="su-pw"/></div>
+        <div class="field input-icon"><label>Confirm Password</label><span class="icon">🔒</span><input class="input" type="password" placeholder="Repeat password" id="su-pw2"/></div>
+        <button class="btn btn-gold btn-full btn-lg" onclick="doSignup()">Create Account</button>
+      </div>
+    </div>
+
+    <div id="admin-note" style="display:none;background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:10px;padding:14px;margin-top:16px;font-size:13px;color:var(--soft);">
+      🔐 Admin access is restricted. Contact your system administrator for credentials.
+    </div>
+  </div>
+
+  <div class="auth-deco">
+    <div style="font-size:80px;" id="auth-deco-icon" class="float">🚌</div>
+    <h3 style="font-size:24px;font-weight:800;text-align:center;">Kenya's Premier Coach</h3>
+    <p style="color:var(--muted);text-align:center;line-height:1.7;max-width:260px;">Experience first-class intercity travel with real-time tracking &amp; digital tickets</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:260px;">
+      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">📶 WiFi</div>
+      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">⚡ Charging</div>
+      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">❄️ A/C Seats</div>
+      <div class="card card-pad" style="padding:12px;text-align:center;font-size:12px;">📍 GPS Track</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app-page" style="display:none;" class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="flex items-center gap-12">
+        <div style="width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;color:#08080F;">Rc</div>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:0.05em;">RAYAN COACH</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:1px;" id="sidebar-role-label">PORTAL</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <div class="nav-item text-red" onclick="doLogout()">
+        <span class="nav-icon">🚪</span>
+        <span>Logout</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="content-area">
+    <header class="topbar">
+      <div class="flex items-center gap-12">
+        <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()" style="display:none;">☰</button>
+        <h3 style="font-size:15px;font-weight:700;" id="page-title">Dashboard</h3>
+      </div>
+      <div class="flex items-center gap-12">
+        <div style="position:relative;cursor:pointer;" onclick="openNotifPanel()">
+          <span style="font-size:18px;">🔔</span>
+          <div class="notif-badge"></div>
+        </div>
+        <div class="flex items-center gap-8 pointer" onclick="navigateTo('profile')" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px;">
+          <div class="avatar" id="topbar-avatar" style="background:var(--gold-bg);color:var(--gold);width:28px;height:28px;font-size:12px;">JK</div>
+          <span style="font-size:13px;font-weight:500;" id="topbar-name">John Kamau</span>
+        </div>
+      </div>
+    </header>
+    <div class="main-content" id="page-content"></div>
+  </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-container"></div>
+
+<script src="app.js"></script>
 </body>
 </html>
