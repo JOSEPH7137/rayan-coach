@@ -536,7 +536,7 @@
   </div>
 </div>
 
-<!-- Role Selection Page (NEW) - Shows the 3 role cards -->
+<!-- Role Selection Page (NEW) - Shows the 3 role cards with typing animation -->
 <div id="role-selection-page" style="display:none;">
   <div class="role-selection-container">
     <nav class="main-nav">
@@ -551,7 +551,7 @@
         <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
         <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
         <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
-        <a href="#" onclick="showRoleSelectionPage()" class="nav-link active-nav">Sign In / Register</a>
+        <a href="#" onclick="showRoleSelectionPage()" class="nav-link active-nav signin-link">Sign In / Register</a>
       </div>
       <div class="nav-actions">
         <div class="theme-toggle" onclick="toggleTheme()">
@@ -562,8 +562,13 @@
     </nav>
 
     <div class="role-selection-hero">
-      <h1 class="role-selection-title">Choose Your Portal</h1>
-      <p class="role-selection-subtitle">Select your role to continue to Rayan Coach</p>
+      <div class="typing-hero-wrapper">
+        <div class="typing-hero-container">
+          <div class="typing-hero-line" id="typingHeroLine"></div>
+          <span class="cursor-hero" id="cursorHero">|</span>
+        </div>
+        <p class="hero-subtitle-role">Choose Your Portal to Continue</p>
+      </div>
     </div>
 
     <!-- Role Cards -->
