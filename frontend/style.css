@@ -1702,35 +1702,53 @@ body.light-mode .main-footer {
 #sendMessageBtn {
   margin-top: 10px;
 }
-.stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-
-  padding: 3rem 2rem;
-  background: #0f172a; /* premium dark */
-  color: white;
-
-  flex-wrap: wrap; /* makes it responsive */
+/* Counter Styles */
+.counter {
+  transition: all 0.3s ease;
 }
 
 .stat {
-  flex: 1;
-  min-width: 150px;
   text-align: center;
+  padding: 20px;
 }
 
-.counter {
-  font-size: 2.8rem;
+.stat h2 {
+  font-size: 48px;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  color: var(--gold);
+  margin-bottom: 10px;
 }
 
 .stat p {
-  font-size: 1rem;
-  opacity: 0.8;
+  font-size: 14px;
+  color: var(--muted);
 }
-.stat:not(:last-child) {
-  border-right: 1px solid rgba(255,255,255,0.1);
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number-large {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+  padding: 40px 20px;
+  background: var(--card);
+  border-radius: 24px;
+  margin: 40px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
 }

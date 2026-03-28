@@ -121,24 +121,42 @@
     </div>
 
     <!-- Stats -->
-    <div class="stats-container">
-   <section class="stats">
+   <!-- Home page counters -->
+<div class="stats-container">
   <div class="stat">
     <h2 class="counter" data-target="50000">0</h2>
     <p>Happy Customers</p>
   </div>
-
   <div class="stat">
     <h2 class="counter" data-target="120">0</h2>
     <p>Daily Routes</p>
   </div>
-
   <div class="stat">
     <h2 class="counter" data-target="98">0</h2>
     <p>Success Rate (%)</p>
   </div>
-</section>
 </div>
+
+<!-- About page counters -->
+<div class="stats-grid">
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="50000">0</div>
+    <div class="stat-label">Happy Customers</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="120">0</div>
+    <div class="stat-label">Daily Routes</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="98">0</div>
+    <div class="stat-label">On-time Rate</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number-large">24/7</div>
+    <div class="stat-label">Support Available</div>
+  </div>
+</div>
+
 
     <!-- Road animation -->
     <div class="road-container">
@@ -781,6 +799,6 @@ function submitContactForm(event) {
 // Initialize
 showPage('welcome');
 </script>
-
+<script src="counter.js"></script>
 </body>
 </html>
