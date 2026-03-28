@@ -122,10 +122,12 @@ function showPage(name){
   const appPage = $('app-page');
   const aboutPage = document.getElementById('about-page');
   const contactPage = document.getElementById('contact-page');
+  const roleSelectionPage = document.getElementById('role-selection-page');
   
   if(welcomePage) welcomePage.style.display = name==='welcome' ? 'flex' : 'none';
   if(aboutPage) aboutPage.style.display = name==='about' ? 'flex' : 'none';
   if(contactPage) contactPage.style.display = name==='contact' ? 'flex' : 'none';
+  if(roleSelectionPage) roleSelectionPage.style.display = name==='role-selection' ? 'flex' : 'none';
   if(authPage) authPage.style.display = name==='auth' ? 'flex' : 'none';
   if(appPage) appPage.style.display = name==='app' ? 'flex' : 'none';
 }
@@ -501,7 +503,6 @@ let typingTimeouts = {};
 let currentTypingSlide = 0;
 
 function startTypingForSlide(slideIndex) {
-  // Clear existing timeouts for this slide
   if (typingTimeouts[slideIndex]) {
     typingTimeouts[slideIndex].forEach(timeout => clearTimeout(timeout));
   }
@@ -547,7 +548,6 @@ function startTypingForSlide(slideIndex) {
   typeEffect();
 }
 
-// Enhanced Carousel with typing animation
 function initCarousel() {
   const slides = document.querySelector('.carousel-slides');
   const dots = document.querySelectorAll('.dot');
@@ -557,7 +557,6 @@ function initCarousel() {
   const totalSlides = 3;
   let autoSlideInterval;
 
-  // Start typing for first slide
   startTypingForSlide(0);
   currentTypingSlide = 0;
 
@@ -577,9 +576,7 @@ function initCarousel() {
       }
     });
     
-    // Start typing for new slide when it changes
     if (currentTypingSlide !== currentIndex) {
-      // Clear old typing timeouts
       if (typingTimeouts[currentTypingSlide]) {
         typingTimeouts[currentTypingSlide].forEach(timeout => clearTimeout(timeout));
       }
@@ -610,7 +607,6 @@ function initCarousel() {
   }
 
   if (prevBtn && nextBtn) {
-    // Remove existing listeners by cloning
     const newPrevBtn = prevBtn.cloneNode(true);
     const newNextBtn = nextBtn.cloneNode(true);
     prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
@@ -646,6 +642,7 @@ function initCarousel() {
     carouselContainer.addEventListener('mouseleave', startAutoSlide);
   }
 }
+
 // ==================== TYPING ANIMATION FOR ROLE SELECTION PAGE ====================
 const heroTypingText = "WELCOME TO RAYAN COACH";
 let heroTypingTimeout = null;
@@ -653,17 +650,18 @@ let heroTypingActive = false;
 
 function startHeroTyping() {
   const typingElement = document.getElementById('typingHeroLine');
-  const cursorElement = document.getElementById('cursorHero');
-  if (!typingElement) return;
-  
-  // Clear existing timeout
-  if (heroTypingTimeout) {
-    clearTimeout(heroTypingTimeout);
+  if (!typingElement) {
+    return;
   }
   
+  if (heroTypingTimeout) {
+    clearTimeout(heroTypingTimeout);
+    heroTypingTimeout = null;
+  }
+  
+  heroTypingActive = true;
   let currentCharIndex = 0;
   let isDeleting = false;
-  heroTypingActive = true;
   
   function heroTypeEffect() {
     if (!typingElement || !heroTypingActive) return;
@@ -704,101 +702,30 @@ function stopHeroTyping() {
   }
 }
 
-// Override showRoleSelectionPage to start typing when page loads
+// ==================== PAGE NAVIGATION ====================
 function showRoleSelectionPage() { 
   showPage('role-selection');
-  // Start typing animation when role selection page is shown
   setTimeout(() => {
-    if (typeof startHeroTyping === 'function') {
-      // Stop any existing typing first
-      if (window.heroTypingActive) {
-        if (window.heroTypingTimeout) clearTimeout(window.heroTypingTimeout);
-        window.heroTypingActive = false;
-      }
-      startHeroTyping();
-    }
-  }, 100);
+    stopHeroTyping();
+    startHeroTyping();
+  }, 150);
 }
+
+function showAboutPage() { showPage('about'); }
+function showContactPage() { showPage('contact'); }
+
 // ==================== NOTIFICATIONS ====================
 function openNotifPanel(){
   showModal(`<div class="modal-box"><div class="modal-header"><h3>Notifications</h3><button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button></div><div class="modal-body"><p>You have 3 new notifications</p></div></div>`);
 }
 
 // ==================== INITIALIZE ====================
-// Load theme on page load
 loadTheme();
 
-// Initialize carousel when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
   initCarousel();
 });
 
-// Show welcome page
 showPage('welcome');
 
 console.log('%c RAYAN COACH TRANSPORT SYSTEM ', 'background:#E8A020;color:#08080F;font-weight:bold;font-size:14px;padding:4px 8px;');
-// ==================== TYPING ANIMATION FOR ROLE SELECTION PAGE ====================
-const heroTypingText = "WELCOME TO RAYAN COACH";
-let heroTypingTimeout = null;
-let heroTypingActive = false;
-
-function startHeroTyping() {
-  const typingElement = document.getElementById('typingHeroLine');
-  const cursorElement = document.getElementById('cursorHero');
-  if (!typingElement) {
-    console.log("Typing element not found");
-    return;
-  }
-  
-  // Clear existing timeout
-  if (heroTypingTimeout) {
-    clearTimeout(heroTypingTimeout);
-    heroTypingTimeout = null;
-  }
-  
-  heroTypingActive = true;
-  let currentCharIndex = 0;
-  let isDeleting = false;
-  
-  function heroTypeEffect() {
-    if (!typingElement || !heroTypingActive) return;
-    
-    if (!isDeleting && currentCharIndex <= heroTypingText.length) {
-      typingElement.textContent = heroTypingText.substring(0, currentCharIndex);
-      currentCharIndex++;
-      
-      if (currentCharIndex > heroTypingText.length) {
-        isDeleting = true;
-        heroTypingTimeout = setTimeout(heroTypeEffect, 3000);
-        return;
-      }
-    } else if (isDeleting && currentCharIndex >= 0) {
-      typingElement.textContent = heroTypingText.substring(0, currentCharIndex);
-      currentCharIndex--;
-      
-      if (currentCharIndex < 0) {
-        isDeleting = false;
-        currentCharIndex = 0;
-        heroTypingTimeout = setTimeout(heroTypeEffect, 500);
-        return;
-      }
-    }
-    
-    const speed = isDeleting ? 50 : 100;
-    heroTypingTimeout = setTimeout(heroTypeEffect, speed);
-  }
-  
-  heroTypeEffect();
-}
-
-function stopHeroTyping() {
-  heroTypingActive = false;
-  if (heroTypingTimeout) {
-    clearTimeout(heroTypingTimeout);
-    heroTypingTimeout = null;
-  }
-}
-
-// Make functions globally available
-window.startHeroTyping = startHeroTyping;
-window.stopHeroTyping = stopHeroTyping;
