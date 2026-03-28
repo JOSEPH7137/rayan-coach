@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#0A0A0F"/>
+<meta name="theme-color" content="#FFFFFF"/>
 <title>Rayan Coach – Kenya's Premier Intercity Transport</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
-<body>
+<body class="light-mode">
 
 <!-- Toast Container -->
 <div id="toast-container"></div>
@@ -48,26 +48,38 @@
   <!-- Hero Section with Carousel -->
   <div class="hero-section">
     
-    <!-- Hero Carousel Images -->
+    <!-- Hero Carousel Images with Typing Overlay -->
     <div class="hero-carousel">
       <div class="carousel-container">
         <div class="carousel-slides" id="carouselSlides">
           <div class="carousel-slide">
             <img src="images/image1.jpg" alt="Rayan Coach Luxury Bus">
-            <div class="carousel-caption">
-              <p>Premium VIP Coaches</p>
+            <div class="carousel-overlay typing-overlay">
+              <div class="typing-wrapper">
+                <div class="typing-line" id="typingLine0"></div>
+                <span class="cursor" id="cursor0">|</span>
+              </div>
+              <p class="hero-subtitle-overlay">Comfortable, Safe & Reliable Travel Across Kenya</p>
             </div>
           </div>
           <div class="carousel-slide">
             <img src="images/image2.jpg" alt="Rayan Coach Comfortable Seats">
-            <div class="carousel-caption">
-              <p>Luxury Recliner Seats</p>
+            <div class="carousel-overlay typing-overlay">
+              <div class="typing-wrapper">
+                <div class="typing-line" id="typingLine1"></div>
+                <span class="cursor" id="cursor1">|</span>
+              </div>
+              <p class="hero-subtitle-overlay">Premium recliner seats with ample legroom</p>
             </div>
           </div>
           <div class="carousel-slide">
             <img src="images/image3.jpg" alt="Rayan Coach Interior">
-            <div class="carousel-caption">
-              <p>Modern Amenities & WiFi</p>
+            <div class="carousel-overlay typing-overlay">
+              <div class="typing-wrapper">
+                <div class="typing-line" id="typingLine2"></div>
+                <span class="cursor" id="cursor2">|</span>
+              </div>
+              <p class="hero-subtitle-overlay">Free WiFi, charging ports & entertainment</p>
             </div>
           </div>
         </div>
@@ -121,42 +133,39 @@
     </div>
 
     <!-- Stats -->
-   <!-- Home page counters -->
-<div class="stats-container">
-  <div class="stat">
-    <h2 class="counter" data-target="50000">0</h2>
-    <p>Happy Customers</p>
-  </div>
-  <div class="stat">
-    <h2 class="counter" data-target="120">0</h2>
-    <p>Daily Routes</p>
-  </div>
-  <div class="stat">
-    <h2 class="counter" data-target="98">0</h2>
-    <p>Success Rate (%)</p>
-  </div>
-</div>
+    <div class="stats-container">
+      <div class="stat">
+        <h2 class="counter" data-target="50000">0</h2>
+        <p>Happy Customers</p>
+      </div>
+      <div class="stat">
+        <h2 class="counter" data-target="120">0</h2>
+        <p>Daily Routes</p>
+      </div>
+      <div class="stat">
+        <h2 class="counter" data-target="98">0</h2>
+        <p>Success Rate (%)</p>
+      </div>
+    </div>
 
-<!-- About page counters -->
-<div class="stats-grid">
-  <div class="stat-item">
-    <div class="stat-number-large counter" data-target="50000">0</div>
-    <div class="stat-label">Happy Customers</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-number-large counter" data-target="120">0</div>
-    <div class="stat-label">Daily Routes</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-number-large counter" data-target="98">0</div>
-    <div class="stat-label">On-time Rate</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-number-large">24/7</div>
-    <div class="stat-label">Support Available</div>
-  </div>
-</div>
-
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number-large counter" data-target="50000">0</div>
+        <div class="stat-label">Happy Customers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number-large counter" data-target="120">0</div>
+        <div class="stat-label">Daily Routes</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number-large counter" data-target="98">0</div>
+        <div class="stat-label">On-time Rate</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number-large">24/7</div>
+        <div class="stat-label">Support Available</div>
+      </div>
+    </div>
 
     <!-- Road animation -->
     <div class="road-container">
@@ -167,11 +176,7 @@
     <!-- Footer -->
     <footer class="main-footer" id="main-footer">
       <div class="footer-container">
-        
-        <!-- Top Footer Grid -->
         <div class="footer-grid">
-          
-          <!-- Company Info -->
           <div class="footer-col">
             <div class="footer-logo">
               <div class="footer-logo-icon">Rc</div>
@@ -190,7 +195,6 @@
             </div>
           </div>
           
-          <!-- Contacts -->
           <div class="footer-col" id="contact-section">
             <h4>Contact Us</h4>
             <div class="footer-divider"></div>
@@ -224,7 +228,6 @@
             </div>
           </div>
           
-          <!-- Operating Hours -->
           <div class="footer-col">
             <h4>Operating Hours</h4>
             <div class="footer-divider"></div>
@@ -247,10 +250,8 @@
           </div>
         </div>
         
-        <!-- Divider -->
         <div class="footer-divider-full"></div>
         
-        <!-- Bottom Footer -->
         <div class="footer-bottom">
           <div>
             <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
@@ -274,7 +275,7 @@
   </div>
 </div>
 
-<!-- About Us Page -->
+<!-- About Us Page (same as original) -->
 <div id="about-page" style="display:none;">
   <div class="about-page-container">
     <nav class="main-nav">
@@ -437,7 +438,7 @@
   </div>
 </div>
 
-<!-- Contact Us Page -->
+<!-- Contact Us Page (same as original) -->
 <div id="contact-page" style="display:none;">
   <div class="contact-page-container">
     <nav class="main-nav">
@@ -582,7 +583,7 @@
   </div>
 </div>
 
-<!-- Auth Page -->
+<!-- Auth Page (same as original) -->
 <div id="auth-page" style="display:none;">
   <div class="auth-panel">
     <div class="auth-header">
@@ -739,64 +740,43 @@ function showPage(pageName) {
   document.getElementById('contact-page').style.display = pageName === 'contact' ? 'flex' : 'none';
   document.getElementById('auth-page').style.display = pageName === 'auth' ? 'flex' : 'none';
   document.getElementById('app-page').style.display = pageName === 'app' ? 'flex' : 'none';
-  
-  // Scroll to top when page changes
   window.scrollTo(0, 0);
 }
 
-function showAboutPage() {
-  showPage('about');
-}
+function showAboutPage() { showPage('about'); }
+function showContactPage() { showPage('contact'); }
 
-function showContactPage() {
-  showPage('contact');
-}
-
-// Contact Form Submission
 function submitContactForm(event) {
   event.preventDefault();
-  
   const name = document.getElementById('contactName').value;
-  const countryCode = document.getElementById('contactCountryCode').value;
   const phone = document.getElementById('contactPhone').value;
   const email = document.getElementById('contactEmail').value;
   const subject = document.getElementById('contactSubject').value;
   const message = document.getElementById('contactMessage').value;
   
-  // Validate form
   if (!name || !phone || !email || !subject || !message) {
     showToast('Please fill in all fields', 'error');
     return false;
   }
   
-  // Show sending message
   const sendBtn = document.getElementById('sendMessageBtn');
   const originalText = sendBtn.textContent;
   sendBtn.textContent = 'Sending...';
   sendBtn.disabled = true;
   
-  // Simulate sending (replace with actual API call)
   setTimeout(() => {
-    showToast(`Thank you ${name}! Your message has been sent successfully. We'll get back to you within 24 hours.`, 'success');
-    
-    // Clear form
+    showToast(`Thank you ${name}! Your message has been sent successfully.`, 'success');
     document.getElementById('contactName').value = '';
     document.getElementById('contactPhone').value = '';
     document.getElementById('contactEmail').value = '';
     document.getElementById('contactSubject').value = '';
     document.getElementById('contactMessage').value = '';
-    
     sendBtn.textContent = originalText;
     sendBtn.disabled = false;
   }, 1500);
-  
   return false;
 }
 
-// Other existing functions (showToast, toggleTheme, etc.) remain the same
-// ... (include all your existing JavaScript functions here)
-
-// Initialize
 showPage('welcome');
 </script>
 <script src="counter.js"></script>

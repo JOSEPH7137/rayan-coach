@@ -549,6 +549,170 @@ function initCarousel() {
     carouselContainer.addEventListener('mouseleave', startAutoSlide);
   }
 }
+// ==================== TYPING ANIMATION ON CAROUSEL IMAGES ====================
+const typingText = "WELCOME TO RAYAN COACH";
+let typingTimeouts = {};
+let currentTypingSlide = 0;
+
+function startTypingForSlide(slideIndex) {
+  // Clear existing timeouts for this slide
+  if (typingTimeouts[slideIndex]) {
+    typingTimeouts[slideIndex].forEach(timeout => clearTimeout(timeout));
+  }
+  typingTimeouts[slideIndex] = [];
+  
+  const typingElement = document.getElementById(`typingLine${slideIndex}`);
+  const cursorElement = document.getElementById(`cursor${slideIndex}`);
+  if (!typingElement) return;
+  
+  let currentCharIndex = 0;
+  let isDeleting = false;
+  
+  function typeEffect() {
+    if (!typingElement) return;
+    
+    if (!isDeleting && currentCharIndex <= typingText.length) {
+      typingElement.textContent = typingText.substring(0, currentCharIndex);
+      currentCharIndex++;
+      
+      if (currentCharIndex > typingText.length) {
+        isDeleting = true;
+        const timeout = setTimeout(typeEffect, 3000);
+        typingTimeouts[slideIndex].push(timeout);
+        return;
+      }
+    } else if (isDeleting && currentCharIndex >= 0) {
+      typingElement.textContent = typingText.substring(0, currentCharIndex);
+      currentCharIndex--;
+      
+      if (currentCharIndex < 0) {
+        isDeleting = false;
+        currentCharIndex = 0;
+        const timeout = setTimeout(typeEffect, 500);
+        typingTimeouts[slideIndex].push(timeout);
+        return;
+      }
+    }
+    
+    const speed = isDeleting ? 50 : 100;
+    const timeout = setTimeout(typeEffect, speed);
+    typingTimeouts[slideIndex].push(timeout);
+  }
+  
+  typeEffect();
+}
+
+// Modified carousel function to include typing
+const originalInitCarousel = initCarousel;
+window.initCarousel = function() {
+  // Call original carousel
+  originalInitCarousel();
+  
+  // Start typing for first slide
+  startTypingForSlide(0);
+  currentTypingSlide = 0;
+  
+  // Override updateCarousel to restart typing on slide change
+  const slides = document.querySelector('.carousel-slides');
+  const dots = document.querySelectorAll('.dot');
+  let currentIndex = 0;
+  let autoSlideInterval;
+  
+  function updateCarouselWithTyping() {
+    if (slides) {
+      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+    dots.forEach((dot, index) => {
+      if (index === currentIndex) {
+        dot.classList.add('active');
+        dot.style.background = 'var(--gold)';
+        dot.style.transform = 'scale(1.2)';
+      } else {
+        dot.classList.remove('active');
+        dot.style.background = 'rgba(255,255,255,0.5)';
+        dot.style.transform = 'scale(1)';
+      }
+    });
+    
+    // Start typing for new slide if changed
+    if (currentTypingSlide !== currentIndex) {
+      if (typingTimeouts[currentTypingSlide]) {
+        typingTimeouts[currentTypingSlide].forEach(timeout => clearTimeout(timeout));
+      }
+      currentTypingSlide = currentIndex;
+      startTypingForSlide(currentIndex);
+    }
+  }
+  
+  function nextSlideWithTyping() {
+    currentIndex = (currentIndex + 1) % 3;
+    updateCarouselWithTyping();
+  }
+  
+  function prevSlideWithTyping() {
+    currentIndex = (currentIndex - 1 + 3) % 3;
+    updateCarouselWithTyping();
+  }
+  
+  function startAutoSlideWithTyping() {
+    autoSlideInterval = setInterval(nextSlideWithTyping, 5000);
+  }
+  
+  function stopAutoSlideWithTyping() {
+    if (autoSlideInterval) {
+      clearInterval(autoSlideInterval);
+    }
+  }
+  
+  const prevBtn = document.querySelector('.carousel-prev');
+  const nextBtn = document.querySelector('.carousel-next');
+  
+  if (prevBtn && nextBtn) {
+    // Remove old listeners and add new ones
+    const newPrevBtn = prevBtn.cloneNode(true);
+    const newNextBtn = nextBtn.cloneNode(true);
+    prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    
+    newPrevBtn.addEventListener('click', () => {
+      stopAutoSlideWithTyping();
+      prevSlideWithTyping();
+      startAutoSlideWithTyping();
+    });
+    
+    newNextBtn.addEventListener('click', () => {
+      stopAutoSlideWithTyping();
+      nextSlideWithTyping();
+      startAutoSlideWithTyping();
+    });
+  }
+  
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      stopAutoSlideWithTyping();
+      currentIndex = index;
+      updateCarouselWithTyping();
+      startAutoSlideWithTyping();
+    });
+  });
+  
+  startAutoSlideWithTyping();
+  
+  const carouselContainer = document.querySelector('.carousel-container');
+  if (carouselContainer) {
+    carouselContainer.addEventListener('mouseenter', stopAutoSlideWithTyping);
+    carouselContainer.addEventListener('mouseleave', startAutoSlideWithTyping);
+  }
+  
+  // Update the global function
+  window.updateCarousel = updateCarouselWithTyping;
+};
+
+// Replace the carousel initialization
+document.removeEventListener('DOMContentLoaded', initCarousel);
+document.addEventListener('DOMContentLoaded', function() {
+  window.initCarousel();
+});
 
 // ==================== NOTIFICATIONS ====================
 function openNotifPanel(){
