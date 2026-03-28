@@ -36,6 +36,7 @@
       <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
       <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
       <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
+      <a href="#" onclick="showRoleSelectionPage()" class="nav-link signin-link">Sign In / Register</a>
     </div>
     <div class="nav-actions">
       <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
@@ -116,33 +117,6 @@
       <div class="stat-item-horizontal">
         <h2>24/7</h2>
         <p>Support Available</p>
-      </div>
-    </div>
-
-    <!-- Role Cards -->
-    <div class="role-cards">
-      <div class="role-card" onclick="gotoLogin('user')">
-        <div class="role-icon user-icon">🧳</div>
-        <div class="role-label user-label">TRAVELLER</div>
-        <h3>User Portal</h3>
-        <p>Book tickets, track buses live, send parcels & manage your journeys.</p>
-        <button class="btn btn-gold btn-full user-btn">Sign In →</button>
-      </div>
-
-      <div class="role-card" onclick="gotoLogin('driver')">
-        <div class="role-icon driver-icon">🚗</div>
-        <div class="role-label driver-label">OPERATOR</div>
-        <h3>Driver Portal</h3>
-        <p>Manage your trips, track earnings, communicate & report incidents.</p>
-        <button class="btn btn-green btn-full">Sign In →</button>
-      </div>
-
-      <div class="role-card" onclick="gotoLogin('admin')">
-        <div class="role-icon admin-icon">🛡️</div>
-        <div class="role-label admin-label">MANAGEMENT</div>
-        <h3>Admin Portal</h3>
-        <p>Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
-        <button class="btn btn-gold btn-full">Sign In →</button>
       </div>
     </div>
 
@@ -252,7 +226,7 @@
   </div>
 </div>
 
-<!-- About Us Page - FULL VERSION -->
+<!-- About Us Page -->
 <div id="about-page" style="display:none;">
   <div class="about-page-container">
     <nav class="main-nav">
@@ -267,6 +241,7 @@
         <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
         <a href="#" onclick="showAboutPage()" class="nav-link active-nav">About Us</a>
         <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
+        <a href="#" onclick="showRoleSelectionPage()" class="nav-link signin-link">Sign In / Register</a>
       </div>
       <div class="nav-actions">
         <div class="theme-toggle" onclick="toggleTheme()">
@@ -415,7 +390,7 @@
   </div>
 </div>
 
-<!-- Contact Us Page - FULL VERSION -->
+<!-- Contact Us Page -->
 <div id="contact-page" style="display:none;">
   <div class="contact-page-container">
     <nav class="main-nav">
@@ -430,6 +405,7 @@
         <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
         <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
         <a href="#" onclick="showContactPage()" class="nav-link active-nav">Contact Us</a>
+        <a href="#" onclick="showRoleSelectionPage()" class="nav-link signin-link">Sign In / Register</a>
       </div>
       <div class="nav-actions">
         <div class="theme-toggle" onclick="toggleTheme()">
@@ -560,11 +536,103 @@
   </div>
 </div>
 
-<!-- Auth Page -->
+<!-- Role Selection Page (NEW) - Shows the 3 role cards -->
+<div id="role-selection-page" style="display:none;">
+  <div class="role-selection-container">
+    <nav class="main-nav">
+      <div class="nav-logo">
+        <div class="logo-icon">Rc</div>
+        <div>
+          <div class="logo-text">RAYAN COACH</div>
+          <div class="logo-sub">KENYA'S PREMIER TRANSPORT</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
+        <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
+        <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
+        <a href="#" onclick="showRoleSelectionPage()" class="nav-link active-nav">Sign In / Register</a>
+      </div>
+      <div class="nav-actions">
+        <div class="theme-toggle" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
+          <span>Dark</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="role-selection-hero">
+      <h1 class="role-selection-title">Choose Your Portal</h1>
+      <p class="role-selection-subtitle">Select your role to continue to Rayan Coach</p>
+    </div>
+
+    <!-- Role Cards -->
+    <div class="role-cards-selection">
+      <div class="role-card" onclick="gotoLogin('user')">
+        <div class="role-icon user-icon">🧳</div>
+        <div class="role-label user-label">TRAVELLER</div>
+        <h3>User Portal</h3>
+        <p>Book tickets, track buses live, send parcels & manage your journeys.</p>
+        <button class="btn btn-gold btn-full user-btn">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('driver')">
+        <div class="role-icon driver-icon">🚗</div>
+        <div class="role-label driver-label">OPERATOR</div>
+        <h3>Driver Portal</h3>
+        <p>Manage your trips, track earnings, communicate & report incidents.</p>
+        <button class="btn btn-green btn-full">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('admin')">
+        <div class="role-icon admin-icon">🛡️</div>
+        <div class="role-label admin-label">MANAGEMENT</div>
+        <h3>Admin Portal</h3>
+        <p>Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
+        <button class="btn btn-gold btn-full">Sign In →</button>
+      </div>
+    </div>
+
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">Rc</div>
+              <div>
+                <div class="footer-logo-text">RAYAN COACH</div>
+                <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
+              </div>
+            </div>
+            <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Contacts</h4>
+            <div class="footer-divider"></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">NAIROBI</p><p class="contact-phone">0745 129233</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">GARISSA</p><p class="contact-phone">0745 129234</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-envelope"></i></span><div><p class="contact-title">EMAIL</p><p class="contact-email">info@rayan.co.ke</p></div></div>
+          </div>
+          <div class="footer-col">
+            <h4>Operating Hours</h4>
+            <div class="footer-divider"></div>
+            <div class="hours-item"><p>Monday - Friday</p><p class="hours-time">6:00 AM - 10:00 PM</p></div>
+            <div class="hours-item"><p>Saturday - Sunday</p><p class="hours-time">7:00 AM - 9:00 PM</p></div>
+            <div class="support-badge"><div class="online-dot"></div><span>24/7 Customer Support</span></div>
+          </div>
+        </div>
+        <div class="footer-divider-full"></div>
+        <div class="footer-bottom"><div><p>© 2025 Rayan Coach Kenya. All rights reserved.</p></div></div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Auth Page (Login Form) -->
 <div id="auth-page" style="display:none;">
   <div class="auth-panel">
     <div class="auth-header">
-      <button class="btn btn-ghost btn-sm" onclick="showPage('welcome')">← Back</button>
+      <button class="btn btn-ghost btn-sm" onclick="showRoleSelectionPage()">← Back</button>
       <div class="auth-logo">
         <div class="auth-logo-icon">Rc</div>
         <span>RAYAN COACH</span>
@@ -713,12 +781,14 @@ function showPage(pageName) {
   const welcomePage = document.getElementById('welcome-page');
   const aboutPage = document.getElementById('about-page');
   const contactPage = document.getElementById('contact-page');
+  const roleSelectionPage = document.getElementById('role-selection-page');
   const authPage = document.getElementById('auth-page');
   const appPage = document.getElementById('app-page');
   
   if(welcomePage) welcomePage.style.display = pageName === 'welcome' ? 'flex' : 'none';
   if(aboutPage) aboutPage.style.display = pageName === 'about' ? 'flex' : 'none';
   if(contactPage) contactPage.style.display = pageName === 'contact' ? 'flex' : 'none';
+  if(roleSelectionPage) roleSelectionPage.style.display = pageName === 'role-selection' ? 'flex' : 'none';
   if(authPage) authPage.style.display = pageName === 'auth' ? 'flex' : 'none';
   if(appPage) appPage.style.display = pageName === 'app' ? 'flex' : 'none';
   window.scrollTo(0, 0);
@@ -726,6 +796,7 @@ function showPage(pageName) {
 
 function showAboutPage() { showPage('about'); }
 function showContactPage() { showPage('contact'); }
+function showRoleSelectionPage() { showPage('role-selection'); }
 
 function submitContactForm(event) {
   event.preventDefault();
@@ -746,7 +817,7 @@ function submitContactForm(event) {
   sendBtn.disabled = true;
   
   setTimeout(() => {
-    showToast(`Thank you ${name}! Your message has been sent successfully. We'll get back to you within 24 hours.`, 'success');
+    showToast(`Thank you ${name}! Your message has been sent successfully.`, 'success');
     document.getElementById('contactName').value = '';
     document.getElementById('contactPhone').value = '';
     document.getElementById('contactEmail').value = '';
