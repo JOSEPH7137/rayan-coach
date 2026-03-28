@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#FFFFFF"/>
+<title>Driver Dashboard - Rayan Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body class="light-mode">
+
+<nav class="main-nav">
+  <div class="nav-logo">
+    <div class="logo-icon">Rc</div>
+    <div>
+      <div class="logo-text">RAYAN COACH</div>
+      <div class="logo-sub">DRIVER PORTAL</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="driver-dashboard.html" class="nav-link active-nav">Dashboard</a>
+    <a href="#" onclick="showToast('My Trips','info')" class="nav-link">My Trips</a>
+    <a href="#" onclick="showToast('Earnings','info')" class="nav-link">Earnings</a>
+    <a href="index.html" class="nav-link" onclick="localStorage.removeItem('loggedIn')">Logout</a>
+  </div>
+  <div class="nav-actions">
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <i class="fas fa-moon"></i>
+      <span>Dark</span>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard-container" style="padding: 120px 40px 40px;">
+  <div class="grid-4">
+    <div class="stat-card"><div class="stat-value">KES 4,200</div><div class="stat-label">Today's Earnings</div></div>
+    <div class="stat-card"><div class="stat-value">KES 48,700</div><div class="stat-label">This Month</div></div>
+    <div class="stat-card"><div class="stat-value">4.9 ★</div><div class="stat-label">Rating</div></div>
+    <div class="stat-card"><div class="stat-value">94%</div><div class="stat-label">On-time Rate</div></div>
+  </div>
+  <div class="card card-pad mt-24">
+    <h3>Upcoming Trips</h3>
+    <p>Nairobi → Mombasa (07:00 AM)</p>
+    <p>Mombasa → Nairobi (14:00 PM)</p>
+    <button class="btn btn-gold mt-16" onclick="showToast('Trip started','success')">Start Trip</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  loadTheme();
+});
+</script>
+</body>
+</html>
