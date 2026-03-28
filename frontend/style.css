@@ -1910,3 +1910,73 @@ body.light-mode .main-footer {
     padding-bottom: 0;
   }
 }
+/* ==================== TYPING OVERLAY ON IMAGES ==================== */
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.4));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  z-index: 5;
+}
+
+.typing-wrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.typing-line {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: #E8A020;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+  letter-spacing: 2px;
+  display: inline-block;
+  white-space: pre;
+}
+
+.cursor {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: #E8A020;
+  animation: blinkCursor 0.9s infinite;
+  line-height: 1;
+  font-family: monospace;
+  margin-left: 2px;
+}
+
+.hero-subtitle-overlay {
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  padding: 8px 20px;
+  border-radius: 40px;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .typing-line, .cursor {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+  .hero-subtitle-overlay {
+    font-size: 0.8rem;
+    padding: 5px 12px;
+  }
+}
