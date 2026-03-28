@@ -34,8 +34,8 @@
     </div>
     <div class="nav-links">
       <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
-      <a href="#" onclick="showAboutModal()" class="nav-link">About Us</a>
-      <a href="#" onclick="scrollToFooter()" class="nav-link">Contact Us</a>
+      <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
+      <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
     </div>
     <div class="nav-actions">
       <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
@@ -128,34 +128,6 @@
       <div><div class="stat-number">24/7</div><div class="stat-label">Support</div></div>
     </div>
 
-    <!-- About Us Section -->
-    <div class="about-section" id="about-section">
-      <div class="about-container">
-        <h2 class="about-title">About Rayan Coach</h2>
-        <div class="about-content">
-          <p>More than just transport! Rayan Coach Limited provide travelers with genuine comfort they deserve from booking to when the passengers board the bus. Travelers will not need to go all the way to booking offices. They can either make phone call or use the Rayan Coach app to book. Payment after booking can be done via M-Pesa.</p>
-          <div class="about-features">
-            <div class="about-feature">
-              <i class="fas fa-mobile-alt"></i>
-              <span>Easy Mobile Booking</span>
-            </div>
-            <div class="about-feature">
-              <i class="fas fa-phone-alt"></i>
-              <span>Phone Reservations</span>
-            </div>
-            <div class="about-feature">
-              <i class="fas fa-money-bill-wave"></i>
-              <span>M-Pesa Payments</span>
-            </div>
-            <div class="about-feature">
-              <i class="fas fa-chair"></i>
-              <span>Premium Comfort</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Road animation -->
     <div class="road-container">
       <div class="road-surface"></div>
@@ -166,7 +138,7 @@
     <footer class="main-footer" id="main-footer">
       <div class="footer-container">
         
-        <!-- Top Footer Grid - 3 Columns (No Quick Links) -->
+        <!-- Top Footer Grid -->
         <div class="footer-grid">
           
           <!-- Company Info -->
@@ -272,6 +244,314 @@
   </div>
 </div>
 
+<!-- About Us Page -->
+<div id="about-page" style="display:none;">
+  <div class="about-page-container">
+    <nav class="main-nav">
+      <div class="nav-logo">
+        <div class="logo-icon">Rc</div>
+        <div>
+          <div class="logo-text">RAYAN COACH</div>
+          <div class="logo-sub">KENYA'S PREMIER TRANSPORT</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
+        <a href="#" onclick="showAboutPage()" class="nav-link active-nav">About Us</a>
+        <a href="#" onclick="showContactPage()" class="nav-link">Contact Us</a>
+      </div>
+      <div class="nav-actions">
+        <div class="theme-toggle" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
+          <span>Dark</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="about-page-hero">
+      <h1 class="about-page-title">About Rayan Coach</h1>
+      <p class="about-page-subtitle">Kenya's Premier Intercity Transport Provider</p>
+    </div>
+
+    <div class="about-page-content">
+      <div class="about-page-section">
+        <h2>Our Story</h2>
+        <p>Rayan Coach Limited was founded with a vision to revolutionize intercity travel in Kenya. Since our inception, we have been committed to providing travelers with the comfort and convenience they deserve. Our journey began with a single bus and a dream to make travel across Kenya safe, comfortable, and reliable.</p>
+      </div>
+
+      <div class="about-page-section">
+        <h2>Our Mission</h2>
+        <p>To deliver premium intercity transport services that exceed customer expectations through innovation, safety, and unwavering commitment to excellence.</p>
+      </div>
+
+      <div class="about-page-section">
+        <h2>Our Vision</h2>
+        <p>To be Kenya's most trusted and preferred transport provider, setting the standard for comfort, safety, and reliability in the region.</p>
+      </div>
+
+      <div class="about-page-section">
+        <h2>Why Choose Rayan Coach?</h2>
+        <div class="about-features-grid">
+          <div class="about-feature-card">
+            <i class="fas fa-mobile-alt"></i>
+            <h3>Easy Booking</h3>
+            <p>Book your tickets online or via phone call. No need to visit booking offices.</p>
+          </div>
+          <div class="about-feature-card">
+            <i class="fas fa-phone-alt"></i>
+            <h3>24/7 Support</h3>
+            <p>Our customer support team is available round the clock to assist you.</p>
+          </div>
+          <div class="about-feature-card">
+            <i class="fas fa-money-bill-wave"></i>
+            <h3>M-Pesa Payments</h3>
+            <p>Secure and instant M-Pesa payments for all your bookings.</p>
+          </div>
+          <div class="about-feature-card">
+            <i class="fas fa-chair"></i>
+            <h3>Premium Comfort</h3>
+            <p>Luxury recliner seats with ample legroom for maximum comfort.</p>
+          </div>
+          <div class="about-feature-card">
+            <i class="fas fa-wifi"></i>
+            <h3>Free WiFi</h3>
+            <p>Stay connected throughout your journey with complimentary high-speed WiFi.</p>
+          </div>
+          <div class="about-feature-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Live Tracking</h3>
+            <p>Track your bus in real-time and know exactly when to expect arrival.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-page-section">
+        <h2>Our Values</h2>
+        <div class="values-grid">
+          <div class="value-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>Safety First</span>
+          </div>
+          <div class="value-item">
+            <i class="fas fa-clock"></i>
+            <span>Punctuality</span>
+          </div>
+          <div class="value-item">
+            <i class="fas fa-smile"></i>
+            <span>Customer Focus</span>
+          </div>
+          <div class="value-item">
+            <i class="fas fa-leaf"></i>
+            <span>Sustainability</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-page-section stats-section">
+        <h2>Rayan Coach By The Numbers</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number-large">50K+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number-large">120+</div>
+            <div class="stat-label">Daily Routes</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number-large">98%</div>
+            <div class="stat-label">On-time Rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number-large">24/7</div>
+            <div class="stat-label">Support Available</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold back-to-home" onclick="showPage('welcome')">← Back to Home</button>
+    </div>
+
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">Rc</div>
+              <div>
+                <div class="footer-logo-text">RAYAN COACH</div>
+                <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
+              </div>
+            </div>
+            <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Contacts</h4>
+            <div class="footer-divider"></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">NAIROBI</p><p class="contact-phone">0745 129233</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">GARISSA</p><p class="contact-phone">0745 129234</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-envelope"></i></span><div><p class="contact-title">EMAIL</p><p class="contact-email">info@rayan.co.ke</p></div></div>
+          </div>
+          <div class="footer-col">
+            <h4>Operating Hours</h4>
+            <div class="footer-divider"></div>
+            <div class="hours-item"><p>Monday - Friday</p><p class="hours-time">6:00 AM - 10:00 PM</p></div>
+            <div class="hours-item"><p>Saturday - Sunday</p><p class="hours-time">7:00 AM - 9:00 PM</p></div>
+            <div class="support-badge"><div class="online-dot"></div><span>24/7 Customer Support</span></div>
+          </div>
+        </div>
+        <div class="footer-divider-full"></div>
+        <div class="footer-bottom"><div><p>© 2025 Rayan Coach Kenya. All rights reserved.</p></div></div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Contact Us Page -->
+<div id="contact-page" style="display:none;">
+  <div class="contact-page-container">
+    <nav class="main-nav">
+      <div class="nav-logo">
+        <div class="logo-icon">Rc</div>
+        <div>
+          <div class="logo-text">RAYAN COACH</div>
+          <div class="logo-sub">KENYA'S PREMIER TRANSPORT</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#" onclick="showPage('welcome')" class="nav-link">Home</a>
+        <a href="#" onclick="showAboutPage()" class="nav-link">About Us</a>
+        <a href="#" onclick="showContactPage()" class="nav-link active-nav">Contact Us</a>
+      </div>
+      <div class="nav-actions">
+        <div class="theme-toggle" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
+          <span>Dark</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="contact-page-hero">
+      <h1 class="contact-page-title">Get In Touch</h1>
+      <p class="contact-page-subtitle">We'd love to hear from you. Send us a message and we'll respond within 24 hours.</p>
+    </div>
+
+    <div class="contact-page-content">
+      <div class="contact-info-section">
+        <h2>Contact Information</h2>
+        <div class="contact-info-cards">
+          <div class="info-card">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>Visit Us</h3>
+            <p>Second Street, Nairobi, Kenya</p>
+            <p>Mombasa Road, Mombasa, Kenya</p>
+          </div>
+          <div class="info-card">
+            <i class="fas fa-phone-alt"></i>
+            <h3>Call Us</h3>
+            <p>+254 745 129233</p>
+            <p>+254 745 129234</p>
+          </div>
+          <div class="info-card">
+            <i class="fas fa-envelope"></i>
+            <h3>Email Us</h3>
+            <p>info@rayan.co.ke</p>
+            <p>support@rayan.co.ke</p>
+          </div>
+          <div class="info-card">
+            <i class="fab fa-whatsapp"></i>
+            <h3>WhatsApp</h3>
+            <p>+254 745 129233</p>
+            <p>Chat with us</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form-section">
+        <h2>Send Us a Message</h2>
+        <form id="contactForm" onsubmit="return submitContactForm(event)">
+          <div class="form-group">
+            <label for="contactName">Name *</label>
+            <input type="text" id="contactName" class="input" placeholder="Enter your full name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="contactPhone">Phone *</label>
+            <div style="display: flex; gap: 10px;">
+              <select id="contactCountryCode" class="input" style="width: 80px;">
+                <option value="+254">+254</option>
+                <option value="+255">+255</option>
+                <option value="+256">+256</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+              </select>
+              <input type="tel" id="contactPhone" class="input" style="flex: 1;" placeholder="712 345 678" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="contactEmail">Email *</label>
+            <input type="email" id="contactEmail" class="input" placeholder="you@example.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="contactSubject">Subject *</label>
+            <select id="contactSubject" class="input" required>
+              <option value="">Select a subject</option>
+              <option value="Booking Inquiry">Booking Inquiry</option>
+              <option value="Parcel Delivery">Parcel Delivery</option>
+              <option value="Complaint">Complaint</option>
+              <option value="Feedback">Feedback</option>
+              <option value="Partnership">Partnership</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="contactMessage">Message *</label>
+            <textarea id="contactMessage" class="input" rows="5" placeholder="Write your message here..." required></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-gold btn-full btn-lg" id="sendMessageBtn">Send Message</button>
+        </form>
+      </div>
+    </div>
+
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">Rc</div>
+              <div>
+                <div class="footer-logo-text">RAYAN COACH</div>
+                <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
+              </div>
+            </div>
+            <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Contacts</h4>
+            <div class="footer-divider"></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">NAIROBI</p><p class="contact-phone">0745 129233</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span><div><p class="contact-title">GARISSA</p><p class="contact-phone">0745 129234</p></div></div>
+            <div class="contact-item"><span class="contact-icon"><i class="fas fa-envelope"></i></span><div><p class="contact-title">EMAIL</p><p class="contact-email">info@rayan.co.ke</p></div></div>
+          </div>
+          <div class="footer-col">
+            <h4>Operating Hours</h4>
+            <div class="footer-divider"></div>
+            <div class="hours-item"><p>Monday - Friday</p><p class="hours-time">6:00 AM - 10:00 PM</p></div>
+            <div class="hours-item"><p>Saturday - Sunday</p><p class="hours-time">7:00 AM - 9:00 PM</p></div>
+            <div class="support-badge"><div class="online-dot"></div><span>24/7 Customer Support</span></div>
+          </div>
+        </div>
+        <div class="footer-divider-full"></div>
+        <div class="footer-bottom"><div><p>© 2025 Rayan Coach Kenya. All rights reserved.</p></div></div>
+      </div>
+    </footer>
+  </div>
+</div>
+
 <!-- Auth Page -->
 <div id="auth-page" style="display:none;">
   <div class="auth-panel">
@@ -280,11 +560,6 @@
       <div class="auth-logo">
         <div class="auth-logo-icon">Rc</div>
         <span>RAYAN COACH</span>
-      </div>
-      <div class="auth-nav-links">
-        <a href="#" onclick="showPage('welcome')" class="auth-nav-link">Home</a>
-        <a href="#" onclick="showAboutModal()" class="auth-nav-link">About Us</a>
-        <a href="#" onclick="scrollToFooter()" class="auth-nav-link">Contact Us</a>
       </div>
       <div class="theme-toggle-small" onclick="toggleTheme()">
         <i class="fas fa-moon"></i>
@@ -314,9 +589,7 @@
           <button onclick="togglePw('login-pw')" class="toggle-pw"><i class="fas fa-eye"></i></button>
         </div>
         <div class="auth-options">
-          <label class="remember-me">
-            <input type="checkbox" style="accent-color:var(--gold);"/> Remember me
-          </label>
+          <label class="remember-me"><input type="checkbox" style="accent-color:var(--gold);"/> Remember me</label>
           <span class="forgot-pw">Forgot password?</span>
         </div>
         <button class="btn btn-gold btn-full btn-lg" onclick="doLogin()" id="login-btn">Sign In</button>
@@ -385,19 +658,14 @@
         <button class="btn btn-ghost btn-sm hide-desktop" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
         <div class="topbar-nav-links">
           <a href="#" onclick="showPage('welcome')" class="topbar-nav-link">Home</a>
-          <a href="#" onclick="showAboutModal()" class="topbar-nav-link">About Us</a>
-          <a href="#" onclick="scrollToFooter()" class="topbar-nav-link">Contact Us</a>
+          <a href="#" onclick="showAboutPage()" class="topbar-nav-link">About Us</a>
+          <a href="#" onclick="showContactPage()" class="topbar-nav-link">Contact Us</a>
         </div>
         <h3 id="page-title">Dashboard</h3>
       </div>
       <div class="flex items-center gap-12">
-        <div class="notif-bell" onclick="openNotifPanel()">
-          <i class="fas fa-bell"></i>
-          <div class="notif-badge"></div>
-        </div>
-        <div class="theme-toggle-small" onclick="toggleTheme()">
-          <i class="fas fa-moon"></i>
-        </div>
+        <div class="notif-bell" onclick="openNotifPanel()"><i class="fas fa-bell"></i><div class="notif-badge"></div></div>
+        <div class="theme-toggle-small" onclick="toggleTheme()"><i class="fas fa-moon"></i></div>
         <div class="user-profile" onclick="navigateTo('profile')">
           <div class="avatar" id="topbar-avatar">JK</div>
           <span id="topbar-name">John Kamau</span>
@@ -406,13 +674,12 @@
     </header>
     <div class="main-content" id="page-content"></div>
     
-    <!-- Footer for Dashboard Pages -->
     <footer class="dashboard-footer">
       <div class="dashboard-footer-content">
         <div class="dashboard-footer-links">
           <a href="#" onclick="showPage('welcome')">Home</a>
-          <a href="#" onclick="showAboutModal()">About Us</a>
-          <a href="#" onclick="scrollToFooter()">Contact Us</a>
+          <a href="#" onclick="showAboutPage()">About Us</a>
+          <a href="#" onclick="showContactPage()">Contact Us</a>
           <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
           <a href="#" onclick="showToast('Terms of Service','info')">Terms</a>
         </div>
@@ -423,9 +690,7 @@
           <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
           <a href="#" class="social-icon" onclick="showToast('WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
         </div>
-        <div class="dashboard-footer-copyright">
-          <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
-        </div>
+        <div class="dashboard-footer-copyright"><p>© 2025 Rayan Coach Kenya. All rights reserved.</p></div>
       </div>
     </footer>
   </div>
@@ -437,56 +702,72 @@
 <script src="app.js"></script>
 
 <script>
-// Scroll to footer function
-function scrollToFooter() {
-  const footer = document.getElementById('main-footer');
-  if (footer) {
-    footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    const dashboardFooter = document.querySelector('.dashboard-footer');
-    if (dashboardFooter) {
-      dashboardFooter.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
+// Page navigation functions
+function showPage(pageName) {
+  document.getElementById('welcome-page').style.display = pageName === 'welcome' ? 'flex' : 'none';
+  document.getElementById('about-page').style.display = pageName === 'about' ? 'flex' : 'none';
+  document.getElementById('contact-page').style.display = pageName === 'contact' ? 'flex' : 'none';
+  document.getElementById('auth-page').style.display = pageName === 'auth' ? 'flex' : 'none';
+  document.getElementById('app-page').style.display = pageName === 'app' ? 'flex' : 'none';
+  
+  // Scroll to top when page changes
+  window.scrollTo(0, 0);
 }
 
-// Show About Us Modal
-function showAboutModal() {
-  showModal(`
-    <div class="modal-box" style="max-width: 500px;">
-      <div class="modal-header">
-        <h3>About Rayan Coach</h3>
-        <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div class="about-icon" style="font-size: 48px;">🚌</div>
-        </div>
-        <p style="margin-bottom: 16px; line-height: 1.6;"><strong>More than just transport!</strong> Rayan Coach Limited provide travelers with genuine comfort they deserve from booking to when the passengers board the bus.</p>
-        <p style="margin-bottom: 16px; line-height: 1.6;">Travelers will not need to go all the way to booking offices. They can either make phone call or use the Rayan Coach app to book. Payment after booking can be done via M-Pesa.</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
-            <i class="fas fa-mobile-alt" style="color: var(--gold);"></i>
-            <span style="font-size: 13px;">Easy Mobile Booking</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
-            <i class="fas fa-phone-alt" style="color: var(--gold);"></i>
-            <span style="font-size: 13px;">Phone Reservations</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
-            <i class="fas fa-money-bill-wave" style="color: var(--gold);"></i>
-            <span style="font-size: 13px;">M-Pesa Payments</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px; background: var(--card2); padding: 10px; border-radius: 8px;">
-            <i class="fas fa-chair" style="color: var(--gold);"></i>
-            <span style="font-size: 13px;">Premium Comfort</span>
-          </div>
-        </div>
-        <button class="btn btn-gold btn-full mt-20" onclick="closeModal()">Close</button>
-      </div>
-    </div>
-  `);
+function showAboutPage() {
+  showPage('about');
 }
+
+function showContactPage() {
+  showPage('contact');
+}
+
+// Contact Form Submission
+function submitContactForm(event) {
+  event.preventDefault();
+  
+  const name = document.getElementById('contactName').value;
+  const countryCode = document.getElementById('contactCountryCode').value;
+  const phone = document.getElementById('contactPhone').value;
+  const email = document.getElementById('contactEmail').value;
+  const subject = document.getElementById('contactSubject').value;
+  const message = document.getElementById('contactMessage').value;
+  
+  // Validate form
+  if (!name || !phone || !email || !subject || !message) {
+    showToast('Please fill in all fields', 'error');
+    return false;
+  }
+  
+  // Show sending message
+  const sendBtn = document.getElementById('sendMessageBtn');
+  const originalText = sendBtn.textContent;
+  sendBtn.textContent = 'Sending...';
+  sendBtn.disabled = true;
+  
+  // Simulate sending (replace with actual API call)
+  setTimeout(() => {
+    showToast(`Thank you ${name}! Your message has been sent successfully. We'll get back to you within 24 hours.`, 'success');
+    
+    // Clear form
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactPhone').value = '';
+    document.getElementById('contactEmail').value = '';
+    document.getElementById('contactSubject').value = '';
+    document.getElementById('contactMessage').value = '';
+    
+    sendBtn.textContent = originalText;
+    sendBtn.disabled = false;
+  }, 1500);
+  
+  return false;
+}
+
+// Other existing functions (showToast, toggleTheme, etc.) remain the same
+// ... (include all your existing JavaScript functions here)
+
+// Initialize
+showPage('welcome');
 </script>
 
 </body>

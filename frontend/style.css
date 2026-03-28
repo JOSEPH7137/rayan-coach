@@ -624,6 +624,7 @@ body.light-mode .main-footer {
 .social-links {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .social-icon {
@@ -651,11 +652,7 @@ body.light-mode .main-footer {
   grid-column: span 1;
 }
 
-.contact-header {
-  margin-bottom: 20px;
-}
-
-.contact-header h4 {
+.contact-title {
   color: var(--text);
   font-size: 18px;
   font-weight: 700;
@@ -668,10 +665,7 @@ body.light-mode .main-footer {
   height: 2px;
   width: 50px;
   background: var(--gold);
-}
-
-.contact-items {
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .contact-item {
@@ -688,17 +682,13 @@ body.light-mode .main-footer {
   margin-top: 2px;
 }
 
-.contact-details {
-  flex: 1;
-}
-
-.contact-title {
+.contact-label {
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
   margin: 0;
   font-weight: 600;
-  letter-spacing: 0.03em;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .contact-value {
@@ -707,7 +697,6 @@ body.light-mode .main-footer {
   margin: 4px 0 0;
   font-family: monospace;
   letter-spacing: 0.5px;
-  font-weight: 500;
 }
 
 /* Operating Hours Column */
@@ -715,11 +704,7 @@ body.light-mode .main-footer {
   grid-column: span 1;
 }
 
-.hours-header {
-  margin-bottom: 20px;
-}
-
-.hours-header h4 {
+.hours-title {
   color: var(--text);
   font-size: 18px;
   font-weight: 700;
@@ -732,10 +717,7 @@ body.light-mode .main-footer {
   height: 2px;
   width: 50px;
   background: var(--gold);
-}
-
-.hours-items {
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .hours-item {
@@ -763,10 +745,10 @@ body.light-mode .main-footer {
   align-items: center;
   gap: 10px;
   margin-top: 20px;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
-.online-dot {
+.support-badge .online-dot {
   width: 10px;
   height: 10px;
   background: var(--green);
@@ -841,134 +823,6 @@ body.light-mode .main-footer {
   font-size: 11px;
 }
 
-/* ==================== RESPONSIVE FOOTER ==================== */
-@media (max-width: 992px) {
-  .footer-grid {
-    gap: 40px;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-footer {
-    padding: 50px 24px 30px;
-    margin-top: 60px;
-  }
-  
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 45px;
-  }
-  
-  .footer-col:first-child,
-  .footer-col:nth-child(2),
-  .footer-col:nth-child(3) {
-    grid-column: span 1;
-    text-align: center;
-  }
-  
-  .footer-logo {
-    justify-content: center;
-  }
-  
-  .footer-description {
-    max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .social-links {
-    justify-content: center;
-  }
-  
-  .contact-header {
-    text-align: center;
-  }
-  
-  .contact-divider {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .contact-item {
-    justify-content: center;
-    text-align: left;
-    max-width: 280px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .hours-header {
-    text-align: center;
-  }
-  
-  .hours-divider {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .hours-item {
-    text-align: center;
-  }
-  
-  .support-badge {
-    justify-content: center;
-  }
-  
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
-    gap: 15px;
-  }
-  
-  .footer-links {
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .footer-kenya {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-logo-icon {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-  }
-  
-  .footer-logo-text {
-    font-size: 16px;
-  }
-  
-  .footer-description {
-    font-size: 13px;
-  }
-  
-  .contact-title {
-    font-size: 13px;
-  }
-  
-  .contact-value {
-    font-size: 12px;
-  }
-  
-  .hours-day {
-    font-size: 13px;
-  }
-  
-  .hours-time {
-    font-size: 12px;
-  }
-  
-  .footer-links {
-    gap: 15px;
-  }
-  
-  .footer-links a {
-    font-size: 11px;
-  }
-}
 /* ==================== HERO CAROUSEL ==================== */
 .hero-carousel {
   border-radius: 20px;
@@ -1412,12 +1266,7 @@ body.light-mode .main-footer {
     justify-content: center;
   }
   
-  .footer-col h4 {
-    display: block;
-    text-align: center;
-  }
-  
-  .footer-divider {
+  .contact-divider {
     margin-left: auto;
     margin-right: auto;
   }
@@ -1426,6 +1275,11 @@ body.light-mode .main-footer {
     justify-content: center;
     text-align: left;
     max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hours-divider {
     margin-left: auto;
     margin-right: auto;
   }
@@ -1535,16 +1389,15 @@ body.light-mode .main-footer {
     font-size: 13px;
   }
   
-  .contact-title {
-    font-size: 13px;
-  }
-  
-  .contact-phone,
-  .contact-email {
+  .contact-label {
     font-size: 12px;
   }
   
-  .hours-item p:first-child {
+  .contact-value {
+    font-size: 12px;
+  }
+  
+  .hours-day {
     font-size: 13px;
   }
   
@@ -1559,4 +1412,293 @@ body.light-mode .main-footer {
   .footer-links a {
     font-size: 11px;
   }
+}
+/* About Us Page Styles */
+#about-page {
+  background: var(--black);
+  min-height: 100vh;
+}
+
+.about-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.about-page-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  background: linear-gradient(135deg, rgba(232,160,32,0.1), rgba(232,160,32,0.02));
+  border-radius: 24px;
+  margin: 30px 0 40px;
+}
+
+.about-page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.about-page-subtitle {
+  font-size: 18px;
+  color: var(--soft);
+}
+
+.about-page-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.about-page-section {
+  margin-bottom: 50px;
+}
+
+.about-page-section h2 {
+  font-size: 28px;
+  color: var(--gold);
+  margin-bottom: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  position: relative;
+  display: inline-block;
+}
+
+.about-page-section h2:after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: var(--gold);
+}
+
+.about-page-section p {
+  color: var(--soft);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.about-feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.about-feature-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold);
+}
+
+.about-feature-card i {
+  font-size: 40px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.about-feature-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.about-feature-card p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.values-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.value-item {
+  background: var(--card2);
+  border-radius: 40px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.value-item:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.value-item i {
+  color: var(--gold);
+  font-size: 18px;
+}
+
+.value-item span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.stats-section {
+  text-align: center;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number-large {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.stat-item .stat-label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.back-to-home {
+  display: block;
+  width: 200px;
+  margin: 40px auto;
+}
+
+.active-nav {
+  color: var(--gold) !important;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 4px;
+}
+
+/* Contact Page Styles */
+#contact-page {
+  background: var(--black);
+  min-height: 100vh;
+}
+
+.contact-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.contact-page-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  background: linear-gradient(135deg, rgba(232,160,32,0.1), rgba(232,160,32,0.02));
+  border-radius: 24px;
+  margin: 30px 0 40px;
+}
+
+.contact-page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.contact-page-subtitle {
+  font-size: 18px;
+  color: var(--soft);
+}
+
+.contact-page-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  margin-bottom: 50px;
+}
+
+@media (max-width: 768px) {
+  .contact-page-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.contact-info-section h2,
+.contact-form-section h2 {
+  font-size: 28px;
+  color: var(--gold);
+  margin-bottom: 30px;
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.contact-info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+}
+
+.info-card i {
+  font-size: 36px;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.info-card h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.info-card p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 5px 0;
+}
+
+.contact-form-section .form-group {
+  margin-bottom: 20px;
+}
+
+.contact-form-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.contact-form-section .input {
+  width: 100%;
+}
+
+#sendMessageBtn {
+  margin-top: 10px;
 }
