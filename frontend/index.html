@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#FFFFFF"/>
+<meta name="theme-color" content="#0A0A0F"/>
 <title>Rayan Coach – Kenya's Premier Intercity Transport</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
-<body class="light-mode">
+<body>
 
 <!-- Toast Container -->
 <div id="toast-container"></div>
@@ -45,36 +45,29 @@
     </div>
   </nav>
 
-  <!-- Hero Section with Carousel - Text Overlay on Images -->
+  <!-- Hero Section with Carousel -->
   <div class="hero-section">
+    
+    <!-- Hero Carousel Images -->
     <div class="hero-carousel">
       <div class="carousel-container">
         <div class="carousel-slides" id="carouselSlides">
           <div class="carousel-slide">
             <img src="images/image1.jpg" alt="Rayan Coach Luxury Bus">
-            <div class="carousel-overlay">
-              <div class="carousel-overlay-content">
-                <h1 class="hero-title-overlay">WELCOME TO RAYAN COACH</h1>
-                <p class="hero-subtitle-overlay">Comfortable, Safe & Reliable Travel Across Kenya</p>
-              </div>
+            <div class="carousel-caption">
+              <p>Premium VIP Coaches</p>
             </div>
           </div>
           <div class="carousel-slide">
             <img src="images/image2.jpg" alt="Rayan Coach Comfortable Seats">
-            <div class="carousel-overlay">
-              <div class="carousel-overlay-content">
-                <h1 class="hero-title-overlay">PREMIUM COMFORT</h1>
-                <p class="hero-subtitle-overlay">Luxury recliner seats with ample legroom</p>
-              </div>
+            <div class="carousel-caption">
+              <p>Luxury Recliner Seats</p>
             </div>
           </div>
           <div class="carousel-slide">
             <img src="images/image3.jpg" alt="Rayan Coach Interior">
-            <div class="carousel-overlay">
-              <div class="carousel-overlay-content">
-                <h1 class="hero-title-overlay">MODERN AMENITIES</h1>
-                <p class="hero-subtitle-overlay">Free WiFi, charging ports & entertainment</p>
-              </div>
+            <div class="carousel-caption">
+              <p>Modern Amenities & WiFi</p>
             </div>
           </div>
         </div>
@@ -91,163 +84,194 @@
         <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
       </div>
     </div>
-  </div>
 
-  <!-- Trust Badge -->
-  <div class="trust-badge-container">
     <div class="trust-badge">● LIVE &nbsp;·&nbsp; TRUSTED BY 50,000+ KENYANS</div>
+
+    <h1 class="hero-title">
+      <span>WELCOME TO</span><br/>
+      <span class="gradient-text">RAYAN COACH</span>
+    </h1>
+    <p class="hero-subtitle">Comfortable, Safe &amp; Reliable Travel Across Kenya</p>
+
+    <!-- Role Cards -->
+    <div class="role-cards">
+      <div class="role-card" onclick="gotoLogin('user')">
+        <div class="role-icon user-icon">🧳</div>
+        <div class="role-label user-label">TRAVELLER</div>
+        <h3>User Portal</h3>
+        <p>Book tickets, track buses live, send parcels & manage your journeys.</p>
+        <button class="btn btn-gold btn-full user-btn">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('driver')">
+        <div class="role-icon driver-icon">🚗</div>
+        <div class="role-label driver-label">OPERATOR</div>
+        <h3>Driver Portal</h3>
+        <p>Manage your trips, track earnings, communicate & report incidents.</p>
+        <button class="btn btn-green btn-full">Sign In →</button>
+      </div>
+
+      <div class="role-card" onclick="gotoLogin('admin')">
+        <div class="role-icon admin-icon">🛡️</div>
+        <div class="role-label admin-label">MANAGEMENT</div>
+        <h3>Admin Portal</h3>
+        <p>Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
+        <button class="btn btn-gold btn-full">Sign In →</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+   <!-- Home page counters -->
+<div class="stats-container">
+  <div class="stat">
+    <h2 class="counter" data-target="50000">0</h2>
+    <p>Happy Customers</p>
   </div>
-
-  <!-- Role Cards -->
-  <div class="role-cards">
-    <div class="role-card" onclick="gotoLogin('user')">
-      <div class="role-icon user-icon">🧳</div>
-      <div class="role-label user-label">TRAVELLER</div>
-      <h3>User Portal</h3>
-      <p>Book tickets, track buses live, send parcels & manage your journeys.</p>
-      <button class="btn btn-gold btn-full user-btn">Sign In →</button>
-    </div>
-
-    <div class="role-card" onclick="gotoLogin('driver')">
-      <div class="role-icon driver-icon">🚗</div>
-      <div class="role-label driver-label">OPERATOR</div>
-      <h3>Driver Portal</h3>
-      <p>Manage your trips, track earnings, communicate & report incidents.</p>
-      <button class="btn btn-green btn-full">Sign In →</button>
-    </div>
-
-    <div class="role-card" onclick="gotoLogin('admin')">
-      <div class="role-icon admin-icon">🛡️</div>
-      <div class="role-label admin-label">MANAGEMENT</div>
-      <h3>Admin Portal</h3>
-      <p>Full control — fleet, drivers, finance, dispatch, analytics & compliance.</p>
-      <button class="btn btn-gold btn-full">Sign In →</button>
-    </div>
+  <div class="stat">
+    <h2 class="counter" data-target="120">0</h2>
+    <p>Daily Routes</p>
   </div>
-
-  <!-- Stats - Horizontal Layout -->
-  <div class="stats-container-horizontal">
-    <div class="stat-item-horizontal">
-      <h2 class="counter" data-target="50000">0</h2>
-      <p>Happy Customers</p>
-    </div>
-    <div class="stat-item-horizontal">
-      <h2 class="counter" data-target="120">0</h2>
-      <p>Daily Routes</p>
-    </div>
-    <div class="stat-item-horizontal">
-      <h2 class="counter" data-target="98">0</h2>
-      <p>On-time Rate</p>
-    </div>
-    <div class="stat-item-horizontal">
-      <h2>24/7</h2>
-      <p>Support Available</p>
-    </div>
+  <div class="stat">
+    <h2 class="counter" data-target="98">0</h2>
+    <p>Success Rate (%)</p>
   </div>
+</div>
 
-  <!-- Road animation -->
-  <div class="road-container">
-    <div class="road-surface"></div>
-    <div class="road-bus">🚌</div>
+<!-- About page counters -->
+<div class="stats-grid">
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="50000">0</div>
+    <div class="stat-label">Happy Customers</div>
   </div>
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="120">0</div>
+    <div class="stat-label">Daily Routes</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number-large counter" data-target="98">0</div>
+    <div class="stat-label">On-time Rate</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-number-large">24/7</div>
+    <div class="stat-label">Support Available</div>
+  </div>
+</div>
 
-  <!-- Footer -->
-  <footer class="main-footer" id="main-footer">
-    <div class="footer-container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <div class="footer-logo">
-            <div class="footer-logo-icon">Rc</div>
-            <div>
-              <div class="footer-logo-text">RAYAN COACH</div>
-              <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
+
+    <!-- Road animation -->
+    <div class="road-container">
+      <div class="road-surface"></div>
+      <div class="road-bus">🚌</div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer" id="main-footer">
+      <div class="footer-container">
+        
+        <!-- Top Footer Grid -->
+        <div class="footer-grid">
+          
+          <!-- Company Info -->
+          <div class="footer-col">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">Rc</div>
+              <div>
+                <div class="footer-logo-text">RAYAN COACH</div>
+                <div class="footer-logo-sub">KENYA'S PREMIER TRANSPORT</div>
+              </div>
+            </div>
+            <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
+            <div class="social-links">
+              <a href="#" class="social-icon" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on X (Twitter)','info')"><i class="fab fa-x-twitter"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
+              <a href="#" class="social-icon" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
             </div>
           </div>
-          <p class="footer-description">Experience first-class intercity travel with real-time tracking, digital tickets, and unmatched comfort across Kenya.</p>
-          <div class="social-links">
-            <a href="#" class="social-icon" onclick="showToast('Follow us on Facebook','info')"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-icon" onclick="showToast('Follow us on X (Twitter)','info')"><i class="fab fa-x-twitter"></i></a>
-            <a href="#" class="social-icon" onclick="showToast('Follow us on Instagram','info')"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="social-icon" onclick="showToast('Follow us on TikTok','info')"><i class="fab fa-tiktok"></i></a>
-            <a href="#" class="social-icon" onclick="showToast('Contact us on WhatsApp','info')"><i class="fab fa-whatsapp"></i></a>
+          
+          <!-- Contacts -->
+          <div class="footer-col" id="contact-section">
+            <h4>Contact Us</h4>
+            <div class="footer-divider"></div>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
+              <div>
+                <p class="contact-title">NAIROBI</p>
+                <p class="contact-phone">0745 129233</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
+              <div>
+                <p class="contact-title">GARISSA</p>
+                <p class="contact-phone">0745 129234</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fas fa-envelope"></i></span>
+              <div>
+                <p class="contact-title">EMAIL</p>
+                <p class="contact-email">info@rayan.co.ke</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="contact-icon"><i class="fab fa-whatsapp"></i></span>
+              <div>
+                <p class="contact-title">WHATSAPP</p>
+                <p class="contact-phone">0745 129233</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Operating Hours -->
+          <div class="footer-col">
+            <h4>Operating Hours</h4>
+            <div class="footer-divider"></div>
+            <div class="hours-item">
+              <p>Monday - Friday</p>
+              <p class="hours-time">6:00 AM - 10:00 PM</p>
+            </div>
+            <div class="hours-item">
+              <p>Saturday - Sunday</p>
+              <p class="hours-time">7:00 AM - 9:00 PM</p>
+            </div>
+            <div class="hours-item">
+              <p>Public Holidays</p>
+              <p class="hours-time">8:00 AM - 8:00 PM</p>
+            </div>
+            <div class="support-badge">
+              <div class="online-dot"></div>
+              <span>24/7 Customer Support</span>
+            </div>
           </div>
         </div>
         
-        <div class="footer-col" id="contact-section">
-          <h4>Contact Us</h4>
-          <div class="footer-divider"></div>
-          <div class="contact-item">
-            <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
-            <div>
-              <p class="contact-title">NAIROBI</p>
-              <p class="contact-phone">0745 129233</p>
-            </div>
+        <!-- Divider -->
+        <div class="footer-divider-full"></div>
+        
+        <!-- Bottom Footer -->
+        <div class="footer-bottom">
+          <div>
+            <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
+            <p class="footer-tagline">Comfort. Safety. Reliability. Since 2020</p>
           </div>
-          <div class="contact-item">
-            <span class="contact-icon"><i class="fas fa-map-marker-alt"></i></span>
-            <div>
-              <p class="contact-title">GARISSA</p>
-              <p class="contact-phone">0745 129234</p>
-            </div>
+          <div class="footer-links">
+            <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
+            <a href="#" onclick="showToast('Terms of Service','info')">Terms of Service</a>
+            <a href="#" onclick="showToast('Refund Policy','info')">Refund Policy</a>
+            <a href="#" onclick="showToast('FAQs','info')">FAQs</a>
           </div>
-          <div class="contact-item">
-            <span class="contact-icon"><i class="fas fa-envelope"></i></span>
-            <div>
-              <p class="contact-title">EMAIL</p>
-              <p class="contact-email">info@rayan.co.ke</p>
-            </div>
-          </div>
-          <div class="contact-item">
-            <span class="contact-icon"><i class="fab fa-whatsapp"></i></span>
-            <div>
-              <p class="contact-title">WHATSAPP</p>
-              <p class="contact-phone">0745 129233</p>
-            </div>
+          <div class="footer-kenya">
+            <span>🇰🇪</span>
+            <span>Made in Kenya | Serving East Africa</span>
           </div>
         </div>
         
-        <div class="footer-col">
-          <h4>Operating Hours</h4>
-          <div class="footer-divider"></div>
-          <div class="hours-item">
-            <p>Monday - Friday</p>
-            <p class="hours-time">6:00 AM - 10:00 PM</p>
-          </div>
-          <div class="hours-item">
-            <p>Saturday - Sunday</p>
-            <p class="hours-time">7:00 AM - 9:00 PM</p>
-          </div>
-          <div class="hours-item">
-            <p>Public Holidays</p>
-            <p class="hours-time">8:00 AM - 8:00 PM</p>
-          </div>
-          <div class="support-badge">
-            <div class="online-dot"></div>
-            <span>24/7 Customer Support</span>
-          </div>
-        </div>
       </div>
-      
-      <div class="footer-divider-full"></div>
-      
-      <div class="footer-bottom">
-        <div>
-          <p>© 2025 Rayan Coach Kenya. All rights reserved.</p>
-          <p class="footer-tagline">Comfort. Safety. Reliability. Since 2020</p>
-        </div>
-        <div class="footer-links">
-          <a href="#" onclick="showToast('Privacy Policy','info')">Privacy Policy</a>
-          <a href="#" onclick="showToast('Terms of Service','info')">Terms of Service</a>
-          <a href="#" onclick="showToast('Refund Policy','info')">Refund Policy</a>
-          <a href="#" onclick="showToast('FAQs','info')">FAQs</a>
-        </div>
-        <div class="footer-kenya">
-          <span>🇰🇪</span>
-          <span>Made in Kenya | Serving East Africa</span>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </footer>
+    
+  </div>
 </div>
 
 <!-- About Us Page -->
@@ -355,22 +379,22 @@
 
       <div class="about-page-section stats-section">
         <h2>Rayan Coach By The Numbers</h2>
-        <div class="stats-container-horizontal">
-          <div class="stat-item-horizontal">
-            <h2 class="counter" data-target="50000">0</h2>
-            <p>Happy Customers</p>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number-large">50K+</div>
+            <div class="stat-label">Happy Customers</div>
           </div>
-          <div class="stat-item-horizontal">
-            <h2 class="counter" data-target="120">0</h2>
-            <p>Daily Routes</p>
+          <div class="stat-item">
+            <div class="stat-number-large">120+</div>
+            <div class="stat-label">Daily Routes</div>
           </div>
-          <div class="stat-item-horizontal">
-            <h2 class="counter" data-target="98">0</h2>
-            <p>On-time Rate</p>
+          <div class="stat-item">
+            <div class="stat-number-large">98%</div>
+            <div class="stat-label">On-time Rate</div>
           </div>
-          <div class="stat-item-horizontal">
-            <h2>24/7</h2>
-            <p>Support Available</p>
+          <div class="stat-item">
+            <div class="stat-number-large">24/7</div>
+            <div class="stat-label">Support Available</div>
           </div>
         </div>
       </div>
@@ -706,7 +730,6 @@
 <div id="modal-container"></div>
 
 <script src="app.js"></script>
-<script src="counter.js"></script>
 
 <script>
 // Page navigation functions
@@ -770,8 +793,12 @@ function submitContactForm(event) {
   return false;
 }
 
+// Other existing functions (showToast, toggleTheme, etc.) remain the same
+// ... (include all your existing JavaScript functions here)
+
 // Initialize
 showPage('welcome');
 </script>
+<script src="counter.js"></script>
 </body>
 </html>
