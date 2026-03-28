@@ -567,7 +567,7 @@
           <div class="typing-hero-line" id="typingHeroLine"></div>
           <span class="cursor-hero" id="cursorHero">|</span>
         </div>
-        <p class="hero-subtitle-role">Choose Your Portal to Continue</p>
+        <!-- Removed the subtitle "Choose Your Portal to Continue" -->
       </div>
     </div>
 
@@ -801,7 +801,15 @@ function showPage(pageName) {
 
 function showAboutPage() { showPage('about'); }
 function showContactPage() { showPage('contact'); }
-function showRoleSelectionPage() { showPage('role-selection'); }
+function showRoleSelectionPage() { 
+  showPage('role-selection');
+  // Start typing animation when role selection page is shown
+  setTimeout(() => {
+    if (typeof window.startHeroTyping === 'function') {
+      window.startHeroTyping();
+    }
+  }, 150);
+}
 
 function submitContactForm(event) {
   event.preventDefault();

@@ -487,16 +487,41 @@ body.light-mode .main-footer{background:linear-gradient(135deg,#F5F5F7,#FFFFFF);
   margin: 30px 40px 40px;
 }
 
-.role-selection-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 48px;
-  color: var(--gold);
-  margin-bottom: 16px;
+.typing-hero-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.role-selection-subtitle {
-  font-size: 18px;
-  color: var(--soft);
+.typing-hero-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.typing-hero-line {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: #E8A020;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+  letter-spacing: 2px;
+  display: inline-block;
+  white-space: pre;
+  min-height: 100px;
+}
+
+.cursor-hero {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: #E8A020;
+  animation: blinkCursor 0.9s infinite;
+  line-height: 1;
+  font-family: monospace;
+  margin-left: 2px;
 }
 
 .role-cards-selection {
@@ -528,11 +553,8 @@ body.light-mode .main-footer{background:linear-gradient(135deg,#F5F5F7,#FFFFFF);
     margin: 20px 20px 30px;
     padding: 40px 16px;
   }
-  .role-selection-title {
-    font-size: 32px;
-  }
-  .role-selection-subtitle {
-    font-size: 14px;
+  .typing-hero-line, .cursor-hero {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
   }
 }
 /* ==================== ROLE SELECTION PAGE STYLES ==================== */

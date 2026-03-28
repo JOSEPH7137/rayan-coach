@@ -705,15 +705,20 @@ function stopHeroTyping() {
 }
 
 // Override showRoleSelectionPage to start typing when page loads
-const originalShowRoleSelectionPage = window.showRoleSelectionPage || function() {};
-window.showRoleSelectionPage = function() {
-  originalShowRoleSelectionPage();
-  // Small delay to ensure DOM is ready
+function showRoleSelectionPage() { 
+  showPage('role-selection');
+  // Start typing animation when role selection page is shown
   setTimeout(() => {
-    stopHeroTyping();
-    startHeroTyping();
+    if (typeof startHeroTyping === 'function') {
+      // Stop any existing typing first
+      if (window.heroTypingActive) {
+        if (window.heroTypingTimeout) clearTimeout(window.heroTypingTimeout);
+        window.heroTypingActive = false;
+      }
+      startHeroTyping();
+    }
   }, 100);
-};
+}
 // ==================== NOTIFICATIONS ====================
 function openNotifPanel(){
   showModal(`<div class="modal-box"><div class="modal-header"><h3>Notifications</h3><button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button></div><div class="modal-body"><p>You have 3 new notifications</p></div></div>`);
@@ -732,3 +737,68 @@ document.addEventListener('DOMContentLoaded', function() {
 showPage('welcome');
 
 console.log('%c RAYAN COACH TRANSPORT SYSTEM ', 'background:#E8A020;color:#08080F;font-weight:bold;font-size:14px;padding:4px 8px;');
+// ==================== TYPING ANIMATION FOR ROLE SELECTION PAGE ====================
+const heroTypingText = "WELCOME TO RAYAN COACH";
+let heroTypingTimeout = null;
+let heroTypingActive = false;
+
+function startHeroTyping() {
+  const typingElement = document.getElementById('typingHeroLine');
+  const cursorElement = document.getElementById('cursorHero');
+  if (!typingElement) {
+    console.log("Typing element not found");
+    return;
+  }
+  
+  // Clear existing timeout
+  if (heroTypingTimeout) {
+    clearTimeout(heroTypingTimeout);
+    heroTypingTimeout = null;
+  }
+  
+  heroTypingActive = true;
+  let currentCharIndex = 0;
+  let isDeleting = false;
+  
+  function heroTypeEffect() {
+    if (!typingElement || !heroTypingActive) return;
+    
+    if (!isDeleting && currentCharIndex <= heroTypingText.length) {
+      typingElement.textContent = heroTypingText.substring(0, currentCharIndex);
+      currentCharIndex++;
+      
+      if (currentCharIndex > heroTypingText.length) {
+        isDeleting = true;
+        heroTypingTimeout = setTimeout(heroTypeEffect, 3000);
+        return;
+      }
+    } else if (isDeleting && currentCharIndex >= 0) {
+      typingElement.textContent = heroTypingText.substring(0, currentCharIndex);
+      currentCharIndex--;
+      
+      if (currentCharIndex < 0) {
+        isDeleting = false;
+        currentCharIndex = 0;
+        heroTypingTimeout = setTimeout(heroTypeEffect, 500);
+        return;
+      }
+    }
+    
+    const speed = isDeleting ? 50 : 100;
+    heroTypingTimeout = setTimeout(heroTypeEffect, speed);
+  }
+  
+  heroTypeEffect();
+}
+
+function stopHeroTyping() {
+  heroTypingActive = false;
+  if (heroTypingTimeout) {
+    clearTimeout(heroTypingTimeout);
+    heroTypingTimeout = null;
+  }
+}
+
+// Make functions globally available
+window.startHeroTyping = startHeroTyping;
+window.stopHeroTyping = stopHeroTyping;
