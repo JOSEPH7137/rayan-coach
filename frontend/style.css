@@ -1702,3 +1702,11 @@ body.light-mode .main-footer {
 #sendMessageBtn {
   margin-top: 10px;
 }
+.stat {
+  text-align: center;
+}
+
+.counter {
+  font-size: 2.5rem;
+  font-weight: bold;
+}

@@ -167,6 +167,54 @@ function doLogout(){
   showPage('welcome');
   showToast('Logged out successfully','info');
 }
+const counters = document.querySelectorAll('.counter');
+
+let hasAnimated = false;
+
+const animateCounters = () => {
+  counters.forEach(counter => {
+    const target = +counter.getAttribute('data-target');
+    const duration = 2000; // total animation time in ms
+    const increment = target / (duration / 16);
+
+    let current = 0;
+
+    const updateCount = () => {
+      current += increment;
+
+      if (current < target) {
+        counter.innerText = formatNumber(Math.ceil(current));
+        requestAnimationFrame(updateCount);
+      } else {
+        counter.innerText = formatNumber(target);
+      }
+    };
+
+    updateCount();
+  });
+};
+
+// Format numbers (e.g. 50000 → 50K+)
+const formatNumber = (num) => {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(num >= 10000 ? 0 : 1) + 'K+';
+  }
+  return num;
+};
+
+// Intersection Observer
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !hasAnimated) {
+      animateCounters();
+      hasAnimated = true;
+    }
+  });
+}, {
+  threshold: 0.5
+});
+
+observer.observe(document.querySelector('.stats'));
 
 /* ══════════════════════════════════════════════
    APP INIT
