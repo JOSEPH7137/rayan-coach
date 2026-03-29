@@ -1,4 +1,4 @@
-// ==================== THEME TOGGLE ====================
+// ==================== THEME TOGGLE WITH PERSISTENCE ====================
 function toggleTheme() {
   const body = document.body;
   const themeIcon = document.getElementById('themeIcon');
@@ -6,26 +6,49 @@ function toggleTheme() {
   
   if (body.classList.contains('light-mode')) {
     body.classList.remove('light-mode');
+    body.classList.add('dark-mode');
     if (themeIcon) themeIcon.className = 'fas fa-moon';
     if (themeText) themeText.textContent = 'Dark';
+    localStorage.setItem('theme', 'dark');
   } else {
+    body.classList.remove('dark-mode');
     body.classList.add('light-mode');
     if (themeIcon) themeIcon.className = 'fas fa-sun';
     if (themeText) themeText.textContent = 'Light';
+    localStorage.setItem('theme', 'light');
   }
-  localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
 }
 
 function loadTheme() {
   const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
+  const body = document.body;
+  
+  // Default to light mode if no preference saved
+  if (savedTheme === 'dark') {
+    body.classList.remove('light-mode');
+    body.classList.add('dark-mode');
+    // Update icons if they exist
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    if (themeIcon) themeIcon.className = 'fas fa-moon';
+    if (themeText) themeText.textContent = 'Dark';
+  } else {
+    body.classList.remove('dark-mode');
+    body.classList.add('light-mode');
     const themeIcon = document.getElementById('themeIcon');
     const themeText = document.getElementById('themeText');
     if (themeIcon) themeIcon.className = 'fas fa-sun';
     if (themeText) themeText.textContent = 'Light';
   }
 }
+
+// Make sure theme loads on every page
+document.addEventListener('DOMContentLoaded', function() {
+  loadTheme();
+});
+
+// Also run immediately to prevent flash
+loadTheme();
 
 // ==================== TOAST ====================
 function showToast(msg, type = 'success', dur = 3500) {

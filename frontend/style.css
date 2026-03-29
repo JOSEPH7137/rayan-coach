@@ -1,30 +1,6 @@
 /* ==================== RAYAN COACH DESIGN SYSTEM ==================== */
+/* ==================== LIGHT MODE (DEFAULT - PURE WHITE) ==================== */
 :root {
-  --black: #070709;
-  --deep: #0F0F17;
-  --card: #141420;
-  --card2: #1A1A28;
-  --border: #252535;
-  --border2: #2E2E45;
-  --gold: #E8A020;
-  --gold2: #F5C842;
-  --gold-d: #B8801A;
-  --gold-bg: rgba(232,160,32,0.10);
-  --gold-b: rgba(232,160,32,0.25);
-  --green: #0FCF7D;
-  --red: #F04545;
-  --blue: #4A8EF5;
-  --purple: #9B6DFF;
-  --text: #EEEEF8;
-  --soft: #C0C0D8;
-  --muted: #7070A0;
-  --sidebar: 220px;
-  --topbar: 58px;
-  --radius: 14px;
-  --radius2: 10px;
-}
-
-body.light-mode {
   --black: #F5F5F7;
   --deep: #FFFFFF;
   --card: #FFFFFF;
@@ -34,6 +10,46 @@ body.light-mode {
   --text: #1A1A2E;
   --soft: #4A4A6A;
   --muted: #8A8AA8;
+  --gold: #E8A020;
+  --gold2: #F5C842;
+  --gold-d: #B8801A;
+  --gold-bg: rgba(232,160,32,0.10);
+  --gold-b: rgba(232,160,32,0.25);
+  --green: #0FCF7D;
+  --red: #F04545;
+  --blue: #4A8EF5;
+  --purple: #9B6DFF;
+  --sidebar: 220px;
+  --topbar: 58px;
+  --radius: 14px;
+  --radius2: 10px;
+}
+
+/* ==================== DARK MODE ==================== */
+body.dark-mode {
+  --black: #070709;
+  --deep: #0F0F17;
+  --card: #141420;
+  --card2: #1A1A28;
+  --border: #252535;
+  --border2: #2E2E45;
+  --text: #EEEEF8;
+  --soft: #C0C0D8;
+  --muted: #7070A0;
+  /* Keep gold and other colors the same in dark mode */
+  --gold: #E8A020;
+  --gold2: #F5C842;
+  --gold-d: #B8801A;
+  --gold-bg: rgba(232,160,32,0.10);
+  --gold-b: rgba(232,160,32,0.25);
+  --green: #0FCF7D;
+  --red: #F04545;
+  --blue: #4A8EF5;
+  --purple: #9B6DFF;
+  --sidebar: 220px;
+  --topbar: 58px;
+  --radius: 14px;
+  --radius2: 10px;
 }
 
 * {
