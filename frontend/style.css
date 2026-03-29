@@ -2063,18 +2063,18 @@ body.light-mode .dashboard-card {
 
 /* ==================== SIMPLIFIED FOOTER ==================== */
 .main-footer {
-  background: linear-gradient(135deg, #0A0A0F, #11111A);
-  border-top: 1px solid #2A2A3A;
-  margin-top: 40px;
-  padding: 50px 40px 40px;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 48px 40px 40px;
   position: relative;
   z-index: 10;
   width: 100%;
 }
 
 body.light-mode .main-footer {
-  background: linear-gradient(135deg, #F5F5F7, #FFFFFF);
-  border-top-color: #E0E0E8;
+  background: var(--card);
+  border-top-color: var(--border);
 }
 
 .footer-container {
@@ -2087,7 +2087,7 @@ body.light-mode .main-footer {
 }
 
 .footer-center {
-  max-width: 700px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -2096,12 +2096,12 @@ body.light-mode .main-footer {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .footer-logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   background: linear-gradient(135deg, var(--gold), var(--gold-d));
   border-radius: 10px;
   display: flex;
@@ -2109,6 +2109,7 @@ body.light-mode .main-footer {
   justify-content: center;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
+  font-weight: bold;
   color: #08080F;
 }
 
@@ -2125,48 +2126,40 @@ body.light-mode .main-footer {
   color: var(--gold);
   font-weight: 600;
   letter-spacing: 0.07em;
-}
-
-.footer-description-mini {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 2px;
 }
 
 .footer-center p {
   color: var(--muted);
   font-size: 13px;
-  margin: 0 0 8px 0;
-}
-
-.footer-tagline {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 5px;
-  margin-bottom: 20px !important;
+  margin: 0 0 20px 0;
 }
 
 .footer-links {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 32px;
   flex-wrap: wrap;
-  margin: 20px 0;
+  margin: 20px 0 24px;
 }
 
 .footer-links a {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.3s ease;
+  position: relative;
 }
 
 .footer-links a:hover {
   color: var(--gold);
+}
+
+.footer-links a:not(:last-child)::after {
+  content: '|';
+  position: absolute;
+  right: -18px;
+  color: var(--border);
 }
 
 .footer-kenya {
@@ -2174,7 +2167,9 @@ body.light-mode .main-footer {
   justify-content: center;
   gap: 8px;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .footer-kenya span:first-child {
@@ -2184,45 +2179,32 @@ body.light-mode .main-footer {
 
 .footer-kenya span:last-child {
   color: var(--muted);
-  font-size: 11px;
-}
-
-/* Remove road animation styles */
-.road-container,
-.road-surface,
-.road-bus {
-  display: none;
+  font-size: 12px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .contact-operating-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    padding: 32px 24px;
-  }
-  
-  .section-subtitle {
-    font-size: 24px;
-    text-align: center;
-  }
-  
-  .info-item {
-    justify-content: center;
-  }
-  
-  .hours-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
-  }
-  
-  .support-badge-footer {
-    justify-content: center;
-  }
-  
   .main-footer {
-    padding: 40px 20px 30px;
+    padding: 36px 20px 30px;
+    margin-top: 40px;
+  }
+  
+  .footer-logo-mini {
+    margin-bottom: 20px;
+  }
+  
+  .footer-logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .footer-logo-text {
+    font-size: 16px;
+  }
+  
+  .footer-center p {
+    font-size: 11px;
   }
   
   .footer-links {
@@ -2230,11 +2212,14 @@ body.light-mode .main-footer {
   }
   
   .footer-links a {
-    font-size: 10px;
+    font-size: 11px;
   }
   
-  .footer-description-mini {
-    font-size: 12px;
-    padding: 0 16px;
+  .footer-links a:not(:last-child)::after {
+    right: -12px;
+  }
+  
+  .footer-kenya span:last-child {
+    font-size: 10px;
   }
 }
