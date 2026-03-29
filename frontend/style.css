@@ -36,7 +36,6 @@ body.dark-mode {
   --text: #EEEEF8;
   --soft: #C0C0D8;
   --muted: #7070A0;
-  /* Keep gold and other colors the same in dark mode */
   --gold: #E8A020;
   --gold2: #F5C842;
   --gold-d: #B8801A;
@@ -993,111 +992,478 @@ body {
   text-transform: uppercase;
 }
 
-/* ==================== FOOTER STYLES ==================== */
+/* ==================== FOOTER STYLES - FULL WIDTH ==================== */
 .main-footer {
-  background: linear-gradient(135deg, #0A0A0F, #11111A);
-  border-top: 1px solid #2A2A3A;
-  margin-top: 80px;
-  padding: 50px 40px 40px;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  padding: 48px 0 32px;
   position: relative;
   z-index: 10;
   width: 100%;
 }
 
 body.light-mode .main-footer {
-  background: linear-gradient(135deg, #F5F5F7, #FFFFFF);
-  border-top-color: #E0E0E8;
+  background: var(--card);
+  border-top-color: var(--border);
 }
 
 .footer-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 40px;
 }
 
+/* Top Section with Logo */
+.footer-top {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.footer-logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.footer-logo-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-d));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  color: #08080F;
+}
+
+.footer-logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.footer-tagline-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.footer-tagline-area .separator {
+  color: var(--border);
+}
+
+/* Middle Section - 5 Columns */
+.footer-middle {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 30px;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.footer-column ul li a:hover {
+  color: var(--gold);
+}
+
+.footer-column ul li i {
+  width: 24px;
+  color: var(--gold);
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+/* Social Links */
+.footer-social {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.social-link i {
+  width: 20px;
+  font-size: 14px;
+}
+
+.social-link:hover {
+  color: var(--gold);
+}
+
+/* Bottom Copyright */
 .footer-bottom {
   text-align: center;
+  padding-top: 20px;
 }
 
-.footer-center {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.footer-center p {
-  color: var(--muted);
-  font-size: 14px;
-  margin: 0 0 8px 0;
-}
-
-.footer-tagline {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 5px;
-  margin-bottom: 20px !important;
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-  margin: 20px 0;
-}
-
-.footer-links a {
+.footer-bottom p {
   color: var(--muted);
   font-size: 13px;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-links a:hover {
-  color: var(--gold);
-}
-
-.footer-kenya {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.footer-kenya span:first-child {
-  color: var(--gold);
-  font-size: 14px;
-}
-
-.footer-kenya span:last-child {
-  color: var(--muted);
-  font-size: 12px;
+  margin: 0;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .footer-middle {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-footer {
-    padding: 40px 20px 30px;
-    margin-top: 60px;
+    margin-top: 40px;
   }
   
-  .footer-links {
-    gap: 20px;
+  .footer-container {
+    padding: 0 20px;
   }
   
-  .footer-links a {
+  .footer-logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .footer-logo-text {
+    font-size: 22px;
+  }
+  
+  .footer-tagline-area {
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  
+  .footer-middle {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+  
+  .footer-column h4 {
+    margin-bottom: 15px;
+  }
+  
+  .footer-social {
+    align-items: center;
+  }
+  
+  .footer-column ul li i {
+    width: auto;
+  }
+  
+  .footer-bottom p {
     font-size: 11px;
   }
-  
-  .footer-center p {
-    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .footer-logo-text {
+    font-size: 18px;
   }
   
-  .footer-tagline {
-    font-size: 10px;
+  .footer-logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
   
-  .footer-kenya span:last-child {
+  .footer-tagline-area {
     font-size: 10px;
+  }
+}
+
+/* ==================== CONTACT & OPERATING HOURS SECTION (ROLE SELECTION PAGE ONLY) ==================== */
+.contact-operating-section {
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contact-operating-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  background: var(--card);
+  border-radius: 24px;
+  padding: 48px 60px;
+  border: 1px solid var(--border);
+}
+
+.section-subtitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.info-item i {
+  width: 44px;
+  height: 44px;
+  background: var(--gold-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.info-item strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.info-item p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hours-item span:first-child {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hours-time {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.support-badge-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: var(--gold-bg);
+  border-radius: 40px;
+  width: fit-content;
+}
+
+.online-dot-footer {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.support-badge-footer span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .contact-operating-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 32px 28px;
+  }
+  
+  .section-subtitle {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  .info-item {
+    justify-content: flex-start;
+  }
+  
+  .hours-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+  
+  .support-badge-footer {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/* ==================== OPERATING HOURS SECTION (CONTACT PAGE ONLY) ==================== */
+.operating-hours-section {
+  padding: 40px 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.operating-hours-container {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 48px 50px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.section-subtitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+}
+
+.hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hours-item span:first-child {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hours-time {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.support-badge-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 20px;
+  background: var(--gold-bg);
+  border-radius: 40px;
+  width: 100%;
+}
+
+.online-dot-footer {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.support-badge-footer span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .operating-hours-container {
+    padding: 32px 24px;
+  }
+  
+  .section-subtitle {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .hours-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+  
+  .hours-item span:first-child {
+    font-size: 14px;
+  }
+  
+  .hours-time {
+    font-size: 13px;
   }
 }
 
@@ -1178,6 +1544,7 @@ body.light-mode .main-footer {
   .auth-panel { margin: 80px 20px; }
   .role-selection-hero { margin: 60px 20px 30px; padding: 40px 16px; }
 }
+
 /* ==================== DASHBOARD LAYOUT ==================== */
 .dashboard-wrapper {
   display: flex;
@@ -1640,6 +2007,7 @@ body.light-mode .stat-card-dashboard,
 body.light-mode .dashboard-card {
   background: #FFFFFF;
 }
+
 /* ==================== AUTH PAGE MODERN ==================== */
 .auth-wrapper {
   display: flex;
@@ -1962,581 +2330,5 @@ body.light-mode .dashboard-card {
   .auth-panel-modern {
     max-width: 100%;
     padding: 24px;
-  }
-}
-/* ==================== CONTACT & OPERATING HOURS SECTION ==================== */
-.contact-operating-section {
-  padding: 40px 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.contact-operating-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  background: var(--card);
-  border-radius: 24px;
-  padding: 48px 40px;
-  border: 1px solid var(--border);
-}
-
-.section-subtitle {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 24px;
-  letter-spacing: 1px;
-}
-
-.info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.info-item i {
-  width: 40px;
-  height: 40px;
-  background: var(--gold-bg);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: var(--gold);
-}
-
-.info-item strong {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.info-item p {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.hours-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hours-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.hours-item span:first-child {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.hours-time {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.support-badge-footer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: var(--gold-bg);
-  border-radius: 40px;
-}
-
-.online-dot-footer {
-  width: 8px;
-  height: 8px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.support-badge-footer span {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gold);
-}
-
-/* ==================== FOOTER STYLES ==================== */
-.main-footer {
-  background: var(--card);
-  border-top: 1px solid var(--border);
-  margin-top: 60px;
-  padding: 48px 40px 32px;
-  position: relative;
-  z-index: 10;
-  width: 100%;
-}
-
-body.light-mode .main-footer {
-  background: var(--card);
-  border-top-color: var(--border);
-}
-
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Top Section with Logo */
-.footer-top {
-  text-align: center;
-  margin-bottom: 48px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
-
-.footer-logo-area {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.footer-logo-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-d));
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  font-weight: bold;
-  color: #08080F;
-}
-
-.footer-logo-text {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  letter-spacing: 0.05em;
-  color: var(--text);
-  font-weight: 700;
-}
-
-.footer-tagline-area {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.footer-tagline-area .separator {
-  color: var(--border);
-}
-
-/* Middle Section - 5 Columns */
-.footer-middle {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 30px;
-  margin-bottom: 48px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--border);
-}
-
-.footer-column h4 {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 20px;
-  letter-spacing: 0.5px;
-}
-
-.footer-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-column ul li {
-  margin-bottom: 12px;
-}
-
-.footer-column ul li a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  transition: color 0.3s ease;
-}
-
-.footer-column ul li a:hover {
-  color: var(--gold);
-}
-
-.footer-column ul li i {
-  width: 24px;
-  color: var(--gold);
-  font-size: 13px;
-  margin-right: 8px;
-}
-
-/* Social Links */
-.footer-social {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.social-link {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 13px;
-  transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.social-link i {
-  width: 20px;
-  font-size: 14px;
-}
-
-.social-link:hover {
-  color: var(--gold);
-}
-
-/* Bottom Copyright */
-.footer-bottom {
-  text-align: center;
-}
-
-.footer-bottom p {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 0;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .footer-middle {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-footer {
-    padding: 36px 20px 28px;
-    margin-top: 40px;
-  }
-  
-  .footer-logo-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-  }
-  
-  .footer-logo-text {
-    font-size: 22px;
-  }
-  
-  .footer-tagline-area {
-    font-size: 11px;
-    flex-wrap: wrap;
-  }
-  
-  .footer-middle {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    text-align: center;
-  }
-  
-  .footer-column h4 {
-    margin-bottom: 15px;
-  }
-  
-  .footer-social {
-    align-items: center;
-  }
-  
-  .footer-column ul li i {
-    width: auto;
-  }
-  
-  .footer-bottom p {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-logo-text {
-    font-size: 18px;
-  }
-  
-  .footer-logo-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-  
-  .footer-tagline-area {
-    font-size: 10px;
-  }
-}
-/* ==================== CONTACT & OPERATING HOURS SECTION (ROLE SELECTION PAGE ONLY) ==================== */
-.contact-operating-section {
-  padding: 40px 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.contact-operating-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 50px;
-  background: var(--card);
-  border-radius: 24px;
-  padding: 48px 50px;
-  border: 1px solid var(--border);
-}
-
-.section-subtitle {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 28px;
-  letter-spacing: 1px;
-}
-
-.info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.info-item i {
-  width: 44px;
-  height: 44px;
-  background: var(--gold-bg);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--gold);
-  flex-shrink: 0;
-}
-
-.info-item strong {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  display: block;
-  margin-bottom: 4px;
-}
-
-.info-item p {
-  font-size: 14px;
-  color: var(--muted);
-  margin: 0;
-}
-
-.hours-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.hours-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.hours-item span:first-child {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.hours-time {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.support-badge-footer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 12px 20px;
-  background: var(--gold-bg);
-  border-radius: 40px;
-  width: fit-content;
-}
-
-.online-dot-footer {
-  width: 8px;
-  height: 8px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.support-badge-footer span {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-/* Responsive */
-@media (max-width: 800px) {
-  .contact-operating-container {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    padding: 32px 28px;
-  }
-  
-  .section-subtitle {
-    font-size: 24px;
-    text-align: center;
-  }
-  
-  .hours-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 6px;
-  }
-  
-  .support-badge-footer {
-    justify-content: center;
-    width: 100%;
-  }
-}
-/* ==================== OPERATING HOURS SECTION (CONTACT PAGE ONLY) ==================== */
-.operating-hours-section {
-  padding: 40px 24px;
-  max-width: 600px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.operating-hours-container {
-  background: var(--card);
-  border-radius: 24px;
-  padding: 48px 50px;
-  border: 1px solid var(--border);
-  text-align: center;
-}
-
-.section-subtitle {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--gold);
-  margin-bottom: 32px;
-  letter-spacing: 1px;
-}
-
-.hours-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.hours-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.hours-item span:first-child {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.hours-time {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.support-badge-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 24px;
-  padding: 12px 20px;
-  background: var(--gold-bg);
-  border-radius: 40px;
-  width: 100%;
-}
-
-.online-dot-footer {
-  width: 8px;
-  height: 8px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.support-badge-footer span {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .operating-hours-container {
-    padding: 32px 24px;
-  }
-  
-  .section-subtitle {
-    font-size: 24px;
-    margin-bottom: 24px;
-  }
-  
-  .hours-item {
-    flex-direction: column;
-    text-align: center;
-    gap: 6px;
-  }
-  
-  .hours-item span:first-child {
-    font-size: 14px;
-  }
-  
-  .hours-time {
-    font-size: 13px;
   }
 }
