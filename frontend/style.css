@@ -2061,7 +2061,7 @@ body.light-mode .dashboard-card {
   color: var(--gold);
 }
 
-/* ==================== SIMPLIFIED FOOTER ==================== */
+/* ==================== FOOTER STYLES ==================== */
 .main-footer {
   background: var(--card);
   border-top: 1px solid var(--border);
@@ -2082,156 +2082,204 @@ body.light-mode .main-footer {
   margin: 0 auto;
 }
 
-/* 3 Column Grid for top section */
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  margin-bottom: 40px;
-  padding-bottom: 30px;
+/* Top Section with Logo */
+.footer-top {
+  text-align: center;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
 
-.footer-col {
+.footer-logo-area {
   display: flex;
   align-items: center;
-}
-
-.footer-col:first-child {
-  justify-content: flex-start;
-}
-
-.footer-col:nth-child(2) {
   justify-content: center;
-}
-
-.footer-col:last-child {
-  justify-content: flex-end;
-}
-
-/* Logo Styles */
-.footer-logo-mini {
-  display: flex;
-  align-items: center;
   gap: 12px;
+  margin-bottom: 12px;
 }
 
 .footer-logo-icon {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, var(--gold), var(--gold-d));
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
   color: #08080F;
 }
 
 .footer-logo-text {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
+  font-size: 28px;
   letter-spacing: 0.05em;
   color: var(--text);
-  line-height: 1.2;
+  font-weight: 700;
 }
 
-.footer-logo-sub {
-  font-size: 9px;
-  color: var(--gold);
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  margin-top: 2px;
-}
-
-/* Policy Links */
-.footer-links {
+.footer-tagline-area {
   display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
-}
-
-.footer-links a {
-  color: var(--muted);
-  font-size: 13px;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-  color: var(--gold);
-}
-
-/* Kenya Badge */
-.footer-kenya {
-  display: flex;
-  gap: 8px;
   align-items: center;
-}
-
-.footer-kenya span:first-child {
-  color: var(--gold);
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
   font-size: 14px;
 }
 
-.footer-kenya span:last-child {
-  color: var(--muted);
-  font-size: 12px;
+.footer-tagline-area .separator {
+  color: var(--border);
 }
 
-/* Centered Copyright */
-.footer-copyright-center {
+/* Middle Section - 5 Columns */
+.footer-middle {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 30px;
+  margin-bottom: 48px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.footer-column ul li a:hover {
+  color: var(--gold);
+}
+
+.footer-column ul li i {
+  width: 24px;
+  color: var(--gold);
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+/* Social Links */
+.footer-social {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.social-link i {
+  width: 20px;
+  font-size: 14px;
+}
+
+.social-link:hover {
+  color: var(--gold);
+}
+
+/* Bottom Copyright */
+.footer-bottom {
   text-align: center;
 }
 
-.footer-copyright-center p {
+.footer-bottom p {
   color: var(--muted);
   font-size: 13px;
   margin: 0;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .footer-middle {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+}
+
 @media (max-width: 768px) {
   .main-footer {
     padding: 36px 20px 28px;
     margin-top: 40px;
   }
   
-  .footer-grid {
+  .footer-logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .footer-logo-text {
+    font-size: 22px;
+  }
+  
+  .footer-tagline-area {
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  
+  .footer-middle {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 30px;
     text-align: center;
-    margin-bottom: 30px;
   }
   
-  .footer-col {
-    justify-content: center !important;
+  .footer-column h4 {
+    margin-bottom: 15px;
   }
   
-  .footer-logo-mini {
-    justify-content: center;
+  .footer-social {
+    align-items: center;
   }
   
-  .footer-links {
-    justify-content: center;
-    gap: 20px;
+  .footer-column ul li i {
+    width: auto;
   }
   
-  .footer-links a {
+  .footer-bottom p {
     font-size: 11px;
   }
-  
-  .footer-kenya {
-    justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .footer-logo-text {
+    font-size: 18px;
   }
   
-  .footer-kenya span:last-child {
+  .footer-logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .footer-tagline-area {
     font-size: 10px;
-  }
-  
-  .footer-copyright-center p {
-    font-size: 11px;
   }
 }
