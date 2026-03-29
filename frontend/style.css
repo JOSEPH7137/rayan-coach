@@ -1067,10 +1067,10 @@ body.light-mode .main-footer {
   color: var(--border);
 }
 
-/* Middle Section - 5 Columns */
+/* Middle Section - 4 COLUMNS (Company, Support, Legal, Follow Us) */
 .footer-middle {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 30px;
   margin-bottom: 48px;
   padding-bottom: 24px;
@@ -1154,7 +1154,7 @@ body.light-mode .main-footer {
 /* Responsive */
 @media (max-width: 1024px) {
   .footer-middle {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px;
   }
   
