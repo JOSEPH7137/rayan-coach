@@ -2404,3 +2404,211 @@ body.dark-mode .sidebar-nav-item {
 body.dark-mode .sidebar-nav-item:hover {
   color: var(--gold);
 }
+/* ==================== NAVIGATION - FIXED WITH LARGER FONT ==================== */
+.main-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--black);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(37,37,53,0.5);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  min-height: 90px;
+}
+
+/* Logo Section - INCREASED FONT SIZE */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-icon {
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-d));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  font-weight: bold;
+  color: #08080F;
+}
+
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.logo-sub {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  margin-top: 3px;
+}
+
+/* Navigation Links - INCREASED FONT SIZE */
+.nav-links {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-link {
+  color: var(--soft);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: 8px 0;
+}
+
+.nav-link:hover {
+  color: var(--gold);
+}
+
+.nav-link.active-nav {
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+
+/* Right Actions - Sign In and Theme Toggle - INCREASED SIZE */
+.nav-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.signin-link {
+  color: var(--gold) !important;
+  font-weight: 600;
+  border: 1px solid var(--gold);
+  padding: 12px 28px;
+  border-radius: 40px;
+  transition: all 0.3s ease;
+  font-size: 17px;
+  background: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signin-link:hover {
+  background: var(--gold);
+  color: var(--black) !important;
+  transform: translateY(-2px);
+}
+
+/* Theme Toggle Button - INCREASED SIZE */
+.theme-toggle {
+  cursor: pointer;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+
+.theme-toggle i {
+  font-size: 18px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .main-nav {
+    padding: 16px 30px;
+    min-height: 80px;
+  }
+  
+  .nav-links {
+    gap: 30px;
+  }
+  
+  .nav-link {
+    font-size: 16px;
+  }
+  
+  .logo-text {
+    font-size: 22px;
+  }
+  
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+  
+  .signin-link {
+    padding: 10px 22px;
+    font-size: 15px;
+  }
+  
+  .theme-toggle {
+    padding: 10px 20px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-nav {
+    padding: 12px 20px;
+    min-height: 70px;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  .nav-actions {
+    gap: 12px;
+  }
+  
+  .signin-link {
+    padding: 8px 18px;
+    font-size: 13px;
+  }
+  
+  .theme-toggle {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .logo-text {
+    font-size: 18px;
+  }
+  
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .logo-sub {
+    font-size: 9px;
+  }
+}
