@@ -2299,10 +2299,10 @@ body.light-mode .main-footer {
     font-size: 10px;
   }
 }
-/* ==================== ROLE SELECTION PAGE CONTACT SECTION ==================== */
+/* ==================== CONTACT & OPERATING HOURS SECTION (ROLE SELECTION PAGE ONLY) ==================== */
 .contact-operating-section {
   padding: 40px 24px;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   width: 100%;
 }
@@ -2310,12 +2310,11 @@ body.light-mode .main-footer {
 .contact-operating-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: 50px;
   background: var(--card);
   border-radius: 24px;
-  padding: 48px 60px;
+  padding: 48px 50px;
   border: 1px solid var(--border);
-  width: 100%;
 }
 
 .section-subtitle {
@@ -2350,10 +2349,6 @@ body.light-mode .main-footer {
   font-size: 20px;
   color: var(--gold);
   flex-shrink: 0;
-}
-
-.info-item div {
-  flex: 1;
 }
 
 .info-item strong {
@@ -2393,36 +2388,35 @@ body.light-mode .main-footer {
 .hours-time {
   font-size: 14px;
   color: var(--muted);
-  font-weight: 500;
 }
 
 .support-badge-footer {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-top: 20px;
-  padding: 14px 20px;
+  padding: 12px 20px;
   background: var(--gold-bg);
-  border-radius: 50px;
+  border-radius: 40px;
   width: fit-content;
 }
 
 .online-dot-footer {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background: var(--green);
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
 
 .support-badge-footer span {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--gold);
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .contact-operating-container {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -2434,14 +2428,10 @@ body.light-mode .main-footer {
     text-align: center;
   }
   
-  .info-item {
-    justify-content: flex-start;
-  }
-  
   .hours-item {
     flex-direction: column;
     text-align: center;
-    gap: 8px;
+    gap: 6px;
   }
   
   .support-badge-footer {
@@ -2449,39 +2439,104 @@ body.light-mode .main-footer {
     width: 100%;
   }
 }
+/* ==================== OPERATING HOURS SECTION (CONTACT PAGE ONLY) ==================== */
+.operating-hours-section {
+  padding: 40px 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
 
-@media (max-width: 480px) {
-  .contact-operating-container {
-    padding: 24px 20px;
+.operating-hours-container {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 48px 50px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.section-subtitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+}
+
+.hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hours-item span:first-child {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hours-time {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.support-badge-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 20px;
+  background: var(--gold-bg);
+  border-radius: 40px;
+  width: 100%;
+}
+
+.online-dot-footer {
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.support-badge-footer span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .operating-hours-container {
+    padding: 32px 24px;
   }
   
-  .info-item {
-    gap: 12px;
+  .section-subtitle {
+    font-size: 24px;
+    margin-bottom: 24px;
   }
   
-  .info-item i {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-  
-  .info-item strong {
-    font-size: 13px;
-  }
-  
-  .info-item p {
-    font-size: 12px;
+  .hours-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
   }
   
   .hours-item span:first-child {
-    font-size: 13px;
+    font-size: 14px;
   }
   
   .hours-time {
-    font-size: 12px;
-  }
-  
-  .support-badge-footer span {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
