@@ -992,7 +992,7 @@ body {
   text-transform: uppercase;
 }
 
-/* ==================== FOOTER STYLES - FULL WIDTH ==================== */
+/* ==================== FOOTER STYLES - FULL WIDTH ON ALL PAGES ==================== */
 .main-footer {
   background: var(--card);
   border-top: 1px solid var(--border);
@@ -1012,6 +1012,7 @@ body.light-mode .main-footer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 40px;
+  width: 100%;
 }
 
 /* Top Section with Logo */
@@ -1059,6 +1060,7 @@ body.light-mode .main-footer {
   gap: 12px;
   color: var(--muted);
   font-size: 14px;
+  flex-wrap: wrap;
 }
 
 .footer-tagline-area .separator {
@@ -1140,7 +1142,7 @@ body.light-mode .main-footer {
 /* Bottom Copyright */
 .footer-bottom {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 10px;
 }
 
 .footer-bottom p {
@@ -1154,6 +1156,10 @@ body.light-mode .main-footer {
   .footer-middle {
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
+  }
+  
+  .footer-container {
+    padding: 0 30px;
   }
 }
 
@@ -1178,7 +1184,6 @@ body.light-mode .main-footer {
   
   .footer-tagline-area {
     font-size: 11px;
-    flex-wrap: wrap;
   }
   
   .footer-middle {
@@ -1217,6 +1222,10 @@ body.light-mode .main-footer {
   
   .footer-tagline-area {
     font-size: 10px;
+  }
+  
+  .footer-container {
+    padding: 0 16px;
   }
 }
 
