@@ -2341,3 +2341,66 @@ body.light-mode .dashboard-card {
     padding: 24px;
   }
 }
+/* Sidebar Navigation Items - Make them clearly visible */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+  text-decoration: none;
+  background: transparent;
+}
+
+.sidebar-nav-item:hover {
+  background: var(--card);
+  color: var(--gold);
+}
+
+.sidebar-nav-item.active {
+  background: var(--gold-bg);
+  color: var(--gold);
+  border: 1px solid var(--gold-b);
+}
+
+.sidebar-nav-item i {
+  width: 22px;
+  font-size: 16px;
+  text-align: center;
+  color: inherit;
+}
+
+/* Remove the muted color from sidebar items */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 12px;
+  overflow-y: auto;
+}
+
+/* Make sure text is dark/black in light mode */
+body.light-mode .sidebar-nav-item {
+  color: #1A1A2E;
+}
+
+body.light-mode .sidebar-nav-item:hover {
+  color: var(--gold);
+}
+
+body.light-mode .sidebar-nav-item.active {
+  color: var(--gold);
+}
+
+/* Dark mode - keep text white/grey but readable */
+body.dark-mode .sidebar-nav-item {
+  color: #EEEEF8;
+}
+
+body.dark-mode .sidebar-nav-item:hover {
+  color: var(--gold);
+}
