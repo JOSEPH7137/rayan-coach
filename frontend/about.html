@@ -15,7 +15,7 @@
 <!-- Toast Container -->
 <div id="toast-container"></div>
 
-<div class="about-page-container">
+<!-- Navigation -->
 <nav class="main-nav">
   <div class="nav-logo">
     <div class="logo-icon">Rc</div>
@@ -40,6 +40,8 @@
   </div>
 </nav>
 
+<!-- About Page Content (Centered) -->
+<div class="about-page-container">
   <div class="about-page-hero">
     <h1 class="about-page-title">About Rayan Coach</h1>
     <p class="about-page-subtitle">Kenya's Premier Intercity Transport Provider</p>
@@ -141,71 +143,72 @@
       </div>
     </div>
 
-   <!-- Contact & Operating Hours Section (replaces road animation) -->
-<div class="contact-operating-section">
-  <div class="contact-operating-container">
-    <!-- Contact Info Column -->
-    <div class="info-column">
-      <h3 class="section-subtitle">Contact Us</h3>
-      <div class="info-list">
-        <div class="info-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <div>
-            <strong>NAIROBI</strong>
-            <p>0745 129233</p>
+    <!-- Contact & Operating Hours Section -->
+    <div class="contact-operating-section">
+      <div class="contact-operating-container">
+        <!-- Contact Info Column -->
+        <div class="info-column">
+          <h3 class="section-subtitle">Contact Us</h3>
+          <div class="info-list">
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <div>
+                <strong>NAIROBI</strong>
+                <p>0745 129233</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <div>
+                <strong>GARISSA</strong>
+                <p>0745 129234</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <strong>EMAIL</strong>
+                <p>info@rayan.co.ke</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fab fa-whatsapp"></i>
+              <div>
+                <strong>WHATSAPP</strong>
+                <p>0745 129233</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <div>
-            <strong>GARISSA</strong>
-            <p>0745 129234</p>
-          </div>
-        </div>
-        <div class="info-item">
-          <i class="fas fa-envelope"></i>
-          <div>
-            <strong>EMAIL</strong>
-            <p>info@rayan.co.ke</p>
-          </div>
-        </div>
-        <div class="info-item">
-          <i class="fab fa-whatsapp"></i>
-          <div>
-            <strong>WHATSAPP</strong>
-            <p>0745 129233</p>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Operating Hours Column -->
-    <div class="hours-column">
-      <h3 class="section-subtitle">Operating Hours</h3>
-      <div class="hours-list">
-        <div class="hours-item">
-          <span>Monday - Friday</span>
-          <span class="hours-time">6:00 AM - 10:00 PM</span>
-        </div>
-        <div class="hours-item">
-          <span>Saturday - Sunday</span>
-          <span class="hours-time">7:00 AM - 9:00 PM</span>
-        </div>
-        <div class="hours-item">
-          <span>Public Holidays</span>
-          <span class="hours-time">8:00 AM - 8:00 PM</span>
-        </div>
-        <div class="support-badge-footer">
-          <div class="online-dot-footer"></div>
-          <span>24/7 Customer Support</span>
+        <!-- Operating Hours Column -->
+        <div class="hours-column">
+          <h3 class="section-subtitle">Operating Hours</h3>
+          <div class="hours-list">
+            <div class="hours-item">
+              <span>Monday - Friday</span>
+              <span class="hours-time">6:00 AM - 10:00 PM</span>
+            </div>
+            <div class="hours-item">
+              <span>Saturday - Sunday</span>
+              <span class="hours-time">7:00 AM - 9:00 PM</span>
+            </div>
+            <div class="hours-item">
+              <span>Public Holidays</span>
+              <span class="hours-time">8:00 AM - 8:00 PM</span>
+            </div>
+            <div class="support-badge-footer">
+              <div class="online-dot-footer"></div>
+              <span>24/7 Customer Support</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-  </div>
 
-<!-- Footer -->
+<!-- Footer - OUTSIDE the about-page-container for full width -->
 <footer class="main-footer">
   <div class="footer-container">
     <!-- Top Section with Logo -->
@@ -221,7 +224,7 @@
       </div>
     </div>
 
-    <!-- Middle Section - 3 Columns -->
+    <!-- Middle Section - 5 Columns -->
     <div class="footer-middle">
       <!-- Company Column -->
       <div class="footer-column">
@@ -269,7 +272,7 @@
         <div class="footer-social">
           <a href="#" onclick="showToast('Facebook','info')" class="social-link"><i class="fab fa-facebook-f"></i> Facebook</a>
           <a href="#" onclick="showToast('WhatsApp','info')" class="social-link"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-          <a href="#" onclick="showToast('X (Twitter)','info')" class="social-link"><i class="fab fa-x-twitter"></i> X</a>
+          <a href="#" onclick="showToast('X','info')" class="social-link"><i class="fab fa-x-twitter"></i> X</a>
         </div>
       </div>
     </div>
