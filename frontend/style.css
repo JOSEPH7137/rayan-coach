@@ -2066,7 +2066,7 @@ body.light-mode .dashboard-card {
   background: var(--card);
   border-top: 1px solid var(--border);
   margin-top: 60px;
-  padding: 48px 40px 40px;
+  padding: 48px 40px 32px;
   position: relative;
   z-index: 10;
   width: 100%;
@@ -2082,21 +2082,38 @@ body.light-mode .main-footer {
   margin: 0 auto;
 }
 
-.footer-bottom {
-  text-align: center;
+/* 3 Column Grid for top section */
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--border);
 }
 
-.footer-center {
-  max-width: 600px;
-  margin: 0 auto;
+.footer-col {
+  display: flex;
+  align-items: center;
 }
 
+.footer-col:first-child {
+  justify-content: flex-start;
+}
+
+.footer-col:nth-child(2) {
+  justify-content: center;
+}
+
+.footer-col:last-child {
+  justify-content: flex-end;
+}
+
+/* Logo Styles */
 .footer-logo-mini {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  margin-bottom: 24px;
 }
 
 .footer-logo-icon {
@@ -2129,18 +2146,11 @@ body.light-mode .main-footer {
   margin-top: 2px;
 }
 
-.footer-center p {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 0 0 20px 0;
-}
-
+/* Policy Links */
 .footer-links {
   display: flex;
-  justify-content: center;
-  gap: 32px;
+  gap: 28px;
   flex-wrap: wrap;
-  margin: 20px 0 24px;
 }
 
 .footer-links a {
@@ -2148,28 +2158,17 @@ body.light-mode .main-footer {
   font-size: 13px;
   text-decoration: none;
   transition: color 0.3s ease;
-  position: relative;
 }
 
 .footer-links a:hover {
   color: var(--gold);
 }
 
-.footer-links a:not(:last-child)::after {
-  content: '|';
-  position: absolute;
-  right: -18px;
-  color: var(--border);
-}
-
+/* Kenya Badge */
 .footer-kenya {
   display: flex;
-  justify-content: center;
   gap: 8px;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
 }
 
 .footer-kenya span:first-child {
@@ -2182,32 +2181,41 @@ body.light-mode .main-footer {
   font-size: 12px;
 }
 
+/* Centered Copyright */
+.footer-copyright-center {
+  text-align: center;
+}
+
+.footer-copyright-center p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .main-footer {
-    padding: 36px 20px 30px;
+    padding: 36px 20px 28px;
     margin-top: 40px;
   }
   
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .footer-col {
+    justify-content: center !important;
+  }
+  
   .footer-logo-mini {
-    margin-bottom: 20px;
-  }
-  
-  .footer-logo-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-  }
-  
-  .footer-logo-text {
-    font-size: 16px;
-  }
-  
-  .footer-center p {
-    font-size: 11px;
+    justify-content: center;
   }
   
   .footer-links {
+    justify-content: center;
     gap: 20px;
   }
   
@@ -2215,11 +2223,15 @@ body.light-mode .main-footer {
     font-size: 11px;
   }
   
-  .footer-links a:not(:last-child)::after {
-    right: -12px;
+  .footer-kenya {
+    justify-content: center;
   }
   
   .footer-kenya span:last-child {
     font-size: 10px;
+  }
+  
+  .footer-copyright-center p {
+    font-size: 11px;
   }
 }
