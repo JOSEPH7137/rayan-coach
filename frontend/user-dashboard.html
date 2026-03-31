@@ -101,24 +101,6 @@
 <script src="supabase-config.js"></script>
 <script src="app.js"></script>
 <script>
-
-// Check if user is logged in, redirect to login if not
-document.addEventListener('DOMContentLoaded', async function() {
-    loadTheme();
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    // Also check stored session for remember me
-    const storedSession = localStorage.getItem('supabase_session');
-    if (!session && !storedSession) {
-        window.location.href = 'role-selection.html';
-    }
-});
-
 let currentPage = 'dashboard';
 
 function toggleSidebar() {
