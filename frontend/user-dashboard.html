@@ -61,7 +61,7 @@
       </a>
     </nav>
     <div class="sidebar-footer">
-      <a href="#" class="sidebar-nav-item logout-btn" onclick="handleLogout()">
+      <a href="index.html" class="sidebar-nav-item logout-btn" onclick="localStorage.removeItem('loggedIn')">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
       </a>
@@ -84,8 +84,8 @@
           <i class="fas fa-moon"></i>
         </div>
         <div class="user-profile" onclick="navigateTo('profile')">
-          <div class="user-avatar" id="userAvatar">JD</div>
-          <span class="user-name" id="userName">Loading...</span>
+          <div class="user-avatar">JK</div>
+          <span class="user-name">John Kamau</span>
         </div>
       </div>
     </header>
@@ -96,23 +96,35 @@
   </main>
 </div>
 
-<!-- Scripts -->
+<!-- Add before your app.js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/app.js"></script>
-<script src="js/auth.js"></script>
-
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
 <script>
-let currentPage = 'dashboard';
-let currentUser = null;
-let userProfile = null;
 
-// Toggle sidebar on mobile
+// Check if user is logged in, redirect to login if not
+document.addEventListener('DOMContentLoaded', async function() {
+    loadTheme();
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Also check stored session for remember me
+    const storedSession = localStorage.getItem('supabase_session');
+    if (!session && !storedSession) {
+        window.location.href = 'role-selection.html';
+    }
+});
+
+let currentPage = 'dashboard';
+
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
 }
 
-// Navigate to different pages
 function navigateTo(page) {
   currentPage = page;
   
@@ -142,7 +154,6 @@ function navigateTo(page) {
   loadPageContent(page);
 }
 
-// Load page content
 function loadPageContent(page) {
   const content = document.getElementById('pageContent');
   
@@ -150,7 +161,7 @@ function loadPageContent(page) {
     dashboard: `
       <div class="welcome-banner">
         <div>
-          <h2>Welcome back, ${userProfile?.name || 'User'}! 👋</h2>
+          <h2>Welcome back, John! 👋</h2>
           <p>You have 2 upcoming trips this week. Safe travels!</p>
         </div>
         <button class="btn-dashboard btn-primary" onclick="navigateTo('booking')">
@@ -160,13 +171,13 @@ function loadPageContent(page) {
       <div class="stats-grid-dashboard">
         <div class="stat-card-dashboard">
           <div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-ticket-alt"></i></div></div>
-          <div class="stat-value-dashboard" id="totalTrips">24</div>
+          <div class="stat-value-dashboard">24</div>
           <div class="stat-label-dashboard">Total Trips</div>
           <div class="stat-trend"><i class="fas fa-arrow-up"></i> 3 this month</div>
         </div>
         <div class="stat-card-dashboard">
           <div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-star"></i></div></div>
-          <div class="stat-value-dashboard" id="rewardPoints">1,240</div>
+          <div class="stat-value-dashboard">1,240</div>
           <div class="stat-label-dashboard">Reward Points</div>
           <div class="stat-trend" style="color: var(--gold);"><i class="fas fa-plus"></i> +80 earned</div>
         </div>
@@ -178,33 +189,33 @@ function loadPageContent(page) {
         </div>
         <div class="stat-card-dashboard">
           <div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-box"></i></div></div>
-          <div class="stat-value-dashboard" id="parcelsSent">6</div>
+          <div class="stat-value-dashboard">6</div>
           <div class="stat-label-dashboard">Parcels Sent</div>
           <div class="stat-trend" style="color: var(--purple);">2 in transit</div>
         </div>
       </div>
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-clock"></i><span>Recent Trips</span></div>
-        <div id="recentTripsList">
-          <div class="trip-item"><div class="trip-info"><h4>Nairobi → Mombasa</h4><p>Today, 07:00 AM • Bus RC-001</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
-          <div class="trip-item"><div class="trip-info"><h4>Mombasa → Nairobi</h4><p>Tomorrow, 14:00 PM • Bus RC-002</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
-          <div class="trip-item"><div class="trip-info"><h4>Nairobi → Kisumu</h4><p>Mar 25, 2025 • Bus RC-003</p></div><span class="trip-status status-completed">Completed</span></div>
-        </div>
+        <div class="trip-item"><div class="trip-info"><h4>Nairobi → Mombasa</h4><p>Today, 07:00 AM • Bus RC-001</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+        <div class="trip-item"><div class="trip-info"><h4>Mombasa → Nairobi</h4><p>Tomorrow, 14:00 PM • Bus RC-002</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+        <div class="trip-item"><div class="trip-info"><h4>Nairobi → Kisumu</h4><p>Mar 25, 2025 • Bus RC-003</p></div><span class="trip-status status-completed">Completed</span></div>
       </div>
     `,
     
     booking: `
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-ticket-alt"></i><span>Book a Ticket</span></div>
-        <div class="form-group"><label>From</label><select class="input" id="fromLocation"><option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Nakuru</option></select></div>
-        <div class="form-group"><label>To</label><select class="input" id="toLocation"><option>Mombasa</option><option>Nairobi</option><option>Kisumu</option><option>Nakuru</option></select></div>
-        <div class="form-group"><label>Travel Date</label><input type="date" class="input" id="travelDate"></div>
-        <div class="form-group"><label>Passengers</label><input type="number" class="input" value="1" min="1" max="10" id="passengers"></div>
-        <button class="btn-dashboard btn-primary" onclick="searchBuses()">Search Buses</button>
+        <div class="form-group"><label>From</label><select class="input"><option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Nakuru</option></select></div>
+        <div class="form-group"><label>To</label><select class="input"><option>Mombasa</option><option>Nairobi</option><option>Kisumu</option><option>Nakuru</option></select></div>
+        <div class="form-group"><label>Travel Date</label><input type="date" class="input"></div>
+        <div class="form-group"><label>Passengers</label><input type="number" class="input" value="1" min="1" max="10"></div>
+        <button class="btn-dashboard btn-primary" onclick="showToast('Searching for available buses...','info')">Search Buses</button>
       </div>
-      <div class="dashboard-card mt-16" id="availableBuses" style="display: none;">
+      <div class="dashboard-card mt-16">
         <div class="card-title"><i class="fas fa-bus"></i><span>Available Buses</span></div>
-        <div id="busesList"></div>
+        <div class="trip-item"><div><h4>7:00 AM - Express</h4><p>KES 1,500 • 3h 30m • WiFi, A/C</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Booking started','success')">Select</button></div>
+        <div class="trip-item"><div><h4>10:30 AM - Luxury</h4><p>KES 2,000 • 3h 15m • WiFi, A/C, Refreshments</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Booking started','success')">Select</button></div>
+        <div class="trip-item"><div><h4>2:00 PM - Economy</h4><p>KES 1,200 • 4h • A/C</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Booking started','success')">Select</button></div>
       </div>
     `,
     
@@ -216,45 +227,38 @@ function loadPageContent(page) {
           <p>Interactive map will appear here</p>
           <p style="font-size: 12px; color: var(--muted);">Showing real-time location of your bus</p>
         </div>
-        <div class="form-group"><label>Enter Trip ID or Route</label><input type="text" class="input" placeholder="e.g., RC-001 or Nairobi-Mombasa" id="trackingInput"></div>
-        <button class="btn-dashboard btn-primary" onclick="trackBus()">Track Now</button>
+        <div class="form-group"><label>Enter Trip ID or Route</label><input type="text" class="input" placeholder="e.g., RC-001 or Nairobi-Mombasa"></div>
+        <button class="btn-dashboard btn-primary" onclick="showToast('Tracking started','info')">Track Now</button>
       </div>
       <div class="dashboard-card mt-16">
         <div class="card-title"><i class="fas fa-bus"></i><span>Active Buses on Route</span></div>
-        <div id="activeBusesList">
-          <div class="trip-item"><div><h4>RC-001</h4><p>Nairobi → Mombasa • ETA: 12:30 PM</p></div><span class="trip-status status-upcoming">On Time</span></div>
-          <div class="trip-item"><div><h4>RC-005</h4><p>Mombasa → Nairobi • ETA: 7:45 PM</p></div><span class="trip-status status-upcoming">Delayed 15min</span></div>
-        </div>
+        <div class="trip-item"><div><h4>RC-001</h4><p>Nairobi → Mombasa • ETA: 12:30 PM</p></div><span class="trip-status status-upcoming">On Time</span></div>
+        <div class="trip-item"><div><h4>RC-005</h4><p>Mombasa → Nairobi • ETA: 7:45 PM</p></div><span class="trip-status status-upcoming">Delayed 15min</span></div>
       </div>
     `,
     
     parcel: `
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-box"></i><span>Send a Parcel</span></div>
-        <div class="form-group"><label>Pickup Location</label><input type="text" class="input" placeholder="Enter pickup address" id="pickupLocation"></div>
-        <div class="form-group"><label>Delivery Location</label><input type="text" class="input" placeholder="Enter delivery address" id="deliveryLocation"></div>
-        <div class="form-group"><label>Receiver Name</label><input type="text" class="input" placeholder="Receiver's full name" id="receiverName"></div>
-        <div class="form-group"><label>Receiver Phone</label><input type="tel" class="input" placeholder="Receiver's phone number" id="receiverPhone"></div>
-        <div class="form-group"><label>Parcel Weight (kg)</label><input type="number" class="input" placeholder="e.g., 2.5" id="parcelWeight"></div>
-        <div class="form-group"><label>Parcel Description</label><textarea class="input" rows="3" placeholder="Describe the item" id="parcelDescription"></textarea></div>
-        <button class="btn-dashboard btn-primary" onclick="sendParcel()">Send Parcel</button>
+        <div class="form-group"><label>Pickup Location</label><input type="text" class="input" placeholder="Enter pickup address"></div>
+        <div class="form-group"><label>Delivery Location</label><input type="text" class="input" placeholder="Enter delivery address"></div>
+        <div class="form-group"><label>Parcel Weight (kg)</label><input type="number" class="input" placeholder="e.g., 2.5"></div>
+        <div class="form-group"><label>Parcel Description</label><textarea class="input" rows="3" placeholder="Describe the item"></textarea></div>
+        <button class="btn-dashboard btn-primary" onclick="showToast('Parcel booking initiated','success')">Calculate Price</button>
       </div>
       <div class="dashboard-card mt-16">
         <div class="card-title"><i class="fas fa-history"></i><span>Recent Parcels</span></div>
-        <div id="userParcelsList">
-          <div class="trip-item"><div><h4>Parcel #RC-234</h4><p>Nairobi → Mombasa • Delivered</p></div><span class="trip-status status-completed">Delivered</span></div>
-          <div class="trip-item"><div><h4>Parcel #RC-235</h4><p>Nairobi → Kisumu • In Transit</p></div><span class="trip-status status-upcoming">In Transit</span></div>
-        </div>
+        <div class="trip-item"><div><h4>Parcel #RC-234</h4><p>Nairobi → Mombasa • Delivered</p></div><span class="trip-status status-completed">Delivered</span></div>
+        <div class="trip-item"><div><h4>Parcel #RC-235</h4><p>Nairobi → Kisumu • In Transit</p></div><span class="trip-status status-upcoming">In Transit</span></div>
       </div>
     `,
     
     tickets: `
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-ticket-alt"></i><span>My Tickets</span></div>
-        <div id="userTicketsList">
-          <div class="trip-item"><div><h4>Nairobi → Mombasa</h4><p>Date: Today, 07:00 AM • Seat: 12A • Bus: RC-001</p><p>Ticket #: RC-2025-00123</p></div><button class="btn-dashboard btn-outline" onclick="downloadTicket('RC-2025-00123')"><i class="fas fa-download"></i> Download</button></div>
-          <div class="trip-item"><div><h4>Mombasa → Nairobi</h4><p>Date: Tomorrow, 14:00 PM • Seat: 8B • Bus: RC-002</p><p>Ticket #: RC-2025-00124</p></div><button class="btn-dashboard btn-outline" onclick="downloadTicket('RC-2025-00124')"><i class="fas fa-download"></i> Download</button></div>
-        </div>
+        <div class="trip-item"><div><h4>Nairobi → Mombasa</h4><p>Date: Today, 07:00 AM • Seat: 12A • Bus: RC-001</p><p>Ticket #: RC-2025-00123</p></div><button class="btn-dashboard btn-outline" onclick="showToast('Ticket downloaded','success')"><i class="fas fa-download"></i> Download</button></div>
+        <div class="trip-item"><div><h4>Mombasa → Nairobi</h4><p>Date: Tomorrow, 14:00 PM • Seat: 8B • Bus: RC-002</p><p>Ticket #: RC-2025-00124</p></div><button class="btn-dashboard btn-outline" onclick="showToast('Ticket downloaded','success')"><i class="fas fa-download"></i> Download</button></div>
+        <div class="trip-item"><div><h4>Nairobi → Kisumu</h4><p>Date: Mar 25, 2025 • Seat: 15C • Bus: RC-008</p><p>Ticket #: RC-2025-00125</p></div><button class="btn-dashboard btn-outline" onclick="showToast('Ticket downloaded','success')"><i class="fas fa-download"></i> Download</button></div>
       </div>
     `,
     
@@ -262,28 +266,26 @@ function loadPageContent(page) {
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-gift"></i><span>My Rewards</span></div>
         <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr;">
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard" id="totalPoints">1,240</div><div class="stat-label-dashboard">Total Points</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard" id="availableRewards">3</div><div class="stat-label-dashboard">Available Rewards</div></div>
+          <div class="stat-card-dashboard"><div class="stat-value-dashboard">1,240</div><div class="stat-label-dashboard">Total Points</div></div>
+          <div class="stat-card-dashboard"><div class="stat-value-dashboard">3</div><div class="stat-label-dashboard">Available Rewards</div></div>
         </div>
-        <div id="rewardsList">
-          <div class="trip-item"><div><h4>Free WiFi Voucher</h4><p>100 points • Valid for 1 trip</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward('wifi')">Redeem</button></div>
-          <div class="trip-item"><div><h4>10% Discount</h4><p>500 points • On next booking</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward('discount')">Redeem</button></div>
-          <div class="trip-item"><div><h4>Free Refreshment</h4><p>200 points • On-board snack</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward('refreshment')">Redeem</button></div>
-        </div>
+        <div class="trip-item"><div><h4>Free WiFi Voucher</h4><p>100 points • Valid for 1 trip</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Reward redeemed!','success')">Redeem</button></div>
+        <div class="trip-item"><div><h4>10% Discount</h4><p>500 points • On next booking</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Reward redeemed!','success')">Redeem</button></div>
+        <div class="trip-item"><div><h4>Free Refreshment</h4><p>200 points • On-board snack</p></div><button class="btn-dashboard btn-primary" onclick="showToast('Reward redeemed!','success')">Redeem</button></div>
       </div>
     `,
     
     messages: `
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-comment"></i><span>Support Chat</span></div>
-        <div class="chat-messages" id="chatMessages" style="height: 300px; overflow-y: auto; background: var(--card2); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+        <div class="chat-messages" style="height: 300px; overflow-y: auto; background: var(--card2); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
           <div class="chat-message" style="margin-bottom: 12px;"><strong>Support:</strong> Hello! How can we help you today?</div>
           <div class="chat-message" style="margin-bottom: 12px;"><strong>You:</strong> I need help with my booking</div>
           <div class="chat-message" style="margin-bottom: 12px;"><strong>Support:</strong> Sure, please provide your booking reference number</div>
         </div>
         <div class="input-group" style="display: flex; gap: 12px;">
           <input type="text" class="input" placeholder="Type your message..." id="chatInput">
-          <button class="btn-dashboard btn-primary" onclick="sendChatMessage()">Send</button>
+          <button class="btn-dashboard btn-primary" onclick="sendMessage()">Send</button>
         </div>
       </div>
     `,
@@ -292,14 +294,14 @@ function loadPageContent(page) {
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-user"></i><span>My Profile</span></div>
         <div style="text-align: center; margin-bottom: 24px;">
-          <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;">${userProfile?.name?.charAt(0) || 'U'}</div>
-          <h3 id="profileName">${userProfile?.name || 'Loading...'}</h3>
-          <p style="color: var(--muted);" id="profileEmail">${userProfile?.email || ''}</p>
+          <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;">JK</div>
+          <h3>John Kamau</h3>
+          <p style="color: var(--muted);">Member since Jan 2024</p>
         </div>
-        <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
-        <div class="form-group"><label>Email</label><input type="email" class="input" id="email" value="${userProfile?.email || ''}" disabled></div>
-        <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || ''}"></div>
-        <button class="btn-dashboard btn-primary" onclick="updateProfile()">Save Changes</button>
+        <div class="form-group"><label>Full Name</label><input type="text" class="input" value="John Kamau"></div>
+        <div class="form-group"><label>Email</label><input type="email" class="input" value="john@rayan.co.ke"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" class="input" value="+254 712 345 678"></div>
+        <button class="btn-dashboard btn-primary" onclick="showToast('Profile updated!','success')">Save Changes</button>
       </div>
     `,
     
@@ -307,13 +309,13 @@ function loadPageContent(page) {
       <div class="dashboard-card">
         <div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
         <div style="text-align: center; padding: 20px;">
-          <button class="btn-dashboard btn-danger" style="background: #F04545; color: white; padding: 16px 32px; font-size: 18px;" onclick="triggerSOS()">
+          <button class="btn-dashboard btn-danger" style="background: #F04545; color: white; padding: 16px 32px; font-size: 18px;" onclick="showToast('SOS Alert Sent! Emergency services notified.','error')">
             <i class="fas fa-exclamation-triangle"></i> SOS EMERGENCY
           </button>
           <p style="margin-top: 20px; color: var(--muted);">Press the SOS button in case of emergency. Your location will be shared with our response team.</p>
         </div>
-        <div class="trip-item"><div><h4>Share Your Trip</h4><p>Share your trip details with family</p></div><button class="btn-dashboard btn-outline" onclick="shareTrip()">Share</button></div>
-        <div class="trip-item"><div><h4>Safety Tips</h4><p>View safety guidelines for travelers</p></div><button class="btn-dashboard btn-outline" onclick="viewSafetyTips()">View</button></div>
+        <div class="trip-item"><div><h4>Share Your Trip</h4><p>Share your trip details with family</p></div><button class="btn-dashboard btn-outline" onclick="showToast('Trip shared!','success')">Share</button></div>
+        <div class="trip-item"><div><h4>Safety Tips</h4><p>View safety guidelines for travelers</p></div><button class="btn-dashboard btn-outline" onclick="showToast('Safety tips loaded','info')">View</button></div>
       </div>
     `
   };
@@ -321,55 +323,10 @@ function loadPageContent(page) {
   content.innerHTML = pages[page] || pages.dashboard;
 }
 
-// Helper functions
-function searchBuses() {
-  showToast('Searching for available buses...', 'info');
-  document.getElementById('availableBuses').style.display = 'block';
-  document.getElementById('busesList').innerHTML = `
-    <div class="trip-item"><div><h4>7:00 AM - Express</h4><p>KES 1,500 • 3h 30m • WiFi, A/C</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('7:00 AM')">Select</button></div>
-    <div class="trip-item"><div><h4>10:30 AM - Luxury</h4><p>KES 2,000 • 3h 15m • WiFi, A/C, Refreshments</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('10:30 AM')">Select</button></div>
-    <div class="trip-item"><div><h4>2:00 PM - Economy</h4><p>KES 1,200 • 4h • A/C</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('2:00 PM')">Select</button></div>
-  `;
-}
-
-function selectBus(time) {
-  showToast(`Booking confirmed for ${time}! Ticket sent to your email.`, 'success');
-}
-
-function trackBus() {
-  const input = document.getElementById('trackingInput')?.value;
-  if (input) {
-    showToast(`Tracking bus ${input}...`, 'info');
-  } else {
-    showToast('Please enter a Trip ID or Route', 'error');
-  }
-}
-
-async function sendParcel() {
-  const pickup = document.getElementById('pickupLocation')?.value;
-  const delivery = document.getElementById('deliveryLocation')?.value;
-  const receiverName = document.getElementById('receiverName')?.value;
-  
-  if (!pickup || !delivery || !receiverName) {
-    showToast('Please fill in all required fields', 'error');
-    return;
-  }
-  
-  showToast('Parcel booking initiated! Tracking number will be sent via SMS.', 'success');
-}
-
-function downloadTicket(ticketNumber) {
-  showToast(`Downloading ticket ${ticketNumber}...`, 'success');
-}
-
-function redeemReward(reward) {
-  showToast(`Reward redeemed! Check your email for details.`, 'success');
-}
-
-function sendChatMessage() {
+function sendMessage() {
   const input = document.getElementById('chatInput');
   if(input && input.value.trim()) {
-    const chatContainer = document.getElementById('chatMessages');
+    const chatContainer = document.querySelector('.chat-messages');
     if(chatContainer) {
       const newMsg = document.createElement('div');
       newMsg.className = 'chat-message';
@@ -390,77 +347,8 @@ function sendChatMessage() {
   }
 }
 
-async function updateProfile() {
-  const fullName = document.getElementById('fullName')?.value;
-  const phone = document.getElementById('phone')?.value;
-  
-  if (currentUser && fullName) {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ name: fullName, phone: phone })
-      .eq('id', currentUser.id);
-    
-    if (error) {
-      showToast('Error updating profile', 'error');
-    } else {
-      showToast('Profile updated successfully!', 'success');
-      userProfile.name = fullName;
-      userProfile.phone = phone;
-      document.getElementById('userName').textContent = fullName;
-      document.getElementById('profileName').textContent = fullName;
-    }
-  }
-}
-
-function triggerSOS() {
-  showToast('SOS Alert Sent! Emergency services notified. Your location has been shared.', 'error');
-}
-
-function shareTrip() {
-  showToast('Trip details shared with your emergency contacts!', 'success');
-}
-
-function viewSafetyTips() {
-  showToast('Safety tips loaded. Check your email.', 'info');
-}
-
-async function handleLogout() {
-  await logoutUser();
-}
-
-// Load user data on page load
-async function loadUserData() {
-  const user = await getCurrentUser();
-  if (user) {
-    currentUser = user;
-    
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    
-    userProfile = profile;
-    
-    // Update UI with user data
-    document.getElementById('userName').textContent = profile?.name || user.email;
-    document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
-  }
-}
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
-  
-  // Check if user is logged in
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.href = 'role-selection.html';
-    return;
-  }
-  
-  await loadUserData();
   loadPageContent('dashboard');
   
   // Add click handlers to sidebar items
@@ -471,22 +359,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
 });
-
-// Make functions global
-window.toggleSidebar = toggleSidebar;
-window.navigateTo = navigateTo;
-window.searchBuses = searchBuses;
-window.selectBus = selectBus;
-window.trackBus = trackBus;
-window.sendParcel = sendParcel;
-window.downloadTicket = downloadTicket;
-window.redeemReward = redeemReward;
-window.sendChatMessage = sendChatMessage;
-window.updateProfile = updateProfile;
-window.triggerSOS = triggerSOS;
-window.shareTrip = shareTrip;
-window.viewSafetyTips = viewSafetyTips;
-window.handleLogout = handleLogout;
 </script>
 </body>
 </html>

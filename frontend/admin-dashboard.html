@@ -35,7 +35,7 @@
       <a href="#" class="sidebar-nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
     </nav>
     <div class="sidebar-footer">
-      <a href="#" class="sidebar-nav-item logout-btn" onclick="handleAdminLogout()">
+      <a href="index.html" class="sidebar-nav-item logout-btn" onclick="localStorage.removeItem('loggedIn')">
         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
       </a>
     </div>
@@ -49,30 +49,21 @@
       <div class="topbar-right">
         <div class="notification-bell" onclick="showToast('You have 5 new notifications','info')"><i class="fas fa-bell"></i><span class="notification-dot"></span></div>
         <div class="theme-toggle-small" onclick="toggleTheme()"><i class="fas fa-moon"></i></div>
-        <div class="user-profile" onclick="navigateTo('profile')">
-          <div class="user-avatar" id="userAvatar">AR</div>
-          <span class="user-name" id="userName">Loading...</span>
-        </div>
+        <div class="user-profile" onclick="navigateTo('profile')"><div class="user-avatar">AR</div><span class="user-name">Admin Rayan</span></div>
       </div>
     </header>
     <div class="dashboard-content" id="pageContent"></div>
   </main>
 </div>
 
-<!-- Scripts -->
+<!-- Add before your app.js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/app.js"></script>
-<script src="js/auth.js"></script>
-
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
 <script>
 let currentPage = 'dashboard';
-let currentUser = null;
-let userProfile = null;
 
-function toggleSidebar() { 
-  document.getElementById('sidebar').classList.toggle('open'); 
-}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
 function navigateTo(page) {
   currentPage = page;
@@ -80,18 +71,7 @@ function navigateTo(page) {
     item.classList.remove('active');
     if(item.getAttribute('data-page') === page) item.classList.add('active');
   });
-  const titles = {
-    dashboard: 'Admin Dashboard', 
-    tracking: 'Live Tracking', 
-    drivers: 'Drivers Management', 
-    fleet: 'Fleet Management', 
-    dispatch: 'Dispatch Center', 
-    payments: 'Payments & Finance', 
-    compliance: 'Compliance', 
-    analytics: 'Analytics & Reports', 
-    audit: 'Audit Logs', 
-    settings: 'Settings'
-  };
+  const titles = {dashboard:'Admin Dashboard', tracking:'Live Tracking', drivers:'Drivers Management', fleet:'Fleet Management', dispatch:'Dispatch Center', payments:'Payments & Finance', compliance:'Compliance', analytics:'Analytics & Reports', audit:'Audit Logs', settings:'Settings'};
   document.getElementById('pageTitle').textContent = titles[page] || 'Admin Dashboard';
   loadPageContent(page);
 }
@@ -100,7 +80,7 @@ function loadPageContent(page) {
   const content = document.getElementById('pageContent');
   const pages = {
     dashboard: `
-      <div class="welcome-banner"><div><h2>Welcome back, ${userProfile?.name || 'Admin'}! 🛡️</h2><p>System running smoothly. 14 active trips today.</p></div><button class="btn-dashboard btn-primary" onclick="navigateTo('analytics')"><i class="fas fa-chart-line"></i> View Reports</button></div>
+      <div class="welcome-banner"><div><h2>Welcome back, Admin! 🛡️</h2><p>System running smoothly. 14 active trips today.</p></div><button class="btn-dashboard btn-primary" onclick="navigateTo('analytics')"><i class="fas fa-chart-line"></i> View Reports</button></div>
       <div class="stats-grid-dashboard">
         <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-bus"></i></div></div><div class="stat-value-dashboard">14</div><div class="stat-label-dashboard">Active Trips</div><div class="stat-trend" style="color: var(--gold);">Today</div></div>
         <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-money-bill-wave"></i></div></div><div class="stat-value-dashboard">KES 84K</div><div class="stat-label-dashboard">Revenue Today</div><div class="stat-trend" style="color: var(--green);">↑ 15%</div></div>
@@ -112,16 +92,14 @@ function loadPageContent(page) {
           <tr><td>07:30 AM</td><td>Nairobi → Mombasa Trip Started</td><td><span class="trip-status status-upcoming">Active</span></td></tr>
           <tr><td>06:45 AM</td><td>Driver James Mwangi Clocked In</td><td><span class="trip-status status-completed">Completed</span></td></tr>
           <tr><td>Yesterday</td><td>New Vehicle Added (RC-025)</td><td><span class="trip-status status-completed">Added</span></td></tr>
-        </tbody>
-      </table>
+        </tbody></table>
       </div>
       <div class="dashboard-card"><div class="card-title"><i class="fas fa-trophy"></i><span>Top Performing Drivers</span></div>
         <table class="data-table"><thead><tr><th>Driver</th><th>Trips</th><th>Rating</th><th>On-time Rate</th></tr></thead><tbody>
           <tr><td>James Mwangi</td><td>124</td><td>4.9 ★</td><td>98%</td></tr>
           <tr><td>Peter Omondi</td><td>98</td><td>4.8 ★</td><td>96%</td></tr>
           <tr><td>Mary Wanjiku</td><td>87</td><td>4.9 ★</td><td>97%</td></tr>
-        </tbody>
-      </table>
+        </tbody></table>
       </div>
     `,
     tracking: `
@@ -141,8 +119,7 @@ function loadPageContent(page) {
           <tr><td>Peter Omondi</td><td>0722 000002</td><td>PSV-KE-2024-00822</td><td><span class="trip-status status-upcoming">Active</span></td><td>4.8 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
           <tr><td>Mary Wanjiku</td><td>0722 000003</td><td>PSV-KE-2024-00823</td><td><span class="trip-status status-upcoming">Active</span></td><td>4.9 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
           <tr><td>John Otieno</td><td>0722 000004</td><td>PSV-KE-2024-00824</td><td><span class="trip-status status-completed">On Leave</span></td><td>4.7 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
-        </tbody>
-      </table>
+        </tbody></table>
       </div>
     `,
     fleet: `
@@ -152,17 +129,16 @@ function loadPageContent(page) {
           <tr><td>RC-002</td><td>Volvo B11R</td><td>50</td><td><span class="trip-status status-upcoming">Active</span></td><td>Mar 10, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
           <tr><td>RC-003</td><td>Mercedes Benz</td><td>48</td><td><span class="trip-status status-upcoming">Active</span></td><td>Mar 5, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
           <tr><td>RC-004</td><td>Isuzu</td><td>45</td><td><span class="trip-status status-completed">Maintenance</span></td><td>Feb 28, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
-        </tbody>
-      </table>
+        </tbody></table>
       </div>
     `,
     dispatch: `
       <div class="dashboard-card"><div class="card-title"><i class="fas fa-tasks"></i><span>Dispatch Center</span></div>
-        <div class="form-group"><label>Create New Trip</label><select class="input" id="tripRoute"><option>Nairobi → Mombasa</option><option>Nairobi → Kisumu</option><option>Mombasa → Nairobi</option><option>Kisumu → Nairobi</option></select></div>
-        <div class="form-group"><label>Departure Time</label><input type="datetime-local" class="input" id="tripDeparture"></div>
-        <div class="form-group"><label>Assign Driver</label><select class="input" id="tripDriver"><option>James Mwangi</option><option>Peter Omondi</option><option>Mary Wanjiku</option></select></div>
-        <div class="form-group"><label>Assign Bus</label><select class="input" id="tripBus"><option>RC-001 (52 seats)</option><option>RC-002 (50 seats)</option><option>RC-003 (48 seats)</option></select></div>
-        <button class="btn-dashboard btn-primary" onclick="createTrip()">Create Trip</button>
+        <div class="form-group"><label>Create New Trip</label><select class="input"><option>Nairobi → Mombasa</option><option>Nairobi → Kisumu</option><option>Mombasa → Nairobi</option><option>Kisumu → Nairobi</option></select></div>
+        <div class="form-group"><label>Departure Time</label><input type="datetime-local" class="input"></div>
+        <div class="form-group"><label>Assign Driver</label><select class="input"><option>James Mwangi</option><option>Peter Omondi</option><option>Mary Wanjiku</option></select></div>
+        <div class="form-group"><label>Assign Bus</label><select class="input"><option>RC-001 (52 seats)</option><option>RC-002 (50 seats)</option><option>RC-003 (48 seats)</option></select></div>
+        <button class="btn-dashboard btn-primary" onclick="showToast('Trip created successfully!','success')">Create Trip</button>
         <div class="divider" style="margin: 20px 0;"></div>
         <div class="card-title"><i class="fas fa-route"></i><span>Scheduled Trips Today</span></div>
         <div class="trip-item"><div><h4>07:00 - Nairobi → Mombasa</h4><p>Driver: James Mwangi • Bus: RC-001</p></div><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Trip details','info')">Manage</button></div>
@@ -183,9 +159,8 @@ function loadPageContent(page) {
           <tr><td>TRX-001</td><td>John Kamau</td><td>KES 1,500</td><td><span class="trip-status status-completed">Completed</span></td></tr>
           <tr><td>TRX-002</td><td>Mary Wanjiku</td><td>KES 2,000</td><td><span class="trip-status status-completed">Completed</span></td></tr>
           <tr><td>TRX-003</td><td>Peter Omondi</td><td>KES 1,200</td><td><span class="trip-status status-upcoming">Pending</span></td></tr>
-        </tbody>
-      </table>
-        <button class="btn-dashboard btn-primary mt-16" onclick="processPayouts()">Process Driver Payouts</button>
+        </tbody></table>
+        <button class="btn-dashboard btn-primary mt-16" onclick="showToast('Processing payouts','info')">Process Driver Payouts</button>
       </div>
     `,
     compliance: `
@@ -196,8 +171,8 @@ function loadPageContent(page) {
           <div class="stat-card-dashboard"><div class="stat-value-dashboard">100%</div><div class="stat-label-dashboard">Compliance Rate</div></div>
         </div>
         <div class="card-title"><i class="fas fa-clock"></i><span>Upcoming Renewals</span></div>
-        <div class="trip-item"><div><h4>PSV License - James Mwangi</h4><p>Expires: May 15, 2025 • 15 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="sendReminder('James Mwangi')">Remind</button></div>
-        <div class="trip-item"><div><h4>Insurance - Bus RC-001</h4><p>Expires: May 20, 2025 • 20 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="sendReminder('RC-001')">Remind</button></div>
+        <div class="trip-item"><div><h4>PSV License - James Mwangi</h4><p>Expires: May 15, 2025 • 15 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="showToast('Reminder sent','info')">Remind</button></div>
+        <div class="trip-item"><div><h4>Insurance - Bus RC-001</h4><p>Expires: May 20, 2025 • 20 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="showToast('Reminder sent','info')">Remind</button></div>
       </div>
     `,
     analytics: `
@@ -212,7 +187,7 @@ function loadPageContent(page) {
           <i class="fas fa-chart-line" style="font-size: 48px; color: var(--gold);"></i>
           <p>Revenue increased by 23% this month</p>
         </div>
-        <div class="action-buttons mt-16"><button class="btn-dashboard btn-primary" onclick="downloadReport()"><i class="fas fa-download"></i> Download Report</button><button class="btn-dashboard btn-outline" onclick="exportData()"><i class="fas fa-file-excel"></i> Export CSV</button></div>
+        <div class="action-buttons mt-16"><button class="btn-dashboard btn-primary" onclick="showToast('Downloading report','info')"><i class="fas fa-download"></i> Download Report</button><button class="btn-dashboard btn-outline" onclick="showToast('Exporting data','info')"><i class="fas fa-file-excel"></i> Export CSV</button></div>
       </div>
     `,
     audit: `
@@ -222,121 +197,30 @@ function loadPageContent(page) {
           <tr><td>2025-03-28 07:15</td><td>Admin Rayan</td><td>Driver Added</td><td>New driver: John Otieno</td></tr>
           <tr><td>2025-03-27 18:30</td><td>Admin Rayan</td><td>Vehicle Added</td><td>New bus: RC-025</td></tr>
           <tr><td>2025-03-27 14:20</td><td>Admin Rayan</td><td>Settings Changed</td><td>Fare rates updated</td></tr>
-        </tbody>
-      </table>
+        </tbody></table>
       </div>
     `,
     settings: `
       <div class="dashboard-card"><div class="card-title"><i class="fas fa-cog"></i><span>System Settings</span></div>
-        <div class="form-group"><label>Company Name</label><input type="text" class="input" id="companyName" value="Rayan Coach Kenya"></div>
-        <div class="form-group"><label>Contact Email</label><input type="email" class="input" id="contactEmail" value="info@rayan.co.ke"></div>
-        <div class="form-group"><label>Support Phone</label><input type="tel" class="input" id="supportPhone" value="+254 745 129233"></div>
-        <div class="form-group"><label>Default Fare Rate (per km)</label><input type="text" class="input" id="fareRate" value="KES 8.50"></div>
-        <div class="form-group"><label>Maintenance Alert Threshold (days)</label><input type="number" class="input" id="alertThreshold" value="30"></div>
-        <div class="action-buttons"><button class="btn-dashboard btn-primary" onclick="saveSettings()">Save Changes</button><button class="btn-dashboard btn-outline" onclick="resetSettings()">Reset Defaults</button></div>
+        <div class="form-group"><label>Company Name</label><input type="text" class="input" value="Rayan Coach Kenya"></div>
+        <div class="form-group"><label>Contact Email</label><input type="email" class="input" value="info@rayan.co.ke"></div>
+        <div class="form-group"><label>Support Phone</label><input type="tel" class="input" value="+254 745 129233"></div>
+        <div class="form-group"><label>Default Fare Rate (per km)</label><input type="text" class="input" value="KES 8.50"></div>
+        <div class="form-group"><label>Maintenance Alert Threshold (days)</label><input type="number" class="input" value="30"></div>
+        <div class="action-buttons"><button class="btn-dashboard btn-primary" onclick="showToast('Settings saved!','success')">Save Changes</button><button class="btn-dashboard btn-outline" onclick="showToast('Reset to defaults','info')">Reset Defaults</button></div>
       </div>
     `
   };
   content.innerHTML = pages[page] || pages.dashboard;
 }
 
-// Admin functions
-function createTrip() {
-  showToast('Trip created successfully!', 'success');
-}
-
-function processPayouts() {
-  showToast('Processing driver payouts...', 'info');
-}
-
-function sendReminder(name) {
-  showToast(`Reminder sent to ${name}`, 'success');
-}
-
-function downloadReport() {
-  showToast('Downloading report...', 'info');
-}
-
-function exportData() {
-  showToast('Exporting data to CSV...', 'info');
-}
-
-function saveSettings() {
-  showToast('Settings saved successfully!', 'success');
-}
-
-function resetSettings() {
-  showToast('Settings reset to defaults', 'info');
-}
-
-async function handleAdminLogout() {
-  await logoutUser();
-}
-
-// Load user data on page load
-async function loadUserData() {
-  const user = await getCurrentUser();
-  if (user) {
-    currentUser = user;
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    
-    userProfile = profile;
-    
-    document.getElementById('userName').textContent = profile?.name || user.email;
-    document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
-  }
-}
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    window.location.href = 'role-selection.html';
-    return;
-  }
-  
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
-  
-  if (profile?.role !== 'admin') {
-    showToast('Unauthorized access. Admin privileges required.', 'error');
-    window.location.href = 'role-selection.html';
-    return;
-  }
-  
-  await loadUserData();
   loadPageContent('dashboard');
-  
   document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
-    item.addEventListener('click', (e) => { 
-      e.preventDefault(); 
-      navigateTo(item.getAttribute('data-page')); 
-    });
+    item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.getAttribute('data-page')); });
   });
 });
-
-// Make functions global
-window.toggleSidebar = toggleSidebar;
-window.navigateTo = navigateTo;
-window.createTrip = createTrip;
-window.processPayouts = processPayouts;
-window.sendReminder = sendReminder;
-window.downloadReport = downloadReport;
-window.exportData = exportData;
-window.saveSettings = saveSettings;
-window.resetSettings = resetSettings;
-window.handleAdminLogout = handleAdminLogout;
 </script>
 </body>
 </html>
