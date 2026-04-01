@@ -149,56 +149,56 @@ function loadPageContent(page) {
             </div>
         `,
         reviews: `
-            <div class="dashboard-card">
-                <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
-                <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
-                
-                <div class="form-group">
-                    <label>Select Your Trip</label>
-                    <select class="input" id="reviewTripSelect">
-                        <option value="">Select a completed trip</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Rate Your Journey</label>
-                    <div class="rating-stars" id="ratingStars">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                    </div>
-                    <input type="hidden" id="selectedRating" value="0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Rate the Driver</label>
-                    <div class="rating-stars" id="driverRatingStars">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                    </div>
-                    <input type="hidden" id="selectedDriverRating" value="0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Your Review (Optional)</label>
-                    <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
-                </div>
-                
-                <button class="btn-dashboard btn-primary" id="submitReviewBtn" onclick="submitReview()">Submit Review</button>
+    <div class="dashboard-card">
+        <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
+        <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
+        
+        <div class="form-group">
+            <label>Select Your Trip</label>
+            <select class="input" id="reviewTripSelect">
+                <option value="">Select a completed trip</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Rate Your Journey</label>
+            <div class="rating-stars" id="ratingStars">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
             </div>
-            
-            <div class="dashboard-card mt-16">
-                <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
-                <div id="userReviewsList">
-                    <div class="trip-item"><div><h4>Loading reviews...</h4></div></div>
-                </div>
+            <input type="hidden" id="selectedRating" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label>Rate the Driver</label>
+            <div class="rating-stars" id="driverRatingStars">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
             </div>
-        `,
+            <input type="hidden" id="selectedDriverRating" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label>Your Review (Optional)</label>
+            <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
+        </div>
+        
+        <button class="btn-dashboard btn-primary" id="submitReviewBtn" onclick="submitReview()">Submit Review</button>
+    </div>
+    
+    <div class="dashboard-card mt-16">
+        <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
+        <div id="userReviewsList">
+            <div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here</p></div></div>
+        </div>
+    </div>
+`,
         safety: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
                 <div style="text-align: center; padding: 20px;">
@@ -709,6 +709,8 @@ function initRatingStars() {
 
 async function loadCompletedTrips() {
     try {
+        console.log('Loading completed trips...'); // Debug log
+        
         const { data: bookings, error } = await window.supabase
             .from('bookings')
             .select(`
@@ -725,39 +727,50 @@ async function loadCompletedTrips() {
         
         if (error) throw error;
         
+        console.log('Bookings found:', bookings?.length); // Debug log
+        
         const select = document.getElementById('reviewTripSelect');
-        if (select && bookings && bookings.length > 0) {
-            select.innerHTML = '<option value="">Select a completed trip</option>';
-            bookings.forEach(booking => {
-                const trip = booking.trips;
-                if (trip) {
-                    const route = trip.routes;
-                    const driverName = trip.drivers?.name || 'Driver';
-                    select.innerHTML += `
-                        <option value="${booking.id}" data-trip-id="${trip.id}" data-driver-id="${trip.driver_id}" data-route="${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'}" data-date="${booking.booking_date}">
-                            ${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'} - ${new Date(booking.booking_date).toLocaleDateString()} (Driver: ${driverName})
-                        </option>
-                    `;
-                }
-            });
-            
-            select.querySelectorAll('option').forEach(option => {
-                if (option.value) {
-                    option.setAttribute('data-trip-id', option.getAttribute('data-trip-id'));
-                    option.setAttribute('data-driver-id', option.getAttribute('data-driver-id'));
-                    option.setAttribute('data-route', option.getAttribute('data-route'));
-                    option.setAttribute('data-date', option.getAttribute('data-date'));
-                }
-            });
+        if (select) {
+            if (bookings && bookings.length > 0) {
+                select.innerHTML = '<option value="">Select a completed trip</option>';
+                bookings.forEach(booking => {
+                    const trip = booking.trips;
+                    if (trip) {
+                        const route = trip.routes;
+                        const driverName = trip.drivers?.name || 'Driver';
+                        select.innerHTML += `
+                            <option value="${booking.id}" 
+                                data-trip-id="${trip.id}" 
+                                data-driver-id="${trip.driver_id || ''}" 
+                                data-route="${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'}" 
+                                data-date="${booking.booking_date}">
+                                ${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'} - ${new Date(booking.booking_date).toLocaleDateString()} (Driver: ${driverName})
+                            </option>
+                        `;
+                    }
+                });
+            } else {
+                select.innerHTML = '<option value="">No completed trips found</option>';
+                showToast('No completed trips to review yet', 'info');
+            }
         }
     } catch (error) {
         console.error('Error loading trips:', error);
+        showToast('Error loading trips. Please refresh the page.', 'error');
     }
 }
 
 async function submitReview() {
+    console.log('Submit review button clicked'); // Debug log
+    
     const tripSelect = document.getElementById('reviewTripSelect');
     const selectedOption = tripSelect?.options[tripSelect.selectedIndex];
+    
+    if (!selectedOption || !selectedOption.value) {
+        showToast('Please select a trip to review', 'error');
+        return;
+    }
+    
     const tripId = selectedOption?.getAttribute('data-trip-id');
     const driverId = selectedOption?.getAttribute('data-driver-id');
     const route = selectedOption?.getAttribute('data-route');
@@ -766,8 +779,10 @@ async function submitReview() {
     const driverRating = parseInt(document.getElementById('selectedDriverRating')?.value) || 0;
     const comment = document.getElementById('reviewComment')?.value;
     
+    console.log('Review data:', { tripId, driverId, journeyRating, driverRating, comment }); // Debug log
+    
     if (!tripId) {
-        showToast('Please select a trip to review', 'error');
+        showToast('Please select a valid trip', 'error');
         return;
     }
     
@@ -785,8 +800,10 @@ async function submitReview() {
     
     // Disable button and show loading
     const submitBtn = document.getElementById('submitReviewBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    }
     
     try {
         const { data, error } = await window.supabase
@@ -804,7 +821,12 @@ async function submitReview() {
             })
             .select();
         
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
+        
+        console.log('Review submitted successfully:', data); // Debug log
         
         showToast('✅ Thank you for your review! Your feedback has been submitted successfully.', 'success');
         
@@ -836,11 +858,12 @@ async function submitReview() {
         console.error('Error submitting review:', error);
         showToast('Error submitting review. Please try again.', 'error');
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Submit Review';
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Review';
+        }
     }
 }
-
 async function loadUserReviews() {
     try {
         const { data: reviews, error } = await window.supabase
