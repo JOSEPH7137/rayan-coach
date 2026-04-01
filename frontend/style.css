@@ -2647,3 +2647,10 @@ body.dark-mode .sidebar-nav-item:hover {
 .mt-24 {
     margin-top: 24px;
 }
+/* Error message styling */
+.error-message {
+    font-size: 11px;
+    margin-top: 4px;
+    color: #F04545;
+    min-height: 18px;
+}

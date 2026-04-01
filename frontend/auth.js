@@ -3,18 +3,6 @@
 // Register user (with driver license and avatar support)
 async function registerUser(email, password, name, phone, role = 'user', driverLicense = null, avatarUrl = null) {
     try {
-        // First check if user already exists
-        const { data: existingUser } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('email', email)
-            .single();
-        
-        if (existingUser) {
-            showToast('Email already registered. Please sign in instead.', 'error');
-            return { success: false, error: 'Email already exists' };
-        }
-        
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -143,7 +131,7 @@ async function resetPassword(email) {
     }
 }
 
-// Update user profile (including driver license)
+// Update user profile
 async function updateUserProfile(userId, updates) {
     try {
         const { data, error } = await supabase
@@ -160,7 +148,7 @@ async function updateUserProfile(userId, updates) {
     }
 }
 
-// Make functions globally available
+// Make functions global
 window.registerUser = registerUser;
 window.loginUser = loginUser;
 window.logoutUser = logoutUser;
