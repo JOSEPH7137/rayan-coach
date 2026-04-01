@@ -195,66 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
       reader.readAsDataURL(file);
     }
   });
-  
-  // Real-time validation for signup fields
-  setupRealTimeValidation();
 });
-
-function setupRealTimeValidation() {
-  // Email validation
-  document.getElementById('signupEmail')?.addEventListener('input', function() {
-    const email = this.value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const errorDiv = document.getElementById('signupEmailError');
-    if (email && !emailRegex.test(email)) {
-      errorDiv.textContent = 'Please enter a valid email address';
-      errorDiv.style.color = '#F04545';
-    } else {
-      errorDiv.textContent = '';
-    }
-  });
-  
-  // Phone validation (only numbers)
-  document.getElementById('signupPhone')?.addEventListener('input', function() {
-    const phone = this.value;
-    const phoneRegex = /^[0-9]{10,12}$/;
-    const errorDiv = document.getElementById('phoneError');
-    if (phone && !phoneRegex.test(phone.replace(/[^0-9]/g, ''))) {
-      errorDiv.textContent = 'Please enter a valid phone number (10-12 digits)';
-      errorDiv.style.color = '#F04545';
-    } else {
-      errorDiv.textContent = '';
-    }
-  });
-  
-  // Password validation
-  document.getElementById('signupPassword')?.addEventListener('input', function() {
-    const password = this.value;
-    const errorDiv = document.getElementById('passwordError');
-    if (password && password.length < 6) {
-      errorDiv.textContent = 'Password must be at least 6 characters';
-      errorDiv.style.color = '#F04545';
-    } else {
-      errorDiv.textContent = '';
-    }
-    validateConfirmPassword();
-  });
-  
-  // Confirm password validation
-  document.getElementById('signupConfirmPassword')?.addEventListener('input', validateConfirmPassword);
-}
-
-function validateConfirmPassword() {
-  const password = document.getElementById('signupPassword')?.value;
-  const confirm = document.getElementById('signupConfirmPassword')?.value;
-  const errorDiv = document.getElementById('confirmPasswordError');
-  if (confirm && password !== confirm) {
-    errorDiv.textContent = 'Passwords do not match';
-    errorDiv.style.color = '#F04545';
-  } else {
-    errorDiv.textContent = '';
-  }
-}
 
 function updateAuthUI(role) {
   const icons = {user:'🧳', driver:'🚗', admin:'🛡️'};
@@ -299,24 +240,19 @@ function validateLogin() {
   const password = document.getElementById('loginPassword').value;
   let isValid = true;
   
-  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email) {
     document.getElementById('loginEmailError').textContent = 'Email is required';
-    document.getElementById('loginEmailError').style.color = '#F04545';
     isValid = false;
   } else if (!emailRegex.test(email)) {
     document.getElementById('loginEmailError').textContent = 'Enter a valid email address';
-    document.getElementById('loginEmailError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('loginEmailError').textContent = '';
   }
   
-  // Password validation
   if (!password) {
     document.getElementById('loginPasswordError').textContent = 'Password is required';
-    document.getElementById('loginPasswordError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('loginPasswordError').textContent = '';
@@ -335,10 +271,8 @@ function validateSignup() {
   const driverLicense = document.getElementById('driverLicense')?.value.trim();
   let isValid = true;
   
-  // Name validation
   if (!fname) {
     document.getElementById('fnameError').textContent = 'First name is required';
-    document.getElementById('fnameError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('fnameError').textContent = '';
@@ -346,64 +280,51 @@ function validateSignup() {
   
   if (!lname) {
     document.getElementById('lnameError').textContent = 'Last name is required';
-    document.getElementById('lnameError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('lnameError').textContent = '';
   }
   
-  // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email) {
     document.getElementById('signupEmailError').textContent = 'Email is required';
-    document.getElementById('signupEmailError').style.color = '#F04545';
     isValid = false;
   } else if (!emailRegex.test(email)) {
     document.getElementById('signupEmailError').textContent = 'Enter a valid email address';
-    document.getElementById('signupEmailError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('signupEmailError').textContent = '';
   }
   
-  // Phone validation
   if (phone) {
     const phoneRegex = /^[0-9]{10,12}$/;
     if (!phoneRegex.test(phone.replace(/[^0-9]/g, ''))) {
       document.getElementById('phoneError').textContent = 'Enter a valid phone number (10-12 digits)';
-      document.getElementById('phoneError').style.color = '#F04545';
       isValid = false;
     } else {
       document.getElementById('phoneError').textContent = '';
     }
   }
   
-  // Driver license validation for driver role
   if (currentRole === 'driver' && !driverLicense) {
     document.getElementById('licenseError').textContent = 'Driver license number is required';
-    document.getElementById('licenseError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('licenseError').textContent = '';
   }
   
-  // Password validation
   if (!password) {
     document.getElementById('passwordError').textContent = 'Password is required';
-    document.getElementById('passwordError').style.color = '#F04545';
     isValid = false;
   } else if (password.length < 6) {
     document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
-    document.getElementById('passwordError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('passwordError').textContent = '';
   }
   
-  // Confirm password validation
   if (password !== confirmPassword) {
     document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
-    document.getElementById('confirmPasswordError').style.color = '#F04545';
     isValid = false;
   } else {
     document.getElementById('confirmPasswordError').textContent = '';
@@ -417,13 +338,12 @@ async function handleLogin() {
   
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  const rememberMe = document.getElementById('rememberMe').checked;
   
   const loginBtn = document.getElementById('loginBtn');
   loginBtn.disabled = true;
   loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
   
-  await loginUser(email, password, rememberMe);
+  await loginUser(email, password);
   
   loginBtn.disabled = false;
   loginBtn.innerHTML = 'Sign In';
@@ -446,7 +366,6 @@ async function handleSignup() {
   signupBtn.disabled = true;
   signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
   
-  // Upload profile picture if exists
   let avatarUrl = null;
   if (profilePicFile && currentRole === 'driver') {
     const fileExt = profilePicFile.name.split('.').pop();
@@ -472,10 +391,7 @@ async function handleSignup() {
     return;
   }
   
-  // The redirect is now handled inside registerUser function
-  // Clear form only if redirect doesn't happen (fallback)
   setTimeout(() => {
-    // If still on same page after 3 seconds, clear form
     if (window.location.href.includes('auth.html')) {
       document.getElementById('signupFname').value = '';
       document.getElementById('signupLname').value = '';
@@ -490,6 +406,7 @@ async function handleSignup() {
     }
   }, 3000);
 }
+
 function togglePasswordField(id) {
   const input = document.getElementById(id);
   if (input) {

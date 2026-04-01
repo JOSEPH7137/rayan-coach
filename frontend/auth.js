@@ -16,7 +16,7 @@ async function loginUser(email, password) {
             return { success: false, error: error.message };
         }
         
-        console.log('Login successful! User ID:', data.user.id);
+        console.log('Login successful!');
         
         // Get user profile
         const { data: profile, error: profileError } = await supabase
@@ -29,18 +29,10 @@ async function loginUser(email, password) {
             console.error('Profile error:', profileError);
         }
         
-        const userName = profile?.name || email;
-        showToast(`Welcome back, ${userName}!`, 'success');
-        
-        // Store session if remember me is checked
-        const rememberMe = document.getElementById('rememberMe')?.checked;
-        if (rememberMe) {
-            localStorage.setItem('supabase_session', JSON.stringify(data.session));
-        }
+        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
         
         // Redirect based on role
         const role = profile?.role || 'user';
-        console.log('Redirecting to role:', role);
         
         if (role === 'admin') {
             window.location.href = 'admin-dashboard.html';
@@ -50,7 +42,7 @@ async function loginUser(email, password) {
             window.location.href = 'user-dashboard.html';
         }
         
-        return { success: true, user: data.user };
+        return { success: true };
     } catch (error) {
         console.error('Unexpected error:', error);
         showToast('Login failed. Please try again.', 'error');
@@ -59,7 +51,7 @@ async function loginUser(email, password) {
 }
 
 // Register user
-async function registerUser(email, password, name, phone, role = 'user', driverLicense = null) {
+async function registerUser(email, password, name, phone, role = 'user', driverLicense = null, avatarUrl = null) {
     try {
         console.log('Attempting signup for:', email);
         
@@ -71,7 +63,8 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
                     name: name,
                     phone: phone,
                     role: role,
-                    driver_license: driverLicense
+                    driver_license: driverLicense,
+                    avatar_url: avatarUrl
                 }
             }
         });
@@ -84,12 +77,6 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
         
         console.log('Signup successful!');
         showToast('Account created! Please sign in.', 'success');
-        
-        // Switch to login tab after 2 seconds
-        setTimeout(() => {
-            const loginTab = document.querySelector('.auth-tab:first-child');
-            if (loginTab) loginTab.click();
-        }, 2000);
         
         return { success: true, user: data.user };
     } catch (error) {
@@ -122,16 +109,6 @@ async function getCurrentUser() {
     }
 }
 
-// Check if user is logged in
-async function isUserLoggedIn() {
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        return session !== null;
-    } catch (error) {
-        return false;
-    }
-}
-
 // Reset password
 async function resetPassword(email) {
     try {
@@ -153,5 +130,4 @@ window.loginUser = loginUser;
 window.registerUser = registerUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
-window.isUserLoggedIn = isUserLoggedIn;
 window.resetPassword = resetPassword;
