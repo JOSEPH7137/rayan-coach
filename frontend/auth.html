@@ -469,24 +469,26 @@ async function handleSignup() {
   signupBtn.innerHTML = 'Create Account';
   
   if (result.success) {
-    // Clear form
-    document.getElementById('signupFname').value = '';
-    document.getElementById('signupLname').value = '';
-    document.getElementById('signupEmail').value = '';
-    document.getElementById('signupPhone').value = '';
-    document.getElementById('signupPassword').value = '';
-    document.getElementById('signupConfirmPassword').value = '';
-    if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
-    document.getElementById('profilePicPreview').innerHTML = '';
-    
-    // Switch to login tab
-    setTimeout(() => {
-      switchTab('login');
-      showToast('Account created! Please sign in.', 'success');
-    }, 2000);
+    // If email confirmation is disabled, user is already redirected by registerUser
+    // If email confirmation is enabled, show message and switch to login tab
+    if (!result.user?.identities?.length) {
+      // Email confirmation is enabled
+      document.getElementById('signupFname').value = '';
+      document.getElementById('signupLname').value = '';
+      document.getElementById('signupEmail').value = '';
+      document.getElementById('signupPhone').value = '';
+      document.getElementById('signupPassword').value = '';
+      document.getElementById('signupConfirmPassword').value = '';
+      if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
+      document.getElementById('profilePicPreview').innerHTML = '';
+      
+      setTimeout(() => {
+        switchTab('login');
+        showToast('Account created! Please sign in.', 'success');
+      }, 2000);
+    }
   }
 }
-
 function togglePasswordField(id) {
   const input = document.getElementById(id);
   if (input) {

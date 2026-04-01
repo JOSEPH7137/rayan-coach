@@ -26,8 +26,25 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
             return { success: false, error: error.message };
         }
         
-        showToast('Account created! Please check your email to verify.', 'success');
-        return { success: true, user: data.user };
+        // If email confirmation is disabled in Supabase, auto-login
+        if (data.user && data.session) {
+            // User is already logged in (email confirmation disabled)
+            showToast('Account created successfully!', 'success');
+            
+            // Redirect based on role
+            if (role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (role === 'driver') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+            return { success: true, user: data.user };
+        } else {
+            // Email confirmation is enabled
+            showToast('Account created! Please check your email to verify.', 'success');
+            return { success: true, user: data.user };
+        }
     } catch (error) {
         showToast(error.message, 'error');
         return { success: false, error: error.message };
@@ -52,11 +69,15 @@ async function loginUser(email, password, rememberMe = false) {
         }
         
         // Get user profile
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
             .single();
+        
+        if (profileError) {
+            console.error('Profile fetch error:', profileError);
+        }
         
         showToast(`Welcome back, ${profile?.name || email}!`, 'success');
         
