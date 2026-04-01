@@ -2654,3 +2654,35 @@ body.dark-mode .sidebar-nav-item:hover {
     color: #F04545;
     min-height: 18px;
 }
+/* Rating Stars */
+.rating-stars {
+    display: flex;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.rating-stars i {
+    transition: all 0.2s ease;
+}
+
+.rating-stars i:hover {
+    transform: scale(1.1);
+}
+
+.rating-display {
+    display: inline-flex;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.review-card {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.review-card:last-child {
+    margin-bottom: 0;
+}

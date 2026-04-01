@@ -27,10 +27,11 @@ function navigateTo(page) {
     });
     
     const titles = {
-        dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
-        parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
-        messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS'
-    };
+    dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
+    parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
+    messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS',
+    reviews: 'Rate Your Journey'  // Add this line
+};
     document.getElementById('pageTitle').textContent = titles[page] || 'Dashboard';
     loadPageContent(page);
 }
@@ -147,6 +148,57 @@ function loadPageContent(page) {
                 <button class="btn-dashboard btn-primary" onclick="updateProfile()">Save Changes</button>
             </div>
         `,
+        reviews: `
+    <div class="dashboard-card">
+        <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
+        <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
+        
+        <div class="form-group">
+            <label>Select Your Trip</label>
+            <select class="input" id="reviewTripSelect">
+                <option value="">Select a completed trip</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Rate Your Journey</label>
+            <div class="rating-stars" id="ratingStars">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
+            </div>
+            <input type="hidden" id="selectedRating" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label>Rate the Driver</label>
+            <div class="rating-stars" id="driverRatingStars">
+                <i class="far fa-star" data-rating="1"></i>
+                <i class="far fa-star" data-rating="2"></i>
+                <i class="far fa-star" data-rating="3"></i>
+                <i class="far fa-star" data-rating="4"></i>
+                <i class="far fa-star" data-rating="5"></i>
+            </div>
+            <input type="hidden" id="selectedDriverRating" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label>Your Review (Optional)</label>
+            <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
+        </div>
+        
+        <button class="btn-dashboard btn-primary" onclick="submitReview()">Submit Review</button>
+    </div>
+    
+    <div class="dashboard-card mt-16">
+        <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
+        <div id="userReviewsList">
+            <div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here</p></div></div>
+        </div>
+    </div>
+`,
         safety: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
                 <div style="text-align: center; padding: 20px;">
@@ -159,7 +211,14 @@ function loadPageContent(page) {
     
     content.innerHTML = pages[page] || pages.dashboard;
     if (page === 'booking') initBookingPage();
-    if (page === 'parcel') initParcelPage();
+if (page === 'parcel') initParcelPage();
+if (page === 'reviews') {
+    setTimeout(() => {
+        initRatingStars();
+        loadCompletedTrips();
+        loadUserReviews();
+    }, 100);
+}
 }
 
 // Initialize Parcel Page with location dropdowns
@@ -603,6 +662,223 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+// ==================== REVIEW SYSTEM ====================
+
+// Initialize rating stars
+function initRatingStars() {
+    // Journey rating stars
+    const journeyStars = document.querySelectorAll('#ratingStars i');
+    const driverStars = document.querySelectorAll('#driverRatingStars i');
+    
+    function setupStarClickHandler(stars, hiddenInputId) {
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                document.getElementById(hiddenInputId).value = rating;
+                
+                // Update star display
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.className = 'fas fa-star';
+                        s.style.color = '#FFD700';
+                    } else {
+                        s.className = 'far fa-star';
+                        s.style.color = 'var(--muted)';
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.className = 'fas fa-star';
+                        s.style.color = '#FFD700';
+                    } else {
+                        s.className = 'far fa-star';
+                        s.style.color = 'var(--muted)';
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseleave', function() {
+                const currentRating = parseInt(document.getElementById(hiddenInputId).value);
+                stars.forEach((s, index) => {
+                    if (index < currentRating) {
+                        s.className = 'fas fa-star';
+                        s.style.color = '#FFD700';
+                    } else {
+                        s.className = 'far fa-star';
+                        s.style.color = 'var(--muted)';
+                    }
+                });
+            });
+        });
+    }
+    
+    setupStarClickHandler(journeyStars, 'selectedRating');
+    setupStarClickHandler(driverStars, 'selectedDriverRating');
+}
+
+// Load completed trips for review selection
+async function loadCompletedTrips() {
+    try {
+        const { data: bookings, error } = await window.supabase
+            .from('bookings')
+            .select(`
+                *,
+                trips:trip_id (
+                    *,
+                    routes:route_id (*),
+                    drivers:driver_id (name)
+                )
+            `)
+            .eq('user_id', currentUser?.id)
+            .eq('status', 'completed')
+            .order('booking_date', { ascending: false });
+        
+        if (error) throw error;
+        
+        const select = document.getElementById('reviewTripSelect');
+        if (select && bookings && bookings.length > 0) {
+            select.innerHTML = '<option value="">Select a completed trip</option>';
+            bookings.forEach(booking => {
+                const trip = booking.trips;
+                if (trip) {
+                    const route = trip.routes;
+                    const driverName = trip.drivers?.name || 'Driver';
+                    select.innerHTML += `
+                        <option value="${booking.id}" data-trip-id="${trip.id}" data-driver-id="${trip.driver_id}" data-route="${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'}" data-date="${booking.booking_date}">
+                            ${route?.origin || 'Unknown'} → ${route?.destination || 'Unknown'} - ${new Date(booking.booking_date).toLocaleDateString()} (Driver: ${driverName})
+                        </option>
+                    `;
+                }
+            });
+            
+            // Store trip data in options
+            select.querySelectorAll('option').forEach(option => {
+                if (option.value) {
+                    option.setAttribute('data-trip-id', option.getAttribute('data-trip-id'));
+                    option.setAttribute('data-driver-id', option.getAttribute('data-driver-id'));
+                    option.setAttribute('data-route', option.getAttribute('data-route'));
+                    option.setAttribute('data-date', option.getAttribute('data-date'));
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading trips:', error);
+    }
+}
+
+// Submit review
+async function submitReview() {
+    const tripSelect = document.getElementById('reviewTripSelect');
+    const selectedOption = tripSelect?.options[tripSelect.selectedIndex];
+    const tripId = selectedOption?.getAttribute('data-trip-id');
+    const driverId = selectedOption?.getAttribute('data-driver-id');
+    const route = selectedOption?.getAttribute('data-route');
+    const journeyDate = selectedOption?.getAttribute('data-date');
+    const journeyRating = parseInt(document.getElementById('selectedRating')?.value) || 0;
+    const driverRating = parseInt(document.getElementById('selectedDriverRating')?.value) || 0;
+    const comment = document.getElementById('reviewComment')?.value;
+    
+    if (!tripId) {
+        showToast('Please select a trip to review', 'error');
+        return;
+    }
+    
+    if (journeyRating === 0) {
+        showToast('Please rate your journey', 'error');
+        return;
+    }
+    
+    if (driverRating === 0) {
+        showToast('Please rate the driver', 'error');
+        return;
+    }
+    
+    const overallRating = Math.round((journeyRating + driverRating) / 2);
+    
+    try {
+        const { data, error } = await window.supabase
+            .from('reviews')
+            .insert({
+                user_id: currentUser.id,
+                trip_id: tripId,
+                driver_id: driverId,
+                rating: overallRating,
+                comment: comment,
+                journey_date: journeyDate,
+                route: route
+            })
+            .select();
+        
+        if (error) throw error;
+        
+        showToast('Thank you for your review!', 'success');
+        
+        // Reset form
+        document.getElementById('selectedRating').value = '0';
+        document.getElementById('selectedDriverRating').value = '0';
+        document.getElementById('reviewComment').value = '';
+        
+        // Reset stars
+        const journeyStars = document.querySelectorAll('#ratingStars i');
+        const driverStars = document.querySelectorAll('#driverRatingStars i');
+        journeyStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
+        driverStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
+        
+        // Reload user reviews
+        loadUserReviews();
+        
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        showToast('Error submitting review. Please try again.', 'error');
+    }
+}
+
+// Load user's previous reviews
+async function loadUserReviews() {
+    try {
+        const { data: reviews, error } = await window.supabase
+            .from('reviews')
+            .select('*')
+            .eq('user_id', currentUser?.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const reviewsList = document.getElementById('userReviewsList');
+        if (reviewsList) {
+            if (reviews && reviews.length > 0) {
+                reviewsList.innerHTML = reviews.map(review => `
+                    <div class="trip-item">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <div class="rating-display">
+                                    ${Array(review.rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
+                                    ${Array(5 - review.rating).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
+                                </div>
+                                <span style="color: var(--gold); font-size: 12px;">${review.rating}/5</span>
+                            </div>
+                            <h4>${review.route || 'Journey'}</h4>
+                            <p style="font-size: 13px; color: var(--muted);">${new Date(review.journey_date || review.created_at).toLocaleDateString()}</p>
+                            ${review.comment ? `<p style="margin-top: 8px; font-style: italic;">"${review.comment}"</p>` : ''}
+                            <p style="font-size: 11px; color: var(--muted); margin-top: 8px;">Reviewed on ${new Date(review.created_at).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                reviewsList.innerHTML = '<div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here after you submit them</p></div></div>';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+    }
+}
+
+// Add reviews to sidebar navigation (in navigateTo function, add to titles)
+// Also add to the page load function to initialize reviews page
 window.toggleSidebar = toggleSidebar;
 window.navigateTo = navigateTo;
 window.searchBuses = searchBuses;

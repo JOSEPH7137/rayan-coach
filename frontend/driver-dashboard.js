@@ -20,7 +20,8 @@ function navigateTo(page) {
     const titles = {
         dashboard: 'Driver Dashboard', trips: 'My Trips', gps: 'GPS Tracking',
         earnings: 'Earnings', messages: 'Messages', incident: 'Incident Report',
-        attendance: 'Attendance', performance: 'Performance', profile: 'Profile'
+        attendance: 'Attendance', performance: 'Performance', profile: 'Profile',
+        reviews: 'My Reviews'
     };
     document.getElementById('pageTitle').textContent = titles[page] || 'Driver Dashboard';
     loadPageContent(page);
@@ -106,6 +107,24 @@ function loadPageContent(page) {
                 <div class="trip-item"><div><h4>Recent Feedback</h4><p>"Excellent driver, very professional and safe!" - ★★★★★</p><p>"Great communication and smooth ride" - ★★★★★</p></div></div>
             </div>
         `,
+        reviews: `
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-star"></i><span>My Reviews</span></div>
+                <div id="driverReviewsList">
+                    <div class="trip-item"><div><h4>Loading reviews...</h4></div></div>
+                </div>
+            </div>
+            <div class="dashboard-card mt-16">
+                <div class="card-title"><i class="fas fa-chart-line"></i><span>Rating Summary</span></div>
+                <div id="ratingSummary">
+                    <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="stat-card-dashboard"><div class="stat-value-dashboard" id="avgRating">0.0</div><div class="stat-label-dashboard">Average Rating</div></div>
+                        <div class="stat-card-dashboard"><div class="stat-value-dashboard" id="totalReviews">0</div><div class="stat-label-dashboard">Total Reviews</div></div>
+                        <div class="stat-card-dashboard"><div class="stat-value-dashboard" id="fiveStarCount">0</div><div class="stat-label-dashboard">5-Star Reviews</div></div>
+                    </div>
+                </div>
+            </div>
+        `,
         profile: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-user"></i><span>Driver Profile</span></div>
                 <div style="text-align: center; margin-bottom: 24px;">
@@ -124,6 +143,13 @@ function loadPageContent(page) {
     };
     
     content.innerHTML = pages[page] || pages.dashboard;
+    
+    // Load reviews when reviews page is opened
+    if (page === 'reviews') {
+        setTimeout(() => {
+            loadDriverReviews();
+        }, 100);
+    }
 }
 
 // Driver specific functions
@@ -200,7 +226,7 @@ async function updateDriverProfile() {
             driver_license: licenseNumber
         };
         
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('profiles')
             .update(updates)
             .eq('id', currentUser.id);
@@ -223,13 +249,72 @@ async function handleDriverLogout() {
     await logoutUser();
 }
 
+// Load driver reviews
+async function loadDriverReviews() {
+    const driver = await getCurrentUser();
+    if (!driver) return;
+    
+    try {
+        const { data: reviews, error } = await window.supabase
+            .from('reviews')
+            .select('*')
+            .eq('driver_id', driver.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // Calculate stats
+        const total = reviews.length;
+        const avg = total > 0 ? (reviews.reduce((sum, r) => sum + (r.overall_rating || r.rating), 0) / total).toFixed(1) : 0;
+        const fiveStar = reviews.filter(r => (r.overall_rating || r.rating) === 5).length;
+        
+        const avgRatingEl = document.getElementById('avgRating');
+        const totalReviewsEl = document.getElementById('totalReviews');
+        const fiveStarCountEl = document.getElementById('fiveStarCount');
+        
+        if (avgRatingEl) avgRatingEl.textContent = avg;
+        if (totalReviewsEl) totalReviewsEl.textContent = total;
+        if (fiveStarCountEl) fiveStarCountEl.textContent = fiveStar;
+        
+        const reviewsList = document.getElementById('driverReviewsList');
+        if (reviewsList) {
+            if (reviews.length > 0) {
+                reviewsList.innerHTML = reviews.map(review => `
+                    <div class="trip-item">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <div class="rating-display">
+                                    ${Array(review.overall_rating || review.rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
+                                    ${Array(5 - (review.overall_rating || review.rating)).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
+                                </div>
+                                <span style="color: var(--gold);">${review.overall_rating || review.rating}/5</span>
+                            </div>
+                            <h4>${review.route || 'Journey'}</h4>
+                            <p style="font-size: 13px; color: var(--muted);">Passenger: ${new Date(review.created_at).toLocaleDateString()}</p>
+                            <div style="display: flex; gap: 16px; margin-top: 8px;">
+                                <span style="font-size: 12px;">🚗 Journey Rating: ${review.journey_rating || review.rating}/5</span>
+                                <span style="font-size: 12px;">👨‍✈️ Your Rating: ${review.driver_rating || review.rating}/5</span>
+                            </div>
+                            ${review.comment ? `<p style="margin-top: 8px; font-style: italic; background: var(--card2); padding: 8px; border-radius: 8px;">"${review.comment}"</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                reviewsList.innerHTML = '<div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here when passengers rate you</p></div></div>';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+    }
+}
+
 // Load user data on page load
 async function loadUserData() {
     const user = await getCurrentUser();
     if (user) {
         currentUser = user;
         
-        const { data: profile } = await supabase
+        const { data: profile } = await window.supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
@@ -259,14 +344,14 @@ async function loadUserData() {
 document.addEventListener('DOMContentLoaded', async function() {
     loadTheme();
     
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await window.supabase.auth.getSession();
     if (!session) {
         window.location.href = 'role-selection.html';
         return;
     }
     
     // Check if user is driver
-    const { data: profile } = await supabase
+    const { data: profile } = await window.supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
@@ -301,3 +386,4 @@ window.clockIn = clockIn;
 window.clockOut = clockOut;
 window.updateDriverProfile = updateDriverProfile;
 window.handleDriverLogout = handleDriverLogout;
+window.loadDriverReviews = loadDriverReviews;
