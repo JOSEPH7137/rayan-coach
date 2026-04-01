@@ -97,7 +97,6 @@
           <input type="tel" placeholder="712 345 678" id="signupPhone">
         </div>
       </div>
-      <!-- Driver License Number - Only visible for driver role -->
       <div class="form-group" id="driverLicenseGroup" style="display: none;">
         <label>Driver License Number</label>
         <div class="input-with-icon">
@@ -105,9 +104,8 @@
           <input type="text" placeholder="PSV-KE-2024-XXXXX" id="driverLicense">
         </div>
       </div>
-      <!-- Profile Picture Upload - Only visible for driver role -->
       <div class="form-group" id="profilePicGroup" style="display: none;">
-        <label>Profile Picture</label>
+        <label>Profile Picture (Optional)</label>
         <div class="input-with-icon">
           <i class="fas fa-camera"></i>
           <input type="file" id="profilePic" accept="image/*">
@@ -230,7 +228,7 @@ function switchTab(tab) {
 }
 
 async function handleLogin() {
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   const rememberMe = document.getElementById('rememberMe').checked;
   
@@ -239,19 +237,27 @@ async function handleLogin() {
     return;
   }
   
+  const loginBtn = document.getElementById('loginBtn');
+  loginBtn.disabled = true;
+  loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+  
   await loginUser(email, password, rememberMe);
+  
+  loginBtn.disabled = false;
+  loginBtn.innerHTML = 'Sign In';
 }
 
 async function handleSignup() {
-  const fname = document.getElementById('signupFname').value;
-  const lname = document.getElementById('signupLname').value;
-  const email = document.getElementById('signupEmail').value;
-  const phone = document.getElementById('signupPhone').value;
+  const fname = document.getElementById('signupFname').value.trim();
+  const lname = document.getElementById('signupLname').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
   const password = document.getElementById('signupPassword').value;
   const confirmPassword = document.getElementById('signupConfirmPassword').value;
-  const driverLicense = document.getElementById('driverLicense')?.value;
+  const driverLicense = document.getElementById('driverLicense')?.value.trim();
   const profilePicFile = document.getElementById('profilePic')?.files[0];
   
+  // Validation
   if (!fname || !lname || !email || !password) {
     showToast('Please fill all required fields', 'error');
     return;
@@ -267,6 +273,13 @@ async function handleSignup() {
     return;
   }
   
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showToast('Please enter a valid email address', 'error');
+    return;
+  }
+  
   // Validate driver license for driver role
   if (currentRole === 'driver' && !driverLicense) {
     showToast('Please enter your driver license number', 'error');
@@ -278,8 +291,8 @@ async function handleSignup() {
   // Show loading state
   const signupBtn = document.getElementById('signupBtn');
   const originalText = signupBtn.textContent;
-  signupBtn.textContent = 'Creating account...';
   signupBtn.disabled = true;
+  signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
   
   // Upload profile picture if exists
   let avatarUrl = null;
@@ -300,10 +313,11 @@ async function handleSignup() {
   
   const result = await registerUser(email, password, fullName, phone, currentRole, driverLicense, avatarUrl);
   
-  signupBtn.textContent = originalText;
   signupBtn.disabled = false;
+  signupBtn.innerHTML = originalText;
   
   if (result.success) {
+    // Clear form
     document.getElementById('signupFname').value = '';
     document.getElementById('signupLname').value = '';
     document.getElementById('signupEmail').value = '';
@@ -313,6 +327,7 @@ async function handleSignup() {
     if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
     document.getElementById('profilePicPreview').innerHTML = '';
     
+    // Switch to login tab
     setTimeout(() => {
       switchTab('login');
       showToast('Account created! Please sign in.', 'success');
@@ -328,7 +343,7 @@ function togglePasswordField(id) {
 }
 
 async function handleForgotPassword() {
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim();
   if (!email) {
     showToast('Please enter your email address', 'error');
     return;

@@ -7,3 +7,5 @@ const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Make available globally
 window.supabase = supabase;
+
+console.log('Supabase initialized');
