@@ -38,10 +38,10 @@
 
     <div id="loginForm" class="auth-form-container">
       <div class="form-group">
-        <label>Email or Phone</label>
+        <label>Email</label>
         <div class="input-with-icon">
           <i class="fas fa-envelope"></i>
-          <input type="text" placeholder="you@example.com or 07XX XXX XXX" id="loginEmail">
+          <input type="email" placeholder="you@example.com" id="loginEmail">
         </div>
       </div>
       <div class="form-group">
@@ -49,24 +49,24 @@
         <div class="input-with-icon">
           <i class="fas fa-lock"></i>
           <input type="password" placeholder="••••••••" id="loginPassword">
-          <button class="toggle-password" onclick="togglePassword('loginPassword')">
+          <button class="toggle-password" type="button" onclick="togglePasswordField('loginPassword')">
             <i class="fas fa-eye"></i>
           </button>
         </div>
       </div>
       <div class="auth-options">
         <label class="checkbox">
-          <input type="checkbox"> Remember me
+          <input type="checkbox" id="rememberMe"> Remember me
         </label>
-        <a href="#" onclick="showToast('Password reset link sent','info')" class="forgot-link">Forgot password?</a>
+        <a href="#" onclick="handleForgotPassword()" class="forgot-link">Forgot password?</a>
       </div>
-      <button class="btn-auth-primary" onclick="doLogin()">Sign In</button>
+      <button class="btn-auth-primary" onclick="handleLogin()" id="loginBtn">Sign In</button>
       <div class="auth-divider">Or sign in with</div>
       <div class="social-auth">
         <button class="btn-social" onclick="showToast('OTP sent to your phone','info')">
           <i class="fas fa-mobile-alt"></i> OTP
         </button>
-        <button class="btn-social" onclick="showToast('Google OAuth integration','info')">
+        <button class="btn-social" onclick="showToast('Google OAuth coming soon','info')">
           <i class="fab fa-google"></i> Google
         </button>
       </div>
@@ -97,11 +97,31 @@
           <input type="tel" placeholder="712 345 678" id="signupPhone">
         </div>
       </div>
+      <!-- Driver License Number - Only visible for driver role -->
+      <div class="form-group" id="driverLicenseGroup" style="display: none;">
+        <label>Driver License Number</label>
+        <div class="input-with-icon">
+          <i class="fas fa-id-card"></i>
+          <input type="text" placeholder="PSV-KE-2024-XXXXX" id="driverLicense">
+        </div>
+      </div>
+      <!-- Profile Picture Upload - Only visible for driver role -->
+      <div class="form-group" id="profilePicGroup" style="display: none;">
+        <label>Profile Picture</label>
+        <div class="input-with-icon">
+          <i class="fas fa-camera"></i>
+          <input type="file" id="profilePic" accept="image/*">
+        </div>
+        <div id="profilePicPreview" style="margin-top: 10px; text-align: center;"></div>
+      </div>
       <div class="form-group">
         <label>Password</label>
         <div class="input-with-icon">
           <i class="fas fa-lock"></i>
-          <input type="password" placeholder="Min 8 characters" id="signupPassword">
+          <input type="password" placeholder="Min 6 characters" id="signupPassword">
+          <button class="toggle-password" type="button" onclick="togglePasswordField('signupPassword')">
+            <i class="fas fa-eye"></i>
+          </button>
         </div>
       </div>
       <div class="form-group">
@@ -111,7 +131,7 @@
           <input type="password" placeholder="Repeat password" id="signupConfirmPassword">
         </div>
       </div>
-      <button class="btn-auth-primary" onclick="doSignup()">Create Account</button>
+      <button class="btn-auth-primary" onclick="handleSignup()" id="signupBtn">Create Account</button>
     </div>
 
     <div id="adminNote" class="admin-note" style="display: none;">
@@ -131,10 +151,11 @@
     </div>
   </div>
 </div>
-<!-- Add before your app.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="app.js"></script>
+<script src="auth.js"></script>
 <script>
 let currentRole = 'user';
 
@@ -145,7 +166,29 @@ document.addEventListener('DOMContentLoaded', function() {
   if (role) {
     currentRole = role;
     updateAuthUI(role);
+    
+    // Show driver-specific fields if role is driver
+    if (role === 'driver') {
+      document.getElementById('driverLicenseGroup').style.display = 'block';
+      document.getElementById('profilePicGroup').style.display = 'block';
+    } else {
+      document.getElementById('driverLicenseGroup').style.display = 'none';
+      document.getElementById('profilePicGroup').style.display = 'none';
+    }
   }
+  
+  // Profile picture preview
+  document.getElementById('profilePic')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const preview = document.getElementById('profilePicPreview');
+        preview.innerHTML = `<img src="${event.target.result}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 });
 
 function updateAuthUI(role) {
@@ -186,31 +229,111 @@ function switchTab(tab) {
   }
 }
 
-function doLogin() {
-  showToast('Login successful! Redirecting...', 'success');
-  setTimeout(() => {
-    if (currentRole === 'user') window.location.href = 'user-dashboard.html';
-    else if (currentRole === 'driver') window.location.href = 'driver-dashboard.html';
-    else if (currentRole === 'admin') window.location.href = 'admin-dashboard.html';
-  }, 1000);
-}
-
-function doSignup() {
-  const fname = document.getElementById('signupFname').value;
-  if (!fname) {
-    showToast('Please fill all fields', 'error');
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+  
+  if (!email || !password) {
+    showToast('Please enter email and password', 'error');
     return;
   }
-  showToast(`Account created! Welcome, ${fname}!`, 'success');
-  setTimeout(() => {
-    if (currentRole === 'user') window.location.href = 'user-dashboard.html';
-    else if (currentRole === 'driver') window.location.href = 'driver-dashboard.html';
-  }, 1500);
+  
+  await loginUser(email, password, rememberMe);
 }
 
-function togglePassword(id) {
+async function handleSignup() {
+  const fname = document.getElementById('signupFname').value;
+  const lname = document.getElementById('signupLname').value;
+  const email = document.getElementById('signupEmail').value;
+  const phone = document.getElementById('signupPhone').value;
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('signupConfirmPassword').value;
+  const driverLicense = document.getElementById('driverLicense')?.value;
+  const profilePicFile = document.getElementById('profilePic')?.files[0];
+  
+  if (!fname || !lname || !email || !password) {
+    showToast('Please fill all required fields', 'error');
+    return;
+  }
+  
+  if (password !== confirmPassword) {
+    showToast('Passwords do not match', 'error');
+    return;
+  }
+  
+  if (password.length < 6) {
+    showToast('Password must be at least 6 characters', 'error');
+    return;
+  }
+  
+  // Validate driver license for driver role
+  if (currentRole === 'driver' && !driverLicense) {
+    showToast('Please enter your driver license number', 'error');
+    return;
+  }
+  
+  const fullName = `${fname} ${lname}`;
+  
+  // Show loading state
+  const signupBtn = document.getElementById('signupBtn');
+  const originalText = signupBtn.textContent;
+  signupBtn.textContent = 'Creating account...';
+  signupBtn.disabled = true;
+  
+  // Upload profile picture if exists
+  let avatarUrl = null;
+  if (profilePicFile && currentRole === 'driver') {
+    const fileExt = profilePicFile.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, profilePicFile);
+    
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      avatarUrl = publicUrl;
+    }
+  }
+  
+  const result = await registerUser(email, password, fullName, phone, currentRole, driverLicense, avatarUrl);
+  
+  signupBtn.textContent = originalText;
+  signupBtn.disabled = false;
+  
+  if (result.success) {
+    document.getElementById('signupFname').value = '';
+    document.getElementById('signupLname').value = '';
+    document.getElementById('signupEmail').value = '';
+    document.getElementById('signupPhone').value = '';
+    document.getElementById('signupPassword').value = '';
+    document.getElementById('signupConfirmPassword').value = '';
+    if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
+    document.getElementById('profilePicPreview').innerHTML = '';
+    
+    setTimeout(() => {
+      switchTab('login');
+      showToast('Account created! Please sign in.', 'success');
+    }, 2000);
+  }
+}
+
+function togglePasswordField(id) {
   const input = document.getElementById(id);
-  input.type = input.type === 'password' ? 'text' : 'password';
+  if (input) {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+}
+
+async function handleForgotPassword() {
+  const email = document.getElementById('loginEmail').value;
+  if (!email) {
+    showToast('Please enter your email address', 'error');
+    return;
+  }
+  await resetPassword(email);
 }
 </script>
 </body>

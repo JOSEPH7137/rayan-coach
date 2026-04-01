@@ -1,0 +1,353 @@
+// User Dashboard Logic
+let currentPage = 'dashboard';
+let currentUser = null;
+let userProfile = null;
+
+// Locations list
+const locations = [
+    'BANGAL', 'GARISSA', 'KANYONYO', 'KITHIMANI', 'KITHYOKA', 
+    'KITHYOKO', 'MATUU', 'MWINGI', 'NAIROBI', 'NGUNI', 'THIKA', 'UKASI'
+];
+
+// Route data cache
+let routeData = {};
+
+function toggleSidebar() {
+    document.getElementById('sidebar')?.classList.toggle('open');
+}
+
+function navigateTo(page) {
+    currentPage = page;
+    
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        }
+    });
+    
+    const titles = {
+        dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
+        parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
+        messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || 'Dashboard';
+    loadPageContent(page);
+}
+
+function loadPageContent(page) {
+    const content = document.getElementById('pageContent');
+    
+    const pages = {
+        dashboard: `
+            <div class="welcome-banner">
+                <div><h2>Welcome back, ${userProfile?.name || 'User'}! 👋</h2><p>You have 2 upcoming trips this week. Safe travels!</p></div>
+                <button class="btn-dashboard btn-primary" onclick="navigateTo('booking')"><i class="fas fa-plus"></i> Book New Trip</button>
+            </div>
+            <div class="stats-grid-dashboard">
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-ticket-alt"></i></div></div><div class="stat-value-dashboard">24</div><div class="stat-label-dashboard">Total Trips</div><div class="stat-trend"><i class="fas fa-arrow-up"></i> 3 this month</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-star"></i></div></div><div class="stat-value-dashboard">1,240</div><div class="stat-label-dashboard">Reward Points</div><div class="stat-trend" style="color: var(--gold);"><i class="fas fa-plus"></i> +80 earned</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-money-bill-wave"></i></div></div><div class="stat-value-dashboard">KES 720</div><div class="stat-label-dashboard">Money Saved</div><div class="stat-trend" style="color: var(--green);">via rewards</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-box"></i></div></div><div class="stat-value-dashboard">6</div><div class="stat-label-dashboard">Parcels Sent</div><div class="stat-trend" style="color: var(--purple);">2 in transit</div></div>
+            </div>
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-clock"></i><span>Recent Trips</span></div>
+                <div class="trip-item"><div class="trip-info"><h4>Nairobi → Mombasa</h4><p>Today, 07:00 AM • Bus RC-001</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+                <div class="trip-item"><div class="trip-info"><h4>Mombasa → Nairobi</h4><p>Tomorrow, 14:00 PM • Bus RC-002</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+                <div class="trip-item"><div class="trip-info"><h4>Nairobi → Kisumu</h4><p>Mar 25, 2025 • Bus RC-003</p></div><span class="trip-status status-completed">Completed</span></div>
+            </div>
+        `,
+        booking: `
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-ticket-alt"></i><span>Book a Ticket</span></div>
+                <div class="form-group"><label>From (Origin)</label><select class="input" id="fromLocation"><option value="">Select Origin</option></select></div>
+                <div class="form-group"><label>To (Destination)</label><select class="input" id="toLocation"><option value="">Select Destination</option></select></div>
+                <div class="form-group"><label>Travel Date</label><input type="date" class="input" id="travelDate"></div>
+                <div class="form-group"><label>Passengers</label><input type="number" class="input" value="1" min="1" max="10" id="passengers"></div>
+                <div id="routeDetails" style="display: none;"></div>
+                <button class="btn-dashboard btn-primary" onclick="searchBuses()">Search Buses</button>
+            </div>
+            <div class="dashboard-card mt-16" id="availableBuses" style="display: none;">
+                <div class="card-title"><i class="fas fa-bus"></i><span>Available Buses</span></div>
+                <div id="busesList"></div>
+            </div>
+        `,
+        tracking: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-map-marker-alt"></i><span>Live Bus Tracking</span></div>
+                <div class="map-placeholder" style="background: var(--card2); border-radius: 12px; padding: 40px; text-align: center;"><i class="fas fa-map" style="font-size: 48px; color: var(--gold); margin-bottom: 16px; display: block;"></i><p>Interactive map will appear here</p></div>
+                <div class="form-group"><label>Enter Trip ID</label><input type="text" class="input" placeholder="e.g., RC-001" id="trackingInput"></div>
+                <button class="btn-dashboard btn-primary" onclick="trackBus()">Track Now</button>
+            </div>
+        `,
+        parcel: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-box"></i><span>Send a Parcel</span></div>
+                <div class="form-group"><label>Pickup Location</label><input type="text" class="input" id="pickupLocation" placeholder="Enter pickup address"></div>
+                <div class="form-group"><label>Delivery Location</label><input type="text" class="input" id="deliveryLocation" placeholder="Enter delivery address"></div>
+                <div class="form-group"><label>Receiver Name</label><input type="text" class="input" id="receiverName" placeholder="Receiver's full name"></div>
+                <div class="form-group"><label>Receiver Phone</label><input type="tel" class="input" id="receiverPhone" placeholder="Receiver's phone number"></div>
+                <div class="form-group"><label>Weight (kg)</label><input type="number" class="input" id="parcelWeight" placeholder="e.g., 2.5"></div>
+                <div class="form-group"><label>Description</label><textarea class="input" rows="3" id="parcelDescription" placeholder="Describe the item"></textarea></div>
+                <button class="btn-dashboard btn-primary" onclick="sendParcel()">Send Parcel</button>
+            </div>
+        `,
+        tickets: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-ticket-alt"></i><span>My Tickets</span></div>
+                <div id="userTicketsList"><div class="trip-item"><div><h4>No tickets found</h4></div></div></div>
+            </div>
+        `,
+        rewards: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-gift"></i><span>My Rewards</span></div>
+                <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card-dashboard"><div class="stat-value-dashboard">1,240</div><div class="stat-label-dashboard">Total Points</div></div>
+                    <div class="stat-card-dashboard"><div class="stat-value-dashboard">3</div><div class="stat-label-dashboard">Available Rewards</div></div>
+                </div>
+                <div class="trip-item"><div><h4>Free WiFi Voucher</h4><p>100 points • Valid for 1 trip</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward()">Redeem</button></div>
+                <div class="trip-item"><div><h4>10% Discount</h4><p>500 points • On next booking</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward()">Redeem</button></div>
+                <div class="trip-item"><div><h4>Free Refreshment</h4><p>200 points • On-board snack</p></div><button class="btn-dashboard btn-primary" onclick="redeemReward()">Redeem</button></div>
+            </div>
+        `,
+        messages: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-comment"></i><span>Support Chat</span></div>
+                <div class="chat-messages" id="chatMessages" style="height: 300px; overflow-y: auto; background: var(--card2); border-radius: 12px; padding: 16px;">
+                    <div class="chat-message"><strong>Support:</strong> Hello! How can we help you today?</div>
+                </div>
+                <div class="input-group" style="display: flex; gap: 12px; margin-top: 16px;">
+                    <input type="text" class="input" placeholder="Type your message..." id="chatInput">
+                    <button class="btn-dashboard btn-primary" onclick="sendChatMessage()">Send</button>
+                </div>
+            </div>
+        `,
+        profile: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-user"></i><span>My Profile</span></div>
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;">${userProfile?.name?.charAt(0) || 'U'}</div>
+                    <h3 id="profileName">${userProfile?.name || 'Loading...'}</h3>
+                    <p style="color: var(--muted);" id="profileEmail">${userProfile?.email || ''}</p>
+                </div>
+                <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || ''}"></div>
+                <button class="btn-dashboard btn-primary" onclick="updateProfile()">Save Changes</button>
+            </div>
+        `,
+        safety: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
+                <div style="text-align: center; padding: 20px;">
+                    <button class="btn-dashboard btn-danger" style="background: #F04545; color: white; padding: 16px 32px; font-size: 18px;" onclick="triggerSOS()"><i class="fas fa-exclamation-triangle"></i> SOS EMERGENCY</button>
+                    <p style="margin-top: 20px; color: var(--muted);">Press the SOS button in case of emergency. Your location will be shared with our response team.</p>
+                </div>
+            </div>
+        `
+    };
+    
+    content.innerHTML = pages[page] || pages.dashboard;
+    if (page === 'booking') initBookingPage();
+}
+
+async function initBookingPage() {
+    const fromSelect = document.getElementById('fromLocation');
+    const toSelect = document.getElementById('toLocation');
+    
+    if (fromSelect && toSelect) {
+        fromSelect.innerHTML = '<option value="">Select Origin</option>';
+        toSelect.innerHTML = '<option value="">Select Destination</option>';
+        
+        locations.forEach(location => {
+            fromSelect.innerHTML += `<option value="${location}">${location}</option>`;
+            toSelect.innerHTML += `<option value="${location}">${location}</option>`;
+        });
+        
+        fromSelect.addEventListener('change', updateToOptions);
+        toSelect.addEventListener('change', calculateRouteDetails);
+        document.getElementById('passengers')?.addEventListener('input', calculateRouteDetails);
+    }
+    await loadRouteData();
+}
+
+async function loadRouteData() {
+    try {
+        const { data, error } = await supabase.from('routes').select('*');
+        if (error) throw error;
+        routeData = {};
+        data.forEach(route => { routeData[`${route.origin}|${route.destination}`] = route; });
+    } catch (error) { console.error('Error loading routes:', error); }
+}
+
+function updateToOptions() {
+    const fromSelect = document.getElementById('fromLocation');
+    const toSelect = document.getElementById('toLocation');
+    const selectedFrom = fromSelect.value;
+    
+    toSelect.innerHTML = '<option value="">Select Destination</option>';
+    if (!selectedFrom) return;
+    
+    locations.forEach(location => {
+        if (location !== selectedFrom) {
+            toSelect.innerHTML += `<option value="${location}">${location}</option>`;
+        }
+    });
+    clearRouteDetails();
+}
+
+function calculateRouteDetails() {
+    const from = document.getElementById('fromLocation')?.value;
+    const to = document.getElementById('toLocation')?.value;
+    const passengers = parseInt(document.getElementById('passengers')?.value) || 1;
+    
+    if (!from || !to) { clearRouteDetails(); return; }
+    
+    const route = routeData[`${from}|${to}`];
+    if (route) {
+        const totalFare = route.base_fare * passengers;
+        const hours = Math.floor(route.duration_minutes / 60);
+        const minutes = route.duration_minutes % 60;
+        const routeDetails = document.getElementById('routeDetails');
+        if (routeDetails) {
+            routeDetails.style.display = 'block';
+            routeDetails.innerHTML = `
+                <div style="background: var(--gold-bg); border-radius: 12px; padding: 16px; margin-top: 16px;">
+                    <h4 style="color: var(--gold);">Route Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div><strong>Distance:</strong> ${route.distance_km} km</div>
+                        <div><strong>Duration:</strong> ${hours}h ${minutes}m</div>
+                        <div><strong>Base Fare:</strong> KES ${route.base_fare.toLocaleString()}</div>
+                        <div><strong>Total (${passengers} passenger${passengers > 1 ? 's' : ''}):</strong> KES ${totalFare.toLocaleString()}</div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                        <small>Speed: 80 km/h | Estimated travel time</small>
+                    </div>
+                </div>
+            `;
+        }
+    } else { clearRouteDetails(); }
+}
+
+function clearRouteDetails() {
+    const rd = document.getElementById('routeDetails');
+    if (rd) { rd.style.display = 'none'; rd.innerHTML = ''; }
+}
+
+async function searchBuses() {
+    const from = document.getElementById('fromLocation')?.value;
+    const to = document.getElementById('toLocation')?.value;
+    if (!from || !to) { showToast('Please select origin and destination', 'error'); return; }
+    if (from === to) { showToast('Origin and destination cannot be the same', 'error'); return; }
+    
+    showToast('Searching for available buses...', 'info');
+    const route = routeData[`${from}|${to}`];
+    if (route) {
+        document.getElementById('availableBuses').style.display = 'block';
+        const hours = Math.floor(route.duration_minutes / 60);
+        const minutes = route.duration_minutes % 60;
+        document.getElementById('busesList').innerHTML = `
+            <div class="trip-item"><div><h4>7:00 AM - Express</h4><p>KES ${route.base_fare} • ${hours}h ${minutes}m • WiFi, A/C, Charging</p><p>Est. Arrival: ${calculateArrivalTime('07:00', route.duration_minutes)}</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('7:00 AM', ${route.base_fare})">Select</button></div>
+            <div class="trip-item"><div><h4>10:30 AM - Luxury</h4><p>KES ${Math.round(route.base_fare * 1.3)} • ${hours}h ${minutes}m • WiFi, A/C, TV, Refreshments</p><p>Est. Arrival: ${calculateArrivalTime('10:30', route.duration_minutes)}</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('10:30 AM', ${Math.round(route.base_fare * 1.3)})">Select</button></div>
+            <div class="trip-item"><div><h4>2:00 PM - Economy</h4><p>KES ${Math.round(route.base_fare * 0.8)} • ${hours}h ${minutes}m • A/C, Charging</p><p>Est. Arrival: ${calculateArrivalTime('14:00', route.duration_minutes)}</p></div><button class="btn-dashboard btn-primary" onclick="selectBus('2:00 PM', ${Math.round(route.base_fare * 0.8)})">Select</button></div>
+        `;
+    }
+}
+
+function calculateArrivalTime(departureTime, durationMinutes) {
+    const [hours, minutes] = departureTime.split(':');
+    let totalMinutes = parseInt(hours) * 60 + parseInt(minutes) + durationMinutes;
+    const arrivalHours = Math.floor(totalMinutes / 60) % 24;
+    const arrivalMinutes = totalMinutes % 60;
+    const ampm = arrivalHours >= 12 ? 'PM' : 'AM';
+    const displayHours = arrivalHours % 12 || 12;
+    return `${displayHours}:${arrivalMinutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+function selectBus(time, fare) {
+    const passengers = parseInt(document.getElementById('passengers')?.value) || 1;
+    const from = document.getElementById('fromLocation')?.value;
+    const to = document.getElementById('toLocation')?.value;
+    showToast(`Booking confirmed for ${time}! ${from} → ${to} | Total: KES ${fare * passengers}`, 'success');
+}
+
+function trackBus() {
+    const input = document.getElementById('trackingInput')?.value;
+    showToast(input ? `Tracking bus ${input}...` : 'Please enter a Trip ID', input ? 'info' : 'error');
+}
+
+async function sendParcel() {
+    const pickup = document.getElementById('pickupLocation')?.value;
+    const delivery = document.getElementById('deliveryLocation')?.value;
+    const receiver = document.getElementById('receiverName')?.value;
+    if (!pickup || !delivery || !receiver) { showToast('Please fill all fields', 'error'); return; }
+    showToast('Parcel booking initiated! Tracking number will be sent.', 'success');
+}
+
+function redeemReward() { showToast('Reward redeemed! Check your email for details.', 'success'); }
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    if (input?.value.trim()) {
+        const container = document.getElementById('chatMessages');
+        const msg = document.createElement('div');
+        msg.className = 'chat-message';
+        msg.style.marginBottom = '12px';
+        msg.innerHTML = `<strong>You:</strong> ${input.value}`;
+        container.appendChild(msg);
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+        setTimeout(() => {
+            const response = document.createElement('div');
+            response.className = 'chat-message';
+            response.style.marginBottom = '12px';
+            response.innerHTML = `<strong>Support:</strong> Thank you for your message. We'll get back to you shortly.`;
+            container.appendChild(response);
+            container.scrollTop = container.scrollHeight;
+        }, 1000);
+    }
+}
+
+async function updateProfile() {
+    const fullName = document.getElementById('fullName')?.value;
+    const phone = document.getElementById('phone')?.value;
+    if (currentUser && fullName) {
+        const { error } = await supabase.from('profiles').update({ name: fullName, phone }).eq('id', currentUser.id);
+        if (error) showToast('Error updating profile', 'error');
+        else { 
+            showToast('Profile updated successfully!', 'success'); 
+            userProfile.name = fullName; 
+            userProfile.phone = phone;
+            document.getElementById('userName').textContent = fullName;
+            document.getElementById('profileName').textContent = fullName;
+        }
+    }
+}
+
+function triggerSOS() { showToast('SOS Alert Sent! Emergency services notified. Your location has been shared.', 'error'); }
+async function handleLogout() { await logoutUser(); }
+
+async function loadUserData() {
+    const user = await getCurrentUser();
+    if (user) {
+        currentUser = user;
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        userProfile = profile;
+        document.getElementById('userName').textContent = profile?.name || user.email;
+        document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    loadTheme();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = 'role-selection.html'; return; }
+    await loadUserData();
+    loadPageContent('dashboard');
+    document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
+        item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.getAttribute('data-page')); });
+    });
+});
+
+window.toggleSidebar = toggleSidebar;
+window.navigateTo = navigateTo;
+window.searchBuses = searchBuses;
+window.selectBus = selectBus;
+window.trackBus = trackBus;
+window.sendParcel = sendParcel;
+window.redeemReward = redeemReward;
+window.sendChatMessage = sendChatMessage;
+window.updateProfile = updateProfile;
+window.triggerSOS = triggerSOS;
+window.handleLogout = handleLogout;

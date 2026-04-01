@@ -1,0 +1,303 @@
+// Driver Dashboard Logic
+let currentPage = 'dashboard';
+let currentUser = null;
+let userProfile = null;
+
+function toggleSidebar() {
+    document.getElementById('sidebar')?.classList.toggle('open');
+}
+
+function navigateTo(page) {
+    currentPage = page;
+    
+    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        }
+    });
+    
+    const titles = {
+        dashboard: 'Driver Dashboard', trips: 'My Trips', gps: 'GPS Tracking',
+        earnings: 'Earnings', messages: 'Messages', incident: 'Incident Report',
+        attendance: 'Attendance', performance: 'Performance', profile: 'Profile'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || 'Driver Dashboard';
+    loadPageContent(page);
+}
+
+function loadPageContent(page) {
+    const content = document.getElementById('pageContent');
+    
+    const pages = {
+        dashboard: `
+            <div class="welcome-banner">
+                <div>
+                    <h2>Good morning, ${userProfile?.name || 'Driver'}! 🚗</h2>
+                    <p>Your next trip: Nairobi → Mombasa at 07:00 AM</p>
+                </div>
+                <button class="btn-dashboard btn-primary" onclick="startTrip()"><i class="fas fa-play"></i> Start Trip</button>
+            </div>
+            <div class="stats-grid-dashboard">
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-money-bill-wave"></i></div></div><div class="stat-value-dashboard">KES 4,200</div><div class="stat-label-dashboard">Today's Earnings</div><div class="stat-trend" style="color: var(--green);"><i class="fas fa-arrow-up"></i> +12%</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-chart-line"></i></div></div><div class="stat-value-dashboard">KES 48,700</div><div class="stat-label-dashboard">This Month</div><div class="stat-trend" style="color: var(--gold);">Target: KES 60K</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-star"></i></div></div><div class="stat-value-dashboard">4.9 ★</div><div class="stat-label-dashboard">Driver Rating</div><div class="stat-trend" style="color: var(--green);">Excellent</div></div>
+                <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-clock"></i></div></div><div class="stat-value-dashboard">94%</div><div class="stat-label-dashboard">On-time Rate</div><div class="stat-trend" style="color: var(--green);">Above average</div></div>
+            </div>
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-calendar-day"></i><span>Today's Trips</span></div>
+                <div class="trip-item"><div class="trip-info"><h4>Nairobi → Mombasa</h4><p>Departure: 07:00 AM • Arrival: 12:30 PM • Bus: RC-001 • Seats: 45/52</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+                <div class="trip-item"><div class="trip-info"><h4>Mombasa → Nairobi</h4><p>Departure: 14:00 PM • Arrival: 19:30 PM • Bus: RC-001 • Seats: 38/52</p></div><span class="trip-status status-upcoming">Upcoming</span></div>
+            </div>
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-bolt"></i><span>Quick Actions</span></div>
+                <div class="action-buttons"><button class="btn-dashboard btn-primary" onclick="startTrip()"><i class="fas fa-play"></i> Start Trip</button><button class="btn-dashboard btn-outline" onclick="navigateTo('incident')"><i class="fas fa-exclamation-triangle"></i> Report Issue</button><button class="btn-dashboard btn-outline" onclick="navigateTo('earnings')"><i class="fas fa-chart-line"></i> View Earnings</button></div>
+            </div>
+        `,
+        trips: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-bus"></i><span>My Trips</span></div>
+                <div class="trip-item"><div><h4>Nairobi → Mombasa</h4><p>Date: Today, 07:00 AM • Bus: RC-001 • Duration: 5h 30m</p><p>Passengers: 45/52 • Status: Scheduled</p></div><button class="btn-dashboard btn-primary" onclick="viewTripDetails('RC-001')">View Details</button></div>
+                <div class="trip-item"><div><h4>Mombasa → Nairobi</h4><p>Date: Today, 14:00 PM • Bus: RC-001 • Duration: 5h 30m</p><p>Passengers: 38/52 • Status: Scheduled</p></div><button class="btn-dashboard btn-primary" onclick="viewTripDetails('RC-002')">View Details</button></div>
+                <div class="trip-item"><div><h4>Nairobi → Kisumu</h4><p>Date: Mar 25, 2025 • Bus: RC-005 • Duration: 6h</p><p>Passengers: 42/52 • Status: Upcoming</p></div><button class="btn-dashboard btn-primary" onclick="viewTripDetails('RC-005')">View Details</button></div>
+            </div>
+        `,
+        gps: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-map-marked-alt"></i><span>GPS Tracking</span></div>
+                <div class="map-placeholder" style="background: var(--card2); border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px;"><i class="fas fa-map" style="font-size: 48px; color: var(--gold); margin-bottom: 16px; display: block;"></i><p>Your current location: Thika Road, Nairobi</p><p style="font-size: 12px;">Last updated: 2 mins ago</p></div>
+                <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr;"><div class="stat-card-dashboard"><div class="stat-value-dashboard">65 km/h</div><div class="stat-label-dashboard">Current Speed</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">320 km</div><div class="stat-label-dashboard">Distance Today</div></div></div>
+                <button class="btn-dashboard btn-primary" onclick="shareLocation()"><i class="fas fa-share-alt"></i> Share Location</button>
+            </div>
+        `,
+        earnings: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-money-bill-wave"></i><span>Earnings Overview</span></div>
+                <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr 1fr;"><div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 4,200</div><div class="stat-label-dashboard">Today</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 24,500</div><div class="stat-label-dashboard">This Week</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 48,700</div><div class="stat-label-dashboard">This Month</div></div></div>
+                <div class="trip-item"><div><h4>Nairobi → Mombasa</h4><p>Today • 45 passengers • Commission: KES 2,500</p></div><span class="trip-status status-completed">Paid</span></div>
+                <div class="trip-item"><div><h4>Mombasa → Nairobi</h4><p>Today • 38 passengers • Commission: KES 2,100</p></div><span class="trip-status status-upcoming">Pending</span></div>
+                <div class="trip-item"><div><h4>Nairobi → Kisumu</h4><p>Mar 25 • 42 passengers • Commission: KES 2,300</p></div><span class="trip-status status-upcoming">Scheduled</span></div>
+            </div>
+        `,
+        messages: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-comment"></i><span>Messages & Communications</span></div>
+                <div class="chat-messages" id="chatMessages" style="height: 350px; overflow-y: auto; background: var(--card2); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div class="chat-message" style="margin-bottom: 12px;"><strong>Dispatch:</strong> Trip RC-001 is ready for departure at 07:00 AM</div>
+                    <div class="chat-message" style="margin-bottom: 12px;"><strong>You:</strong> Roger that, preparing for departure</div>
+                    <div class="chat-message" style="margin-bottom: 12px;"><strong>Dispatch:</strong> Weather alert: Light rain expected on Mombasa route</div>
+                </div>
+                <div class="input-group" style="display: flex; gap: 12px;"><input type="text" class="input" placeholder="Type your message..." id="chatInput"><button class="btn-dashboard btn-primary" onclick="sendDriverMessage()">Send</button></div>
+            </div>
+        `,
+        incident: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-exclamation-triangle"></i><span>Report Incident</span></div>
+                <div class="form-group"><label>Incident Type</label><select class="input" id="incidentType"><option>Mechanical Issue</option><option>Accident</option><option>Passenger Issue</option><option>Road Hazard</option><option>Other</option></select></div>
+                <div class="form-group"><label>Location</label><input type="text" class="input" id="incidentLocation" placeholder="Enter location"></div>
+                <div class="form-group"><label>Description</label><textarea class="input" rows="4" id="incidentDescription" placeholder="Describe the incident in detail..."></textarea></div>
+                <div class="form-group"><label>Upload Photos (optional)</label><input type="file" class="input" id="incidentPhotos"></div>
+                <button class="btn-dashboard btn-danger" style="background: #F04545; color: white;" onclick="submitIncidentReport()">Submit Report</button>
+            </div>
+        `,
+        attendance: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-calendar-check"></i><span>Attendance</span></div>
+                <div class="stats-grid-dashboard" style="grid-template-columns: 1fr 1fr 1fr;"><div class="stat-card-dashboard"><div class="stat-value-dashboard">22</div><div class="stat-label-dashboard">Days Worked</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">98%</div><div class="stat-label-dashboard">Attendance Rate</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">2</div><div class="stat-label-dashboard">Days Off</div></div></div>
+                <div class="action-buttons"><button class="btn-dashboard btn-primary" onclick="clockIn()"><i class="fas fa-clock"></i> Clock In</button><button class="btn-dashboard btn-outline" onclick="clockOut()"><i class="fas fa-clock"></i> Clock Out</button></div>
+                <div class="trip-item mt-16"><div><h4>This Week's Attendance</h4><p>Mon: Present | Tue: Present | Wed: Present | Thu: Present | Fri: Present</p></div></div>
+            </div>
+        `,
+        performance: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-chart-line"></i><span>Performance Metrics</span></div>
+                <div class="stats-grid-dashboard"><div class="stat-card-dashboard"><div class="stat-value-dashboard">4.9 ★</div><div class="stat-label-dashboard">Rating (125 reviews)</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">94%</div><div class="stat-label-dashboard">On-time Rate</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">98%</div><div class="stat-label-dashboard">Customer Satisfaction</div></div><div class="stat-card-dashboard"><div class="stat-value-dashboard">124</div><div class="stat-label-dashboard">Trips Completed</div></div></div>
+                <div class="trip-item"><div><h4>Recent Feedback</h4><p>"Excellent driver, very professional and safe!" - ★★★★★</p><p>"Great communication and smooth ride" - ★★★★★</p></div></div>
+            </div>
+        `,
+        profile: `
+            <div class="dashboard-card"><div class="card-title"><i class="fas fa-user"></i><span>Driver Profile</span></div>
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;" id="profileAvatar">${userProfile?.name?.charAt(0) || 'D'}</div>
+                    <h3 id="profileName">${userProfile?.name || 'Loading...'}</h3>
+                    <p style="color: var(--muted);" id="profileEmail">${userProfile?.email || ''}</p>
+                    <p style="color: var(--gold); font-size: 12px; margin-top: 5px;" id="driverLicenseDisplay">${userProfile?.driver_license ? `License: ${userProfile.driver_license}` : ''}</p>
+                </div>
+                <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
+                <div class="form-group"><label>Email</label><input type="email" class="input" id="email" value="${userProfile?.email || ''}" disabled></div>
+                <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || '+254 722 000 001'}"></div>
+                <div class="form-group"><label>PSV License Number</label><input type="text" class="input" id="licenseNumber" value="${userProfile?.driver_license || 'PSV-KE-2024-00821'}"></div>
+                <button class="btn-dashboard btn-primary" onclick="updateDriverProfile()">Save Changes</button>
+            </div>
+        `
+    };
+    
+    content.innerHTML = pages[page] || pages.dashboard;
+}
+
+// Driver specific functions
+function startTrip() {
+    showToast('Trip started! Safe driving!', 'success');
+}
+
+function viewTripDetails(tripId) {
+    showToast(`Viewing details for trip ${tripId}`, 'info');
+}
+
+function shareLocation() {
+    showToast('Location shared with dispatch', 'success');
+}
+
+function sendDriverMessage() {
+    const input = document.getElementById('chatInput');
+    if(input && input.value.trim()) {
+        const chatContainer = document.getElementById('chatMessages');
+        if(chatContainer) {
+            const newMsg = document.createElement('div');
+            newMsg.className = 'chat-message';
+            newMsg.style.marginBottom = '12px';
+            newMsg.innerHTML = `<strong>You:</strong> ${input.value}`;
+            chatContainer.appendChild(newMsg);
+            input.value = '';
+            setTimeout(() => {
+                const response = document.createElement('div');
+                response.className = 'chat-message';
+                response.style.marginBottom = '12px';
+                response.innerHTML = `<strong>Dispatch:</strong> Message received. Thank you.`;
+                chatContainer.appendChild(response);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 800);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    }
+}
+
+function submitIncidentReport() {
+    const type = document.getElementById('incidentType')?.value;
+    const location = document.getElementById('incidentLocation')?.value;
+    const description = document.getElementById('incidentDescription')?.value;
+    
+    if (!location || !description) {
+        showToast('Please fill in location and description', 'error');
+        return;
+    }
+    
+    showToast('Incident reported! Emergency team notified.', 'error');
+    document.getElementById('incidentLocation').value = '';
+    document.getElementById('incidentDescription').value = '';
+}
+
+function clockIn() {
+    const now = new Date();
+    showToast(`Clocked in at ${now.toLocaleTimeString()}`, 'success');
+}
+
+function clockOut() {
+    const now = new Date();
+    showToast(`Clocked out at ${now.toLocaleTimeString()}`, 'info');
+}
+
+async function updateDriverProfile() {
+    const fullName = document.getElementById('fullName')?.value;
+    const phone = document.getElementById('phone')?.value;
+    const licenseNumber = document.getElementById('licenseNumber')?.value;
+    
+    if (currentUser && fullName) {
+        const updates = { 
+            name: fullName, 
+            phone: phone,
+            driver_license: licenseNumber
+        };
+        
+        const { error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', currentUser.id);
+        
+        if (error) {
+            showToast('Error updating profile', 'error');
+        } else {
+            showToast('Profile updated successfully!', 'success');
+            userProfile.name = fullName;
+            userProfile.phone = phone;
+            userProfile.driver_license = licenseNumber;
+            document.getElementById('userName').textContent = fullName;
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('driverLicenseDisplay').textContent = `License: ${licenseNumber}`;
+        }
+    }
+}
+
+async function handleDriverLogout() {
+    await logoutUser();
+}
+
+// Load user data on page load
+async function loadUserData() {
+    const user = await getCurrentUser();
+    if (user) {
+        currentUser = user;
+        
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        
+        userProfile = profile;
+        
+        document.getElementById('userName').textContent = profile?.name || user.email;
+        document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
+        
+        // Update profile page elements if they exist
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const driverLicenseDisplay = document.getElementById('driverLicenseDisplay');
+        
+        if (profileAvatar) profileAvatar.textContent = profile?.name?.charAt(0) || 'D';
+        if (profileName) profileName.textContent = profile?.name || 'Loading...';
+        if (profileEmail) profileEmail.textContent = profile?.email || '';
+        if (driverLicenseDisplay && profile?.driver_license) {
+            driverLicenseDisplay.textContent = `License: ${profile.driver_license}`;
+        }
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+    loadTheme();
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Check if user is driver
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+    
+    if (profile?.role !== 'driver') {
+        showToast('Unauthorized access. Driver privileges required.', 'error');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    await loadUserData();
+    loadPageContent('dashboard');
+    
+    document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
+        item.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            navigateTo(item.getAttribute('data-page')); 
+        });
+    });
+});
+
+// Make functions global
+window.toggleSidebar = toggleSidebar;
+window.navigateTo = navigateTo;
+window.startTrip = startTrip;
+window.viewTripDetails = viewTripDetails;
+window.shareLocation = shareLocation;
+window.sendDriverMessage = sendDriverMessage;
+window.submitIncidentReport = submitIncidentReport;
+window.clockIn = clockIn;
+window.clockOut = clockOut;
+window.updateDriverProfile = updateDriverProfile;
+window.handleDriverLogout = handleDriverLogout;

@@ -2612,3 +2612,38 @@ body.dark-mode .sidebar-nav-item:hover {
     font-size: 9px;
   }
 }
+/* Route Details Styling */
+#routeDetails div {
+    transition: all 0.3s ease;
+}
+
+#availableBuses {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Route Details Styling */
+#routeDetails div {
+    transition: all 0.3s ease;
+}
+
+#availableBuses {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Make sure the dashboard cards have proper spacing */
+.mt-16 {
+    margin-top: 16px;
+}
+
+.mt-24 {
+    margin-top: 24px;
+}
