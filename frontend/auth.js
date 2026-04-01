@@ -5,7 +5,12 @@ async function loginUser(email, password) {
     try {
         console.log('Attempting login for:', email);
         
-        const { data, error } = await supabase.auth.signInWithPassword({
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false, error: 'Supabase not initialized' };
+        }
+        
+        const { data, error } = await window.supabase.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -19,7 +24,7 @@ async function loginUser(email, password) {
         console.log('Login successful!');
         
         // Get user profile
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await window.supabase
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
@@ -31,8 +36,15 @@ async function loginUser(email, password) {
         
         showToast(`Welcome back, ${profile?.name || email}!`, 'success');
         
+        // Store session if remember me is checked
+        const rememberMe = document.getElementById('rememberMe')?.checked;
+        if (rememberMe) {
+            localStorage.setItem('supabase_session', JSON.stringify(data.session));
+        }
+        
         // Redirect based on role
         const role = profile?.role || 'user';
+        console.log('Redirecting to role:', role);
         
         if (role === 'admin') {
             window.location.href = 'admin-dashboard.html';
@@ -55,7 +67,12 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
     try {
         console.log('Attempting signup for:', email);
         
-        const { data, error } = await supabase.auth.signUp({
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false, error: 'Supabase not initialized' };
+        }
+        
+        const { data, error } = await window.supabase.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -89,7 +106,7 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
 // Logout user
 async function logoutUser() {
     try {
-        await supabase.auth.signOut();
+        await window.supabase.auth.signOut();
         localStorage.removeItem('supabase_session');
         window.location.href = 'index.html';
         showToast('Logged out successfully', 'success');
@@ -101,7 +118,7 @@ async function logoutUser() {
 // Get current user
 async function getCurrentUser() {
     try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await window.supabase.auth.getUser();
         if (error) return null;
         return user;
     } catch (error) {
@@ -112,7 +129,7 @@ async function getCurrentUser() {
 // Reset password
 async function resetPassword(email) {
     try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + '/reset-password.html',
         });
         
