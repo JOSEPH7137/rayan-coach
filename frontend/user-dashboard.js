@@ -502,17 +502,35 @@ async function updateProfile() {
     let avatarUrl = userProfile?.avatar_url;
     
     if (profilePicFile) {
+        // Show upload progress
+        showToast('Uploading profile picture...', 'info');
+        
         const fileExt = profilePicFile.name.split('.').pop();
         const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await window.supabase.storage
-            .from('avatars')
-            .upload(fileName, profilePicFile);
         
-        if (!uploadError) {
-            const { data: { publicUrl } } = window.supabase.storage
+        try {
+            // Upload to avatars bucket
+            const { data: uploadData, error: uploadError } = await window.supabase.storage
                 .from('avatars')
-                .getPublicUrl(fileName);
-            avatarUrl = publicUrl;
+                .upload(fileName, profilePicFile, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
+            
+            if (uploadError) {
+                console.error('Upload error:', uploadError);
+                showToast('Error uploading picture: ' + uploadError.message, 'error');
+            } else {
+                // Get public URL
+                const { data: { publicUrl } } = window.supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(fileName);
+                avatarUrl = publicUrl;
+                showToast('Profile picture uploaded!', 'success');
+            }
+        } catch (uploadErr) {
+            console.error('Upload exception:', uploadErr);
+            showToast('Error uploading picture. Please try again.', 'error');
         }
     }
     
@@ -521,8 +539,10 @@ async function updateProfile() {
         if (avatarUrl) updates.avatar_url = avatarUrl;
         
         const { error } = await window.supabase.from('profiles').update(updates).eq('id', currentUser.id);
-        if (error) showToast('Error updating profile', 'error');
-        else { 
+        if (error) {
+            showToast('Error updating profile', 'error');
+            console.error('Profile update error:', error);
+        } else { 
             showToast('Profile updated successfully!', 'success'); 
             userProfile.name = fullName; 
             userProfile.phone = phone;
@@ -537,6 +557,8 @@ async function updateProfile() {
                 profileImg.src = avatarUrl;
                 profileImg.style.display = 'block';
                 if (fallback) fallback.style.display = 'none';
+            } else if (profileImg && profileImg.src) {
+                // Keep existing image
             }
         }
     }
@@ -554,11 +576,22 @@ async function loadUserData() {
         document.getElementById('userName').textContent = profile?.name || user.email;
         document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
         
+        // Update profile picture in profile page
+        const profileImg = document.getElementById('profilePictureImg');
+        const fallback = document.getElementById('profileAvatarFallback');
+        if (profile?.avatar_url && profileImg) {
+            profileImg.src = profile.avatar_url;
+            profileImg.style.display = 'block';
+            if (fallback) fallback.style.display = 'none';
+        } else if (fallback) {
+            fallback.style.display = 'flex';
+            fallback.textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
+        }
+        
         // Load user parcels
         loadUserParcels();
     }
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
     const { data: { session } } = await window.supabase.auth.getSession();
