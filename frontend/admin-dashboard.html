@@ -33,9 +33,10 @@
       <a href="#" class="sidebar-nav-item" data-page="analytics"><i class="fas fa-chart-pie"></i><span>Analytics</span></a>
       <a href="#" class="sidebar-nav-item" data-page="audit"><i class="fas fa-history"></i><span>Audit Logs</span></a>
       <a href="#" class="sidebar-nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+      <a href="#" class="sidebar-nav-item" data-page="reviews"><i class="fas fa-star"></i><span>Reviews</span></a>
     </nav>
     <div class="sidebar-footer">
-      <a href="index.html" class="sidebar-nav-item logout-btn" onclick="localStorage.removeItem('loggedIn')">
+      <a href="#" class="sidebar-nav-item logout-btn" onclick="handleAdminLogout()">
         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
       </a>
     </div>
@@ -49,175 +50,20 @@
       <div class="topbar-right">
         <div class="notification-bell" onclick="showToast('You have 5 new notifications','info')"><i class="fas fa-bell"></i><span class="notification-dot"></span></div>
         <div class="theme-toggle-small" onclick="toggleTheme()"><i class="fas fa-moon"></i></div>
-        <div class="user-profile" onclick="navigateTo('profile')"><div class="user-avatar">AR</div><span class="user-name">Admin Rayan</span></div>
+        <div class="user-profile" onclick="navigateTo('profile')">
+          <div class="user-avatar" id="userAvatar">AR</div>
+          <span class="user-name" id="userName">Admin Rayan</span>
+        </div>
       </div>
     </header>
     <div class="dashboard-content" id="pageContent"></div>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="app.js"></script>
-<script>
-let currentPage = 'dashboard';
-
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-function navigateTo(page) {
-  currentPage = page;
-  document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-    item.classList.remove('active');
-    if(item.getAttribute('data-page') === page) item.classList.add('active');
-  });
-  const titles = {dashboard:'Admin Dashboard', tracking:'Live Tracking', drivers:'Drivers Management', fleet:'Fleet Management', dispatch:'Dispatch Center', payments:'Payments & Finance', compliance:'Compliance', analytics:'Analytics & Reports', audit:'Audit Logs', settings:'Settings'};
-  document.getElementById('pageTitle').textContent = titles[page] || 'Admin Dashboard';
-  loadPageContent(page);
-}
-
-function loadPageContent(page) {
-  const content = document.getElementById('pageContent');
-  const pages = {
-    dashboard: `
-      <div class="welcome-banner"><div><h2>Welcome back, Admin! 🛡️</h2><p>System running smoothly. 14 active trips today.</p></div><button class="btn-dashboard btn-primary" onclick="navigateTo('analytics')"><i class="fas fa-chart-line"></i> View Reports</button></div>
-      <div class="stats-grid-dashboard">
-        <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-bus"></i></div></div><div class="stat-value-dashboard">14</div><div class="stat-label-dashboard">Active Trips</div><div class="stat-trend" style="color: var(--gold);">Today</div></div>
-        <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-money-bill-wave"></i></div></div><div class="stat-value-dashboard">KES 84K</div><div class="stat-label-dashboard">Revenue Today</div><div class="stat-trend" style="color: var(--green);">↑ 15%</div></div>
-        <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-users"></i></div></div><div class="stat-value-dashboard">31</div><div class="stat-label-dashboard">Active Drivers</div><div class="stat-trend" style="color: var(--green);">All on duty</div></div>
-        <div class="stat-card-dashboard"><div class="stat-header"><div class="stat-icon-dashboard"><i class="fas fa-exclamation-triangle"></i></div></div><div class="stat-value-dashboard">3</div><div class="stat-label-dashboard">Active Alerts</div><div class="stat-trend" style="color: var(--red);">Requires attention</div></div>
-      </div>
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-clock"></i><span>Recent Activity</span></div>
-        <table class="data-table"><thead><tr><th>Time</th><th>Event</th><th>Status</th></tr></thead><tbody>
-          <tr><td>07:30 AM</td><td>Nairobi → Mombasa Trip Started</td><td><span class="trip-status status-upcoming">Active</span></td></tr>
-          <tr><td>06:45 AM</td><td>Driver James Mwangi Clocked In</td><td><span class="trip-status status-completed">Completed</span></td></tr>
-          <tr><td>Yesterday</td><td>New Vehicle Added (RC-025)</td><td><span class="trip-status status-completed">Added</span></td></tr>
-        </tbody></table>
-      </div>
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-trophy"></i><span>Top Performing Drivers</span></div>
-        <table class="data-table"><thead><tr><th>Driver</th><th>Trips</th><th>Rating</th><th>On-time Rate</th></tr></thead><tbody>
-          <tr><td>James Mwangi</td><td>124</td><td>4.9 ★</td><td>98%</td></tr>
-          <tr><td>Peter Omondi</td><td>98</td><td>4.8 ★</td><td>96%</td></tr>
-          <tr><td>Mary Wanjiku</td><td>87</td><td>4.9 ★</td><td>97%</td></tr>
-        </tbody></table>
-      </div>
-    `,
-    tracking: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-map-marked-alt"></i><span>Live Fleet Tracking</span></div>
-        <div class="map-placeholder" style="background: var(--card2); border-radius: 12px; padding: 60px; text-align: center;"><i class="fas fa-map" style="font-size: 64px; color: var(--gold); margin-bottom: 16px; display: block;"></i><p>Live GPS Tracking Map</p><p style="font-size: 12px;">14 active buses on the road</p></div>
-        <div class="stats-grid-dashboard" style="grid-template-columns: repeat(3, 1fr); margin-top: 20px;">
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">14</div><div class="stat-label-dashboard">Buses En Route</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">8</div><div class="stat-label-dashboard">At Terminals</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">2</div><div class="stat-label-dashboard">Maintenance</div></div>
-        </div>
-      </div>
-    `,
-    drivers: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-users"></i><span>Drivers Management</span><button class="btn-dashboard btn-primary" style="margin-left: auto;" onclick="showToast('Add driver form opened','info')">+ Add Driver</button></div>
-        <table class="data-table"><thead><tr><th>Driver</th><th>Phone</th><th>License</th><th>Status</th><th>Rating</th><th>Actions</th></tr></thead><tbody>
-          <tr><td>James Mwangi</td><td>0722 000001</td><td>PSV-KE-2024-00821</td><td><span class="trip-status status-upcoming">Active</span></td><td>4.9 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
-          <tr><td>Peter Omondi</td><td>0722 000002</td><td>PSV-KE-2024-00822</td><td><span class="trip-status status-upcoming">Active</span></td><td>4.8 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
-          <tr><td>Mary Wanjiku</td><td>0722 000003</td><td>PSV-KE-2024-00823</td><td><span class="trip-status status-upcoming">Active</span></td><td>4.9 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
-          <tr><td>John Otieno</td><td>0722 000004</td><td>PSV-KE-2024-00824</td><td><span class="trip-status status-completed">On Leave</span></td><td>4.7 ★</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Edit driver','info')">Edit</button></td></tr>
-        </tbody></table>
-      </div>
-    `,
-    fleet: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-bus"></i><span>Fleet Management</span><button class="btn-dashboard btn-primary" style="margin-left: auto;" onclick="showToast('Add vehicle form opened','info')">+ Add Vehicle</button></div>
-        <table class="data-table"><thead><tr><th>Bus No.</th><th>Model</th><th>Capacity</th><th>Status</th><th>Last Service</th><th>Actions</th></tr></thead><tbody>
-          <tr><td>RC-001</td><td>Scania Higer</td><td>52</td><td><span class="trip-status status-upcoming">Active</span></td><td>Mar 15, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
-          <tr><td>RC-002</td><td>Volvo B11R</td><td>50</td><td><span class="trip-status status-upcoming">Active</span></td><td>Mar 10, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
-          <tr><td>RC-003</td><td>Mercedes Benz</td><td>48</td><td><span class="trip-status status-upcoming">Active</span></td><td>Mar 5, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
-          <tr><td>RC-004</td><td>Isuzu</td><td>45</td><td><span class="trip-status status-completed">Maintenance</span></td><td>Feb 28, 2025</td><td><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('View details','info')">View</button></td></tr>
-        </tbody></table>
-      </div>
-    `,
-    dispatch: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-tasks"></i><span>Dispatch Center</span></div>
-        <div class="form-group"><label>Create New Trip</label><select class="input"><option>Nairobi → Mombasa</option><option>Nairobi → Kisumu</option><option>Mombasa → Nairobi</option><option>Kisumu → Nairobi</option></select></div>
-        <div class="form-group"><label>Departure Time</label><input type="datetime-local" class="input"></div>
-        <div class="form-group"><label>Assign Driver</label><select class="input"><option>James Mwangi</option><option>Peter Omondi</option><option>Mary Wanjiku</option></select></div>
-        <div class="form-group"><label>Assign Bus</label><select class="input"><option>RC-001 (52 seats)</option><option>RC-002 (50 seats)</option><option>RC-003 (48 seats)</option></select></div>
-        <button class="btn-dashboard btn-primary" onclick="showToast('Trip created successfully!','success')">Create Trip</button>
-        <div class="divider" style="margin: 20px 0;"></div>
-        <div class="card-title"><i class="fas fa-route"></i><span>Scheduled Trips Today</span></div>
-        <div class="trip-item"><div><h4>07:00 - Nairobi → Mombasa</h4><p>Driver: James Mwangi • Bus: RC-001</p></div><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Trip details','info')">Manage</button></div>
-        <div class="trip-item"><div><h4>10:30 - Nairobi → Kisumu</h4><p>Driver: Peter Omondi • Bus: RC-002</p></div><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Trip details','info')">Manage</button></div>
-        <div class="trip-item"><div><h4>14:00 - Mombasa → Nairobi</h4><p>Driver: Mary Wanjiku • Bus: RC-003</p></div><button class="btn-dashboard btn-outline btn-sm" onclick="showToast('Trip details','info')">Manage</button></div>
-      </div>
-    `,
-    payments: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-credit-card"></i><span>Payments & Finance</span></div>
-        <div class="stats-grid-dashboard" style="grid-template-columns: repeat(4, 1fr);">
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 84K</div><div class="stat-label-dashboard">Today</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 520K</div><div class="stat-label-dashboard">This Week</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 2.1M</div><div class="stat-label-dashboard">This Month</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">KES 8.4M</div><div class="stat-label-dashboard">Year to Date</div></div>
-        </div>
-        <div class="card-title"><i class="fas fa-clock"></i><span>Recent Transactions</span></div>
-        <table class="data-table"><thead><tr><th>Transaction ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-          <tr><td>TRX-001</td><td>John Kamau</td><td>KES 1,500</td><td><span class="trip-status status-completed">Completed</span></td></tr>
-          <tr><td>TRX-002</td><td>Mary Wanjiku</td><td>KES 2,000</td><td><span class="trip-status status-completed">Completed</span></td></tr>
-          <tr><td>TRX-003</td><td>Peter Omondi</td><td>KES 1,200</td><td><span class="trip-status status-upcoming">Pending</span></td></tr>
-        </tbody></table>
-        <button class="btn-dashboard btn-primary mt-16" onclick="showToast('Processing payouts','info')">Process Driver Payouts</button>
-      </div>
-    `,
-    compliance: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-file-alt"></i><span>Compliance Dashboard</span></div>
-        <div class="stats-grid-dashboard" style="grid-template-columns: repeat(3, 1fr);">
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">3</div><div class="stat-label-dashboard">License Expiring Soon</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">2</div><div class="stat-label-dashboard">Insurance Due</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">100%</div><div class="stat-label-dashboard">Compliance Rate</div></div>
-        </div>
-        <div class="card-title"><i class="fas fa-clock"></i><span>Upcoming Renewals</span></div>
-        <div class="trip-item"><div><h4>PSV License - James Mwangi</h4><p>Expires: May 15, 2025 • 15 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="showToast('Reminder sent','info')">Remind</button></div>
-        <div class="trip-item"><div><h4>Insurance - Bus RC-001</h4><p>Expires: May 20, 2025 • 20 days left</p></div><button class="btn-dashboard btn-primary btn-sm" onclick="showToast('Reminder sent','info')">Remind</button></div>
-      </div>
-    `,
-    analytics: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-chart-pie"></i><span>Analytics & Reports</span></div>
-        <div class="stats-grid-dashboard">
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">+23%</div><div class="stat-label-dashboard">Revenue Growth</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">94%</div><div class="stat-label-dashboard">Occupancy Rate</div></div>
-          <div class="stat-card-dashboard"><div class="stat-value-dashboard">4.8 ★</div><div class="stat-label-dashboard">Avg Customer Rating</div></div>
-        </div>
-        <div class="card-title"><i class="fas fa-chart-line"></i><span>Monthly Revenue Trend</span></div>
-        <div class="mini-chart" style="height: 200px; background: var(--card2); border-radius: 12px; padding: 20px; text-align: center;">
-          <i class="fas fa-chart-line" style="font-size: 48px; color: var(--gold);"></i>
-          <p>Revenue increased by 23% this month</p>
-        </div>
-        <div class="action-buttons mt-16"><button class="btn-dashboard btn-primary" onclick="showToast('Downloading report','info')"><i class="fas fa-download"></i> Download Report</button><button class="btn-dashboard btn-outline" onclick="showToast('Exporting data','info')"><i class="fas fa-file-excel"></i> Export CSV</button></div>
-      </div>
-    `,
-    audit: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-history"></i><span>Audit Logs</span></div>
-        <table class="data-table"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody>
-          <tr><td>2025-03-28 07:30</td><td>Admin Rayan</td><td>User Login</td><td>Successful login from 192.168.1.1</td></tr>
-          <tr><td>2025-03-28 07:15</td><td>Admin Rayan</td><td>Driver Added</td><td>New driver: John Otieno</td></tr>
-          <tr><td>2025-03-27 18:30</td><td>Admin Rayan</td><td>Vehicle Added</td><td>New bus: RC-025</td></tr>
-          <tr><td>2025-03-27 14:20</td><td>Admin Rayan</td><td>Settings Changed</td><td>Fare rates updated</td></tr>
-        </tbody></table>
-      </div>
-    `,
-    settings: `
-      <div class="dashboard-card"><div class="card-title"><i class="fas fa-cog"></i><span>System Settings</span></div>
-        <div class="form-group"><label>Company Name</label><input type="text" class="input" value="Rayan Coach Kenya"></div>
-        <div class="form-group"><label>Contact Email</label><input type="email" class="input" value="info@rayan.co.ke"></div>
-        <div class="form-group"><label>Support Phone</label><input type="tel" class="input" value="+254 745 129233"></div>
-        <div class="form-group"><label>Default Fare Rate (per km)</label><input type="text" class="input" value="KES 8.50"></div>
-        <div class="form-group"><label>Maintenance Alert Threshold (days)</label><input type="number" class="input" value="30"></div>
-        <div class="action-buttons"><button class="btn-dashboard btn-primary" onclick="showToast('Settings saved!','success')">Save Changes</button><button class="btn-dashboard btn-outline" onclick="showToast('Reset to defaults','info')">Reset Defaults</button></div>
-      </div>
-    `
-  };
-  content.innerHTML = pages[page] || pages.dashboard;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  loadTheme();
-  loadPageContent('dashboard');
-  document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
-    item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.getAttribute('data-page')); });
-  });
-});
-</script>
+<script src="auth.js"></script>
+<script src="admin-dashboard.js"></script>
 </body>
 </html>

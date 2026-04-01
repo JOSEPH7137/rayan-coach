@@ -27,11 +27,11 @@ function navigateTo(page) {
     });
     
     const titles = {
-    dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
-    parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
-    messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS',
-    reviews: 'Rate Your Journey'  // Add this line
-};
+        dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
+        parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
+        messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS',
+        reviews: 'Rate Your Journey'
+    };
     document.getElementById('pageTitle').textContent = titles[page] || 'Dashboard';
     loadPageContent(page);
 }
@@ -149,56 +149,56 @@ function loadPageContent(page) {
             </div>
         `,
         reviews: `
-    <div class="dashboard-card">
-        <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
-        <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
-        
-        <div class="form-group">
-            <label>Select Your Trip</label>
-            <select class="input" id="reviewTripSelect">
-                <option value="">Select a completed trip</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Rate Your Journey</label>
-            <div class="rating-stars" id="ratingStars">
-                <i class="far fa-star" data-rating="1"></i>
-                <i class="far fa-star" data-rating="2"></i>
-                <i class="far fa-star" data-rating="3"></i>
-                <i class="far fa-star" data-rating="4"></i>
-                <i class="far fa-star" data-rating="5"></i>
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
+                <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
+                
+                <div class="form-group">
+                    <label>Select Your Trip</label>
+                    <select class="input" id="reviewTripSelect">
+                        <option value="">Select a completed trip</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Rate Your Journey</label>
+                    <div class="rating-stars" id="ratingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="selectedRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Rate the Driver</label>
+                    <div class="rating-stars" id="driverRatingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="selectedDriverRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Review (Optional)</label>
+                    <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
+                </div>
+                
+                <button class="btn-dashboard btn-primary" id="submitReviewBtn" onclick="submitReview()">Submit Review</button>
             </div>
-            <input type="hidden" id="selectedRating" value="0">
-        </div>
-        
-        <div class="form-group">
-            <label>Rate the Driver</label>
-            <div class="rating-stars" id="driverRatingStars">
-                <i class="far fa-star" data-rating="1"></i>
-                <i class="far fa-star" data-rating="2"></i>
-                <i class="far fa-star" data-rating="3"></i>
-                <i class="far fa-star" data-rating="4"></i>
-                <i class="far fa-star" data-rating="5"></i>
+            
+            <div class="dashboard-card mt-16">
+                <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
+                <div id="userReviewsList">
+                    <div class="trip-item"><div><h4>Loading reviews...</h4></div></div>
+                </div>
             </div>
-            <input type="hidden" id="selectedDriverRating" value="0">
-        </div>
-        
-        <div class="form-group">
-            <label>Your Review (Optional)</label>
-            <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
-        </div>
-        
-        <button class="btn-dashboard btn-primary" onclick="submitReview()">Submit Review</button>
-    </div>
-    
-    <div class="dashboard-card mt-16">
-        <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
-        <div id="userReviewsList">
-            <div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here</p></div></div>
-        </div>
-    </div>
-`,
+        `,
         safety: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
                 <div style="text-align: center; padding: 20px;">
@@ -211,14 +211,14 @@ function loadPageContent(page) {
     
     content.innerHTML = pages[page] || pages.dashboard;
     if (page === 'booking') initBookingPage();
-if (page === 'parcel') initParcelPage();
-if (page === 'reviews') {
-    setTimeout(() => {
-        initRatingStars();
-        loadCompletedTrips();
-        loadUserReviews();
-    }, 100);
-}
+    if (page === 'parcel') initParcelPage();
+    if (page === 'reviews') {
+        setTimeout(() => {
+            initRatingStars();
+            loadCompletedTrips();
+            loadUserReviews();
+        }, 100);
+    }
 }
 
 // Initialize Parcel Page with location dropdowns
@@ -274,7 +274,7 @@ function calculateParcelRoute() {
     
     const route = routeData[`${pickup}|${delivery}`];
     if (route) {
-        const baseParcelRate = 50; // KES per km
+        const baseParcelRate = 50;
         const distance = route.distance_km;
         const parcelCost = distance * baseParcelRate * weight;
         const estimatedHours = Math.floor(route.duration_minutes / 60);
@@ -355,14 +355,12 @@ async function sendParcel() {
         
         showToast(`Parcel booked! Tracking: ${trackingNumber} | Cost: KES ${parcelCost}`, 'success');
         
-        // Clear form
         document.getElementById('receiverName').value = '';
         document.getElementById('receiverPhone').value = '';
         document.getElementById('parcelWeight').value = '';
         document.getElementById('parcelDescription').value = '';
         clearParcelRouteDetails();
         
-        // Load recent parcels
         loadUserParcels();
         
     } catch (error) {
@@ -403,7 +401,6 @@ async function loadUserParcels() {
     }
 }
 
-// Initialize booking page
 async function initBookingPage() {
     const fromSelect = document.getElementById('fromLocation');
     const toSelect = document.getElementById('toLocation');
@@ -561,14 +558,12 @@ async function updateProfile() {
     let avatarUrl = userProfile?.avatar_url;
     
     if (profilePicFile) {
-        // Show upload progress
         showToast('Uploading profile picture...', 'info');
         
         const fileExt = profilePicFile.name.split('.').pop();
         const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
         
         try {
-            // Upload to avatars bucket
             const { data: uploadData, error: uploadError } = await window.supabase.storage
                 .from('avatars')
                 .upload(fileName, profilePicFile, {
@@ -580,7 +575,6 @@ async function updateProfile() {
                 console.error('Upload error:', uploadError);
                 showToast('Error uploading picture: ' + uploadError.message, 'error');
             } else {
-                // Get public URL
                 const { data: { publicUrl } } = window.supabase.storage
                     .from('avatars')
                     .getPublicUrl(fileName);
@@ -609,15 +603,12 @@ async function updateProfile() {
             document.getElementById('userName').textContent = fullName;
             document.getElementById('profileName').textContent = fullName;
             
-            // Update profile picture display
             const profileImg = document.getElementById('profilePictureImg');
             const fallback = document.getElementById('profileAvatarFallback');
             if (avatarUrl) {
                 profileImg.src = avatarUrl;
                 profileImg.style.display = 'block';
                 if (fallback) fallback.style.display = 'none';
-            } else if (profileImg && profileImg.src) {
-                // Keep existing image
             }
         }
     }
@@ -635,7 +626,6 @@ async function loadUserData() {
         document.getElementById('userName').textContent = profile?.name || user.email;
         document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
         
-        // Update profile picture in profile page
         const profileImg = document.getElementById('profilePictureImg');
         const fallback = document.getElementById('profileAvatarFallback');
         if (profile?.avatar_url && profileImg) {
@@ -647,10 +637,10 @@ async function loadUserData() {
             fallback.textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
         }
         
-        // Load user parcels
         loadUserParcels();
     }
 }
+
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
     const { data: { session } } = await window.supabase.auth.getSession();
@@ -664,9 +654,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ==================== REVIEW SYSTEM ====================
 
-// Initialize rating stars
 function initRatingStars() {
-    // Journey rating stars
     const journeyStars = document.querySelectorAll('#ratingStars i');
     const driverStars = document.querySelectorAll('#driverRatingStars i');
     
@@ -676,7 +664,6 @@ function initRatingStars() {
                 const rating = parseInt(this.getAttribute('data-rating'));
                 document.getElementById(hiddenInputId).value = rating;
                 
-                // Update star display
                 stars.forEach((s, index) => {
                     if (index < rating) {
                         s.className = 'fas fa-star';
@@ -720,7 +707,6 @@ function initRatingStars() {
     setupStarClickHandler(driverStars, 'selectedDriverRating');
 }
 
-// Load completed trips for review selection
 async function loadCompletedTrips() {
     try {
         const { data: bookings, error } = await window.supabase
@@ -755,7 +741,6 @@ async function loadCompletedTrips() {
                 }
             });
             
-            // Store trip data in options
             select.querySelectorAll('option').forEach(option => {
                 if (option.value) {
                     option.setAttribute('data-trip-id', option.getAttribute('data-trip-id'));
@@ -770,7 +755,6 @@ async function loadCompletedTrips() {
     }
 }
 
-// Submit review
 async function submitReview() {
     const tripSelect = document.getElementById('reviewTripSelect');
     const selectedOption = tripSelect?.options[tripSelect.selectedIndex];
@@ -799,6 +783,11 @@ async function submitReview() {
     
     const overallRating = Math.round((journeyRating + driverRating) / 2);
     
+    // Disable button and show loading
+    const submitBtn = document.getElementById('submitReviewBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
     try {
         const { data, error } = await window.supabase
             .from('reviews')
@@ -806,7 +795,9 @@ async function submitReview() {
                 user_id: currentUser.id,
                 trip_id: tripId,
                 driver_id: driverId,
-                rating: overallRating,
+                journey_rating: journeyRating,
+                driver_rating: driverRating,
+                overall_rating: overallRating,
                 comment: comment,
                 journey_date: journeyDate,
                 route: route
@@ -815,7 +806,7 @@ async function submitReview() {
         
         if (error) throw error;
         
-        showToast('Thank you for your review!', 'success');
+        showToast('✅ Thank you for your review! Your feedback has been submitted successfully.', 'success');
         
         // Reset form
         document.getElementById('selectedRating').value = '0';
@@ -828,16 +819,28 @@ async function submitReview() {
         journeyStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
         driverStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
         
-        // Reload user reviews
-        loadUserReviews();
+        // Reset trip select
+        if (tripSelect) tripSelect.value = '';
+        
+        // Reload reviews
+        await loadUserReviews();
+        
+        // Show success popup
+        const successPopup = document.createElement('div');
+        successPopup.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--gold); color: #08080F; padding: 20px 40px; border-radius: 12px; font-weight: bold; z-index: 1000; animation: fadeOut 2s forwards;';
+        successPopup.innerHTML = '✨ Review Submitted! ✨';
+        document.body.appendChild(successPopup);
+        setTimeout(() => successPopup.remove(), 2000);
         
     } catch (error) {
         console.error('Error submitting review:', error);
         showToast('Error submitting review. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Review';
     }
 }
 
-// Load user's previous reviews
 async function loadUserReviews() {
     try {
         const { data: reviews, error } = await window.supabase
@@ -856,15 +859,19 @@ async function loadUserReviews() {
                         <div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <div class="rating-display">
-                                    ${Array(review.rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
-                                    ${Array(5 - review.rating).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
+                                    ${Array(review.overall_rating || review.journey_rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
+                                    ${Array(5 - (review.overall_rating || review.journey_rating)).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
                                 </div>
-                                <span style="color: var(--gold); font-size: 12px;">${review.rating}/5</span>
+                                <span style="color: var(--gold); font-size: 12px;">${review.overall_rating || review.journey_rating}/5</span>
                             </div>
                             <h4>${review.route || 'Journey'}</h4>
-                            <p style="font-size: 13px; color: var(--muted);">${new Date(review.journey_date || review.created_at).toLocaleDateString()}</p>
-                            ${review.comment ? `<p style="margin-top: 8px; font-style: italic;">"${review.comment}"</p>` : ''}
-                            <p style="font-size: 11px; color: var(--muted); margin-top: 8px;">Reviewed on ${new Date(review.created_at).toLocaleDateString()}</p>
+                            <p style="font-size: 13px; color: var(--muted);">Trip: ${new Date(review.journey_date || review.created_at).toLocaleDateString()}</p>
+                            <div style="display: flex; gap: 16px; margin-top: 8px;">
+                                <span style="font-size: 12px;">🚗 Journey: ${review.journey_rating}/5</span>
+                                <span style="font-size: 12px;">👨‍✈️ Driver: ${review.driver_rating}/5</span>
+                            </div>
+                            ${review.comment ? `<p style="margin-top: 8px; font-style: italic; background: var(--card2); padding: 8px; border-radius: 8px;">💬 "${review.comment}"</p>` : ''}
+                            <p style="font-size: 11px; color: var(--muted); margin-top: 8px;">📅 Reviewed on ${new Date(review.created_at).toLocaleDateString()}</p>
                         </div>
                     </div>
                 `).join('');
@@ -877,8 +884,6 @@ async function loadUserReviews() {
     }
 }
 
-// Add reviews to sidebar navigation (in navigateTo function, add to titles)
-// Also add to the page load function to initialize reviews page
 window.toggleSidebar = toggleSidebar;
 window.navigateTo = navigateTo;
 window.searchBuses = searchBuses;
