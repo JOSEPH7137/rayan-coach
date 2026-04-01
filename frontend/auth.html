@@ -468,11 +468,15 @@ async function handleSignup() {
   signupBtn.disabled = false;
   signupBtn.innerHTML = 'Create Account';
   
-  if (result.success) {
-    // If email confirmation is disabled, user is already redirected by registerUser
-    // If email confirmation is enabled, show message and switch to login tab
-    if (!result.user?.identities?.length) {
-      // Email confirmation is enabled
+  if (!result.success) {
+    return;
+  }
+  
+  // The redirect is now handled inside registerUser function
+  // Clear form only if redirect doesn't happen (fallback)
+  setTimeout(() => {
+    // If still on same page after 3 seconds, clear form
+    if (window.location.href.includes('auth.html')) {
       document.getElementById('signupFname').value = '';
       document.getElementById('signupLname').value = '';
       document.getElementById('signupEmail').value = '';
@@ -481,13 +485,10 @@ async function handleSignup() {
       document.getElementById('signupConfirmPassword').value = '';
       if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
       document.getElementById('profilePicPreview').innerHTML = '';
-      
-      setTimeout(() => {
-        switchTab('login');
-        showToast('Account created! Please sign in.', 'success');
-      }, 2000);
+      switchTab('login');
+      showToast('Account created! Please sign in.', 'success');
     }
-  }
+  }, 3000);
 }
 function togglePasswordField(id) {
   const input = document.getElementById(id);

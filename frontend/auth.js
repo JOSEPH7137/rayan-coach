@@ -26,25 +26,44 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
             return { success: false, error: error.message };
         }
         
-        // If email confirmation is disabled in Supabase, auto-login
-        if (data.user && data.session) {
-            // User is already logged in (email confirmation disabled)
-            showToast('Account created successfully!', 'success');
+        // Wait a moment for the profile to be created by the trigger
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Try to get the profile
+        let profile = null;
+        let retries = 3;
+        while (retries > 0 && !profile) {
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
             
+            if (!profileError && profileData) {
+                profile = profileData;
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
+            retries--;
+        }
+        
+        const userRole = profile?.role || role;
+        
+        showToast('Account created successfully!', 'success');
+        
+        // Force a small delay before redirect
+        setTimeout(() => {
             // Redirect based on role
-            if (role === 'admin') {
+            if (userRole === 'admin') {
                 window.location.href = 'admin-dashboard.html';
-            } else if (role === 'driver') {
+            } else if (userRole === 'driver') {
                 window.location.href = 'driver-dashboard.html';
             } else {
                 window.location.href = 'user-dashboard.html';
             }
-            return { success: true, user: data.user };
-        } else {
-            // Email confirmation is enabled
-            showToast('Account created! Please check your email to verify.', 'success');
-            return { success: true, user: data.user };
-        }
+        }, 500);
+        
+        return { success: true, user: data.user, profile: profile };
     } catch (error) {
         showToast(error.message, 'error');
         return { success: false, error: error.message };
@@ -87,13 +106,15 @@ async function loginUser(email, password, rememberMe = false) {
         }
         
         // Redirect based on role
-        if (profile?.role === 'admin') {
-            window.location.href = 'admin-dashboard.html';
-        } else if (profile?.role === 'driver') {
-            window.location.href = 'driver-dashboard.html';
-        } else {
-            window.location.href = 'user-dashboard.html';
-        }
+        setTimeout(() => {
+            if (profile?.role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (profile?.role === 'driver') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+        }, 500);
         
         return { success: true, user: data.user, profile: profile };
     } catch (error) {
