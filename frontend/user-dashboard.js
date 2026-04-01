@@ -3,7 +3,7 @@ let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 
-// Locations list
+// Locations list (same as trips)
 const locations = [
     'BANGAL', 'GARISSA', 'KANYONYO', 'KITHIMANI', 'KITHYOKA', 
     'KITHYOKO', 'MATUU', 'MWINGI', 'NAIROBI', 'NGUNI', 'THIKA', 'UKASI'
@@ -79,14 +79,28 @@ function loadPageContent(page) {
             </div>
         `,
         parcel: `
-            <div class="dashboard-card"><div class="card-title"><i class="fas fa-box"></i><span>Send a Parcel</span></div>
-                <div class="form-group"><label>Pickup Location</label><input type="text" class="input" id="pickupLocation" placeholder="Enter pickup address"></div>
-                <div class="form-group"><label>Delivery Location</label><input type="text" class="input" id="deliveryLocation" placeholder="Enter delivery address"></div>
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-box"></i><span>Send a Parcel</span></div>
+                <div class="form-group"><label>Pickup Location</label>
+                    <select class="input" id="parcelPickupLocation">
+                        <option value="">Select Pickup Location</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Delivery Location</label>
+                    <select class="input" id="parcelDeliveryLocation">
+                        <option value="">Select Delivery Location</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Receiver Name</label><input type="text" class="input" id="receiverName" placeholder="Receiver's full name"></div>
                 <div class="form-group"><label>Receiver Phone</label><input type="tel" class="input" id="receiverPhone" placeholder="Receiver's phone number"></div>
                 <div class="form-group"><label>Weight (kg)</label><input type="number" class="input" id="parcelWeight" placeholder="e.g., 2.5"></div>
                 <div class="form-group"><label>Description</label><textarea class="input" rows="3" id="parcelDescription" placeholder="Describe the item"></textarea></div>
-                <button class="btn-dashboard btn-primary" onclick="sendParcel()">Send Parcel</button>
+                <div id="parcelRouteDetails" style="display: none;"></div>
+                <button class="btn-dashboard btn-primary" onclick="sendParcel()">Calculate & Send</button>
+            </div>
+            <div class="dashboard-card mt-16" id="recentParcels" style="display: none;">
+                <div class="card-title"><i class="fas fa-history"></i><span>Recent Parcels</span></div>
+                <div id="userParcelsList"></div>
             </div>
         `,
         tickets: `
@@ -119,12 +133,17 @@ function loadPageContent(page) {
         profile: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-user"></i><span>My Profile</span></div>
                 <div style="text-align: center; margin-bottom: 24px;">
-                    <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;">${userProfile?.name?.charAt(0) || 'U'}</div>
+                    <div id="profilePictureContainer">
+                        <img id="profilePictureImg" src="${userProfile?.avatar_url || ''}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto; display: block;" onerror="this.style.display='none'">
+                        <div class="user-avatar" id="profileAvatarFallback" style="width: 100px; height: 100px; font-size: 48px; margin: 0 auto 16px; display: ${userProfile?.avatar_url ? 'none' : 'flex'}">${userProfile?.name?.charAt(0) || 'U'}</div>
+                    </div>
                     <h3 id="profileName">${userProfile?.name || 'Loading...'}</h3>
                     <p style="color: var(--muted);" id="profileEmail">${userProfile?.email || ''}</p>
                 </div>
                 <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
                 <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || ''}"></div>
+                <div class="form-group"><label>Profile Picture</label><input type="file" class="input" id="profilePicture" accept="image/*"></div>
+                <div id="profilePicPreview" style="margin-top: 10px; text-align: center;"></div>
                 <button class="btn-dashboard btn-primary" onclick="updateProfile()">Save Changes</button>
             </div>
         `,
@@ -140,8 +159,192 @@ function loadPageContent(page) {
     
     content.innerHTML = pages[page] || pages.dashboard;
     if (page === 'booking') initBookingPage();
+    if (page === 'parcel') initParcelPage();
 }
 
+// Initialize Parcel Page with location dropdowns
+function initParcelPage() {
+    const pickupSelect = document.getElementById('parcelPickupLocation');
+    const deliverySelect = document.getElementById('parcelDeliveryLocation');
+    
+    if (pickupSelect && deliverySelect) {
+        pickupSelect.innerHTML = '<option value="">Select Pickup Location</option>';
+        deliverySelect.innerHTML = '<option value="">Select Delivery Location</option>';
+        
+        locations.forEach(location => {
+            pickupSelect.innerHTML += `<option value="${location}">${location}</option>`;
+            deliverySelect.innerHTML += `<option value="${location}">${location}</option>`;
+        });
+        
+        pickupSelect.addEventListener('change', updateParcelDeliveryOptions);
+        deliverySelect.addEventListener('change', calculateParcelRoute);
+    }
+}
+
+function updateParcelDeliveryOptions() {
+    const pickupSelect = document.getElementById('parcelPickupLocation');
+    const deliverySelect = document.getElementById('parcelDeliveryLocation');
+    const selectedPickup = pickupSelect.value;
+    
+    deliverySelect.innerHTML = '<option value="">Select Delivery Location</option>';
+    if (!selectedPickup) return;
+    
+    locations.forEach(location => {
+        if (location !== selectedPickup) {
+            deliverySelect.innerHTML += `<option value="${location}">${location}</option>`;
+        }
+    });
+    clearParcelRouteDetails();
+}
+
+function calculateParcelRoute() {
+    const pickup = document.getElementById('parcelPickupLocation')?.value;
+    const delivery = document.getElementById('parcelDeliveryLocation')?.value;
+    const weight = parseFloat(document.getElementById('parcelWeight')?.value) || 1;
+    
+    if (!pickup || !delivery) {
+        clearParcelRouteDetails();
+        return;
+    }
+    
+    if (pickup === delivery) {
+        showToast('Pickup and delivery locations cannot be the same', 'error');
+        clearParcelRouteDetails();
+        return;
+    }
+    
+    const route = routeData[`${pickup}|${delivery}`];
+    if (route) {
+        const baseParcelRate = 50; // KES per km
+        const distance = route.distance_km;
+        const parcelCost = distance * baseParcelRate * weight;
+        const estimatedHours = Math.floor(route.duration_minutes / 60);
+        const estimatedMinutes = route.duration_minutes % 60;
+        
+        const parcelDetails = document.getElementById('parcelRouteDetails');
+        if (parcelDetails) {
+            parcelDetails.style.display = 'block';
+            parcelDetails.innerHTML = `
+                <div style="background: var(--gold-bg); border-radius: 12px; padding: 16px; margin-top: 16px;">
+                    <h4 style="color: var(--gold);">Parcel Delivery Details</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div><strong>Distance:</strong> ${distance} km</div>
+                        <div><strong>Est. Delivery:</strong> ${estimatedHours}h ${estimatedMinutes}m</div>
+                        <div><strong>Weight:</strong> ${weight} kg</div>
+                        <div><strong>Cost:</strong> KES ${parcelCost.toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        clearParcelRouteDetails();
+        showToast('No route available between these locations', 'error');
+    }
+}
+
+function clearParcelRouteDetails() {
+    const rd = document.getElementById('parcelRouteDetails');
+    if (rd) { rd.style.display = 'none'; rd.innerHTML = ''; }
+}
+
+async function sendParcel() {
+    const pickup = document.getElementById('parcelPickupLocation')?.value;
+    const delivery = document.getElementById('parcelDeliveryLocation')?.value;
+    const receiverName = document.getElementById('receiverName')?.value;
+    const receiverPhone = document.getElementById('receiverPhone')?.value;
+    const weight = parseFloat(document.getElementById('parcelWeight')?.value) || 1;
+    const description = document.getElementById('parcelDescription')?.value;
+    
+    if (!pickup || !delivery || !receiverName) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    if (pickup === delivery) {
+        showToast('Pickup and delivery locations cannot be the same', 'error');
+        return;
+    }
+    
+    const route = routeData[`${pickup}|${delivery}`];
+    if (!route) {
+        showToast('No route available between these locations', 'error');
+        return;
+    }
+    
+    const baseParcelRate = 50;
+    const parcelCost = route.distance_km * baseParcelRate * weight;
+    const trackingNumber = 'RCP' + Date.now() + Math.floor(Math.random() * 1000);
+    
+    try {
+        const { data, error } = await window.supabase
+            .from('parcels')
+            .insert({
+                sender_id: currentUser?.id,
+                receiver_name: receiverName,
+                receiver_phone: receiverPhone,
+                pickup_location: pickup,
+                delivery_location: delivery,
+                weight_kg: weight,
+                description: description,
+                tracking_number: trackingNumber,
+                amount: parcelCost,
+                status: 'pending'
+            })
+            .select();
+        
+        if (error) throw error;
+        
+        showToast(`Parcel booked! Tracking: ${trackingNumber} | Cost: KES ${parcelCost}`, 'success');
+        
+        // Clear form
+        document.getElementById('receiverName').value = '';
+        document.getElementById('receiverPhone').value = '';
+        document.getElementById('parcelWeight').value = '';
+        document.getElementById('parcelDescription').value = '';
+        clearParcelRouteDetails();
+        
+        // Load recent parcels
+        loadUserParcels();
+        
+    } catch (error) {
+        console.error('Parcel booking error:', error);
+        showToast('Error booking parcel. Please try again.', 'error');
+    }
+}
+
+async function loadUserParcels() {
+    try {
+        const { data, error } = await window.supabase
+            .from('parcels')
+            .select('*')
+            .eq('sender_id', currentUser?.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+        
+        if (error) throw error;
+        
+        const parcelsList = document.getElementById('userParcelsList');
+        const recentParcels = document.getElementById('recentParcels');
+        
+        if (parcelsList && data && data.length > 0) {
+            recentParcels.style.display = 'block';
+            parcelsList.innerHTML = data.map(parcel => `
+                <div class="trip-item">
+                    <div>
+                        <h4>Parcel #${parcel.tracking_number}</h4>
+                        <p>${parcel.pickup_location} → ${parcel.delivery_location}</p>
+                        <p>Weight: ${parcel.weight_kg} kg | Cost: KES ${parcel.amount}</p>
+                        <p>Status: <span class="trip-status status-${parcel.status === 'delivered' ? 'completed' : 'upcoming'}">${parcel.status}</span></p>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading parcels:', error);
+    }
+}
+
+// Initialize booking page
 async function initBookingPage() {
     const fromSelect = document.getElementById('fromLocation');
     const toSelect = document.getElementById('toLocation');
@@ -164,7 +367,7 @@ async function initBookingPage() {
 
 async function loadRouteData() {
     try {
-        const { data, error } = await supabase.from('routes').select('*');
+        const { data, error } = await window.supabase.from('routes').select('*');
         if (error) throw error;
         routeData = {};
         data.forEach(route => { routeData[`${route.origin}|${route.destination}`] = route; });
@@ -267,14 +470,6 @@ function trackBus() {
     showToast(input ? `Tracking bus ${input}...` : 'Please enter a Trip ID', input ? 'info' : 'error');
 }
 
-async function sendParcel() {
-    const pickup = document.getElementById('pickupLocation')?.value;
-    const delivery = document.getElementById('deliveryLocation')?.value;
-    const receiver = document.getElementById('receiverName')?.value;
-    if (!pickup || !delivery || !receiver) { showToast('Please fill all fields', 'error'); return; }
-    showToast('Parcel booking initiated! Tracking number will be sent.', 'success');
-}
-
 function redeemReward() { showToast('Reward redeemed! Check your email for details.', 'success'); }
 
 function sendChatMessage() {
@@ -302,15 +497,47 @@ function sendChatMessage() {
 async function updateProfile() {
     const fullName = document.getElementById('fullName')?.value;
     const phone = document.getElementById('phone')?.value;
+    const profilePicFile = document.getElementById('profilePicture')?.files[0];
+    
+    let avatarUrl = userProfile?.avatar_url;
+    
+    if (profilePicFile) {
+        const fileExt = profilePicFile.name.split('.').pop();
+        const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await window.supabase.storage
+            .from('avatars')
+            .upload(fileName, profilePicFile);
+        
+        if (!uploadError) {
+            const { data: { publicUrl } } = window.supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+            avatarUrl = publicUrl;
+        }
+    }
+    
     if (currentUser && fullName) {
-        const { error } = await supabase.from('profiles').update({ name: fullName, phone }).eq('id', currentUser.id);
+        const updates = { name: fullName, phone: phone };
+        if (avatarUrl) updates.avatar_url = avatarUrl;
+        
+        const { error } = await window.supabase.from('profiles').update(updates).eq('id', currentUser.id);
         if (error) showToast('Error updating profile', 'error');
         else { 
             showToast('Profile updated successfully!', 'success'); 
             userProfile.name = fullName; 
             userProfile.phone = phone;
+            if (avatarUrl) userProfile.avatar_url = avatarUrl;
             document.getElementById('userName').textContent = fullName;
             document.getElementById('profileName').textContent = fullName;
+            
+            // Update profile picture display
+            const profileImg = document.getElementById('profilePictureImg');
+            const fallback = document.getElementById('profileAvatarFallback');
+            if (avatarUrl) {
+                profileImg.src = avatarUrl;
+                profileImg.style.display = 'block';
+                if (fallback) fallback.style.display = 'none';
+            }
         }
     }
 }
@@ -322,16 +549,19 @@ async function loadUserData() {
     const user = await getCurrentUser();
     if (user) {
         currentUser = user;
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        const { data: profile } = await window.supabase.from('profiles').select('*').eq('id', user.id).single();
         userProfile = profile;
         document.getElementById('userName').textContent = profile?.name || user.email;
         document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
+        
+        // Load user parcels
+        loadUserParcels();
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await window.supabase.auth.getSession();
     if (!session) { window.location.href = 'role-selection.html'; return; }
     await loadUserData();
     loadPageContent('dashboard');

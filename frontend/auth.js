@@ -21,20 +21,47 @@ async function loginUser(email, password) {
             return { success: false, error: error.message };
         }
         
-        console.log('Login successful!');
+        console.log('Login successful! User ID:', data.user.id);
         
-        // Get user profile
-        const { data: profile, error: profileError } = await window.supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
+        // Get user profile - if doesn't exist, create it
+        let profile = null;
+        let profileError = null;
         
-        if (profileError) {
-            console.error('Profile error:', profileError);
+        try {
+            const result = await window.supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+            
+            profile = result.data;
+            profileError = result.error;
+        } catch (err) {
+            console.log('Profile fetch error, will create profile:', err);
         }
         
-        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
+        // If profile doesn't exist, create one
+        if (!profile && profileError?.code === 'PGRST116') {
+            console.log('Creating profile for user...');
+            const { data: newProfile, error: insertError } = await window.supabase
+                .from('profiles')
+                .insert({
+                    id: data.user.id,
+                    name: data.user.user_metadata?.name || email,
+                    email: email,
+                    role: 'user'
+                })
+                .select()
+                .single();
+            
+            if (!insertError) {
+                profile = newProfile;
+                console.log('Profile created successfully');
+            }
+        }
+        
+        const userName = profile?.name || email;
+        showToast(`Welcome back, ${userName}!`, 'success');
         
         // Store session if remember me is checked
         const rememberMe = document.getElementById('rememberMe')?.checked;
@@ -88,12 +115,43 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
         
         if (error) {
             console.error('Signup error:', error);
-            showToast(error.message, 'error');
+            if (error.message.includes('User already registered')) {
+                showToast('Email already registered. Please sign in instead.', 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
             return { success: false, error: error.message };
         }
         
-        console.log('Signup successful!');
-        showToast('Account created! Please sign in.', 'success');
+        console.log('Signup successful! User ID:', data.user.id);
+        
+        // Create profile manually after signup
+        const { error: insertError } = await window.supabase
+            .from('profiles')
+            .insert({
+                id: data.user.id,
+                name: name,
+                email: email,
+                phone: phone,
+                role: role,
+                driver_license: driverLicense,
+                avatar_url: avatarUrl
+            });
+        
+        if (insertError) {
+            console.error('Profile creation error:', insertError);
+        }
+        
+        showToast('Account created successfully! Logging you in...', 'success');
+        
+        // Auto login after signup
+        setTimeout(async () => {
+            const loginResult = await loginUser(email, password);
+            if (!loginResult.success) {
+                // If auto-login fails, redirect to login page
+                window.location.href = 'auth.html?role=' + role;
+            }
+        }, 1500);
         
         return { success: true, user: data.user };
     } catch (error) {

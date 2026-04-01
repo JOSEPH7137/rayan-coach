@@ -224,12 +224,13 @@ function switchTab(tab) {
   const signupForm = document.getElementById('signupForm');
   
   tabs.forEach(t => t.classList.remove('active'));
+  
   if (tab === 'login') {
-    event.target.classList.add('active');
+    if (tabs[0]) tabs[0].classList.add('active');
     loginForm.style.display = 'block';
     signupForm.style.display = 'none';
   } else {
-    event.target.classList.add('active');
+    if (tabs[1]) tabs[1].classList.add('active');
     loginForm.style.display = 'none';
     signupForm.style.display = 'block';
   }
@@ -370,12 +371,12 @@ async function handleSignup() {
   if (profilePicFile && currentRole === 'driver') {
     const fileExt = profilePicFile.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await window.supabase.storage
       .from('avatars')
       .upload(fileName, profilePicFile);
     
     if (!uploadError) {
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = window.supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
       avatarUrl = publicUrl;
@@ -390,21 +391,6 @@ async function handleSignup() {
   if (!result.success) {
     return;
   }
-  
-  setTimeout(() => {
-    if (window.location.href.includes('auth.html')) {
-      document.getElementById('signupFname').value = '';
-      document.getElementById('signupLname').value = '';
-      document.getElementById('signupEmail').value = '';
-      document.getElementById('signupPhone').value = '';
-      document.getElementById('signupPassword').value = '';
-      document.getElementById('signupConfirmPassword').value = '';
-      if (document.getElementById('driverLicense')) document.getElementById('driverLicense').value = '';
-      document.getElementById('profilePicPreview').innerHTML = '';
-      switchTab('login');
-      showToast('Account created! Please sign in.', 'success');
-    }
-  }, 3000);
 }
 
 function togglePasswordField(id) {
