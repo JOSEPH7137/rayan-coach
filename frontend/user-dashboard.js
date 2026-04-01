@@ -709,8 +709,9 @@ function initRatingStars() {
 
 async function loadCompletedTrips() {
     try {
-        console.log('Loading completed trips...'); // Debug log
+        console.log('Loading completed trips...');
         
+        // First, get all bookings for this user
         const { data: bookings, error } = await window.supabase
             .from('bookings')
             .select(`
@@ -722,18 +723,31 @@ async function loadCompletedTrips() {
                 )
             `)
             .eq('user_id', currentUser?.id)
-            .eq('status', 'completed')
             .order('booking_date', { ascending: false });
         
         if (error) throw error;
         
-        console.log('Bookings found:', bookings?.length); // Debug log
+        console.log('All bookings found:', bookings?.length);
+        
+        // Filter to show only bookings that can be reviewed (not already reviewed)
+        const { data: existingReviews } = await window.supabase
+            .from('reviews')
+            .select('trip_id')
+            .eq('user_id', currentUser?.id);
+        
+        const reviewedTripIds = existingReviews?.map(r => r.trip_id) || [];
+        
+        const availableBookings = bookings?.filter(booking => 
+            !reviewedTripIds.includes(booking.trip_id)
+        ) || [];
+        
+        console.log('Available bookings for review:', availableBookings.length);
         
         const select = document.getElementById('reviewTripSelect');
         if (select) {
-            if (bookings && bookings.length > 0) {
-                select.innerHTML = '<option value="">Select a completed trip</option>';
-                bookings.forEach(booking => {
+            if (availableBookings.length > 0) {
+                select.innerHTML = '<option value="">Select a trip to review</option>';
+                availableBookings.forEach(booking => {
                     const trip = booking.trips;
                     if (trip) {
                         const route = trip.routes;
@@ -750,8 +764,12 @@ async function loadCompletedTrips() {
                     }
                 });
             } else {
-                select.innerHTML = '<option value="">No completed trips found</option>';
-                showToast('No completed trips to review yet', 'info');
+                select.innerHTML = '<option value="">No trips available for review</option>';
+                if (bookings?.length > 0) {
+                    showToast('You have already reviewed all your trips!', 'info');
+                } else {
+                    showToast('Complete a trip first to leave a review!', 'info');
+                }
             }
         }
     } catch (error) {
@@ -759,7 +777,6 @@ async function loadCompletedTrips() {
         showToast('Error loading trips. Please refresh the page.', 'error');
     }
 }
-
 async function submitReview() {
     console.log('Submit review button clicked'); // Debug log
     
