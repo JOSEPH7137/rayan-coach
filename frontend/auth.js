@@ -1,36 +1,61 @@
-// Login user with role validation
+// Login user with better error handling
 async function loginUser(email, password, rememberMe = false) {
     try {
+        console.log('Attempting login for:', email);
+        
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
         });
         
-        if (error) throw error;
+        if (error) {
+            console.error('Login error:', error);
+            if (error.message.includes('Invalid login credentials')) {
+                showToast('Invalid email or password. Please check your credentials.', 'error');
+            } else if (error.message.includes('Email not confirmed')) {
+                showToast('Please verify your email address before logging in.', 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
+            return { success: false, error: error.message };
+        }
         
-        // Get user profile with role
-        const { data: profile } = await supabase
+        console.log('Login successful for:', data.user.email);
+        
+        // Get user profile
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
             .single();
         
-        // Check if user is active
-        if (profile?.is_active === false) {
-            await supabase.auth.signOut();
-            showToast('Your account has been deactivated. Contact support.', 'error');
-            return { success: false };
+        if (profileError) {
+            console.error('Profile fetch error:', profileError);
         }
         
-        // Store role in session
-        sessionStorage.setItem('user_role', profile?.role);
+        const userRole = profile?.role || 'client';
+        console.log('User role:', userRole);
+        
+        // Store user info
+        sessionStorage.setItem('user_role', userRole);
+        sessionStorage.setItem('user_id', data.user.id);
+        sessionStorage.setItem('user_email', email);
+        
+        if (rememberMe) {
+            localStorage.setItem('rayan_user', JSON.stringify({
+                id: data.user.id,
+                email: email,
+                role: userRole,
+                name: profile?.name
+            }));
+        }
         
         showToast(`Welcome back, ${profile?.name || email}!`, 'success');
         
         // Redirect based on role
-        if (profile?.role === 'admin') {
+        if (userRole === 'admin') {
             window.location.href = 'admin-dashboard.html';
-        } else if (profile?.role === 'driver') {
+        } else if (userRole === 'driver') {
             window.location.href = 'driver-dashboard.html';
         } else {
             window.location.href = 'user-dashboard.html';
@@ -38,7 +63,8 @@ async function loginUser(email, password, rememberMe = false) {
         
         return { success: true, user: data.user, profile: profile };
     } catch (error) {
-        showToast(error.message, 'error');
+        console.error('Unexpected error:', error);
+        showToast('Login failed. Please try again.', 'error');
         return { success: false, error: error.message };
     }
 }
