@@ -19,8 +19,6 @@ async function loginUser(email, password) {
             console.error('Login error:', error);
             if (error.message === 'Invalid login credentials') {
                 showToast('❌ Invalid email or password. Please try again.', 'error');
-            } else if (error.message.includes('Email not confirmed')) {
-                showToast('📧 Please verify your email address before logging in.', 'error');
             } else {
                 showToast(error.message, 'error');
             }
@@ -50,37 +48,30 @@ async function loginUser(email, password) {
         
         console.log('User role:', userRole);
         
-        // Clear any existing session data first
-        sessionStorage.clear();
+        // Store user info in localStorage (persists across page reloads)
+        const userData = {
+            id: data.user.id,
+            email: email,
+            role: userRole,
+            name: profile?.name || email.split('@')[0],
+            login_time: Date.now()
+        };
         
-        // Store user info in sessionStorage (persists until browser closes)
-        sessionStorage.setItem('user_role', userRole);
-        sessionStorage.setItem('user_id', data.user.id);
-        sessionStorage.setItem('user_email', email);
-        sessionStorage.setItem('logged_in', 'true');
-        sessionStorage.setItem('login_time', Date.now().toString());
+        localStorage.setItem('rayan_user', JSON.stringify(userData));
+        sessionStorage.setItem('rayan_session', JSON.stringify(userData));
         
-        const rememberMe = document.getElementById('rememberMe');
-        if (rememberMe && rememberMe.checked) {
-            localStorage.setItem('rayan_user', JSON.stringify({
-                id: data.user.id,
-                email: email,
-                role: userRole,
-                name: profile?.name,
-                login_time: Date.now()
-            }));
-        }
+        showToast(`✅ Welcome back, ${userData.name}!`, 'success');
         
-        showToast(`✅ Welcome back, ${profile?.name || email}!`, 'success');
-        
-        // Redirect based on role
-        if (userRole === 'admin') {
-            window.location.replace('admin-dashboard.html');
-        } else if (userRole === 'driver') {
-            window.location.replace('driver-dashboard.html');
-        } else {
-            window.location.replace('user-dashboard.html');
-        }
+        // Redirect based on role - use window.location.href instead of replace
+        setTimeout(() => {
+            if (userRole === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (userRole === 'driver') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+        }, 500);
         
         return { success: true, user: data.user, profile: profile };
     } catch (error) {
@@ -151,9 +142,9 @@ async function logoutUser() {
         if (window.supabase) {
             await window.supabase.auth.signOut();
         }
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.replace('index.html');
+        localStorage.removeItem('rayan_user');
+        sessionStorage.removeItem('rayan_session');
+        window.location.href = 'index.html';
         showToast('Logged out successfully', 'success');
     } catch (error) {
         showToast(error.message, 'error');
@@ -163,28 +154,23 @@ async function logoutUser() {
 // Get current user - check session
 async function getCurrentUser() {
     try {
-        // First check sessionStorage
-        const loggedIn = sessionStorage.getItem('logged_in');
-        const userId = sessionStorage.getItem('user_id');
-        const userRole = sessionStorage.getItem('user_role');
-        
-        if (loggedIn === 'true' && userId) {
-            return { 
-                id: userId, 
-                role: userRole,
-                email: sessionStorage.getItem('user_email')
-            };
-        }
-        
-        // Check localStorage for remember me
+        // First check localStorage
         const storedUser = localStorage.getItem('rayan_user');
         if (storedUser) {
             const userData = JSON.parse(storedUser);
-            sessionStorage.setItem('logged_in', 'true');
-            sessionStorage.setItem('user_id', userData.id);
-            sessionStorage.setItem('user_role', userData.role);
-            sessionStorage.setItem('user_email', userData.email);
-            return userData;
+            // Check if session is still valid (within 7 days)
+            if (userData.login_time && (Date.now() - userData.login_time) < 7 * 24 * 60 * 60 * 1000) {
+                return userData;
+            } else {
+                // Session expired
+                localStorage.removeItem('rayan_user');
+            }
+        }
+        
+        // Check sessionStorage
+        const sessionUser = sessionStorage.getItem('rayan_session');
+        if (sessionUser) {
+            return JSON.parse(sessionUser);
         }
         
         return null;
