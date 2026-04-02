@@ -422,24 +422,12 @@ async function handleSignup() {
   }
   
   if (result && result.success) {
-    const signupFname = document.getElementById('signupFname');
-    const signupLname = document.getElementById('signupLname');
-    const signupEmail = document.getElementById('signupEmail');
-    const signupPhone = document.getElementById('signupPhone');
-    const signupPassword = document.getElementById('signupPassword');
-    const signupConfirmPassword = document.getElementById('signupConfirmPassword');
-    
-    if (signupFname) signupFname.value = '';
-    if (signupLname) signupLname.value = '';
-    if (signupEmail) signupEmail.value = '';
-    if (signupPhone) signupPhone.value = '';
-    if (signupPassword) signupPassword.value = '';
-    if (signupConfirmPassword) signupConfirmPassword.value = '';
-    
-    setTimeout(() => {
-      switchTab('login');
-      showToast('Account created! Please sign in.', 'success');
-    }, 2000);
+    // Clear form
+    const inputs = ['signupFname', 'signupLname', 'signupEmail', 'signupPhone', 'signupPassword', 'signupConfirmPassword'];
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
   }
 }
 
