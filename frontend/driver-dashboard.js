@@ -1,3 +1,15 @@
+(async function() {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    if (user.role !== 'driver' && user.role !== 'admin') {
+        showToast('Access denied. Driver privileges required.', 'error');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+})();
 // Driver Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
@@ -6,7 +18,23 @@ let userProfile = null;
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
 }
-
+// Check for valid session at the start
+async function checkValidSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const storedUserId = sessionStorage.getItem('current_user_id');
+    const storedUser = localStorage.getItem('rayan_user');
+    
+    if (!session && !storedUser) {
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    
+    if (session) {
+        sessionStorage.setItem('current_user_id', session.user.id);
+    }
+    
+    return true;
+}
 function navigateTo(page) {
     currentPage = page;
     
@@ -252,12 +280,7 @@ async function handleDriverLogout() {
 // Load driver reviews (only reviews about this driver)
 async function loadDriverReviews() {
     const driver = await getCurrentUser();
-    if (!driver) {
-        console.log('No driver found');
-        return;
-    }
-    
-    console.log('Loading reviews for driver:', driver.id);
+    if (!driver) return;
     
     try {
         const { data: reviews, error } = await window.supabase
@@ -271,20 +294,17 @@ async function loadDriverReviews() {
         
         if (error) throw error;
         
-        console.log('Reviews found for driver:', reviews?.length);
-        
-        // Calculate stats
         const total = reviews.length;
         const avg = total > 0 ? (reviews.reduce((sum, r) => sum + (r.overall_rating || r.driver_rating), 0) / total).toFixed(1) : 0;
         const fiveStar = reviews.filter(r => (r.overall_rating || r.driver_rating) === 5).length;
         
-        const avgRatingEl = document.getElementById('avgRating');
-        const totalReviewsEl = document.getElementById('totalReviews');
-        const fiveStarCountEl = document.getElementById('fiveStarCount');
+        const avgEl = document.getElementById('avgRating');
+        const totalEl = document.getElementById('totalReviews');
+        const fiveStarEl = document.getElementById('fiveStarCount');
         
-        if (avgRatingEl) avgRatingEl.textContent = avg;
-        if (totalReviewsEl) totalReviewsEl.textContent = total;
-        if (fiveStarCountEl) fiveStarCountEl.textContent = fiveStar;
+        if (avgEl) avgEl.textContent = avg;
+        if (totalEl) totalEl.textContent = total;
+        if (fiveStarEl) fiveStarEl.textContent = fiveStar;
         
         const reviewsList = document.getElementById('driverReviewsList');
         if (reviewsList) {
@@ -292,31 +312,27 @@ async function loadDriverReviews() {
                 reviewsList.innerHTML = reviews.map(review => `
                     <div class="trip-item">
                         <div>
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                                <div>
-                                    <div class="rating-display">
-                                        ${Array(review.overall_rating || review.driver_rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
-                                        ${Array(5 - (review.overall_rating || review.driver_rating)).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
-                                    </div>
-                                    <span style="color: var(--gold); font-size: 12px;">${review.overall_rating || review.driver_rating}/5</span>
-                                </div>
-                                <span style="color: var(--muted); font-size: 11px;">${new Date(review.created_at).toLocaleDateString()}</span>
+                            <div class="rating-display" style="margin-bottom: 8px;">
+                                ${Array(review.overall_rating || review.driver_rating).fill('<i class="fas fa-star" style="color: #FFD700;"></i>').join('')}
+                                ${Array(5 - (review.overall_rating || review.driver_rating)).fill('<i class="far fa-star" style="color: var(--muted);"></i>').join('')}
+                                <span style="color: var(--gold); margin-left: 8px;">${review.overall_rating || review.driver_rating}/5</span>
                             </div>
                             <h4>${review.route || 'Journey'}</h4>
-                            <p style="font-size: 13px; color: var(--muted);">Passenger: ${review.profiles?.name || 'Anonymous'}</p>
-                            <div style="display: flex; gap: 16px; margin-top: 8px;">
-                                <span style="font-size: 12px;">🚗 Journey Rating: ${review.journey_rating}/5</span>
-                                <span style="font-size: 12px;">👨‍✈️ Your Rating: ${review.driver_rating}/5</span>
+                            <p style="color: var(--muted); font-size: 13px;">Passenger: ${review.profiles?.name || 'Anonymous'}</p>
+                            <div style="margin-top: 8px;">
+                                <span>🚗 Journey: ${review.journey_rating}/5</span> | 
+                                <span>👨‍✈️ Driver: ${review.driver_rating}/5</span>
                             </div>
-                            ${review.comment ? `<div style="margin-top: 12px; background: var(--card2); padding: 10px; border-radius: 8px;">
-                                <strong>💬 Passenger Feedback:</strong>
-                                <p style="margin-top: 5px; font-style: italic;">"${review.comment}"</p>
+                            ${review.comment ? `<div style="margin-top: 12px; background: var(--card2); padding: 12px; border-radius: 8px;">
+                                <strong>💬 Passenger Comment:</strong>
+                                <p style="margin-top: 5px;">"${review.comment}"</p>
                             </div>` : ''}
+                            <small style="color: var(--muted); display: block; margin-top: 8px;">📅 ${new Date(review.created_at).toLocaleDateString()}</small>
                         </div>
                     </div>
                 `).join('');
             } else {
-                reviewsList.innerHTML = '<div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here when passengers rate you</p></div></div>';
+                reviewsList.innerHTML = '<div class="trip-item"><div><h4>No reviews yet</h4><p>Reviews will appear here when passengers rate you</p></div></div>';
             }
         }
     } catch (error) {

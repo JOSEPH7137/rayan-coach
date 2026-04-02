@@ -1,3 +1,15 @@
+(async function() {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    if (user.role !== 'admin') {
+        showToast('Access denied. Admin privileges required.', 'error');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+})();
 // Admin Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
@@ -6,7 +18,23 @@ let userProfile = null;
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
 }
-
+// Check for valid session at the start
+async function checkValidSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const storedUserId = sessionStorage.getItem('current_user_id');
+    const storedUser = localStorage.getItem('rayan_user');
+    
+    if (!session && !storedUser) {
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    
+    if (session) {
+        sessionStorage.setItem('current_user_id', session.user.id);
+    }
+    
+    return true;
+}
 function navigateTo(page) {
     currentPage = page;
     

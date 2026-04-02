@@ -1,112 +1,122 @@
-// auth.js - Authentication functions
-
-// Login user
-async function loginUser(email, password) {
+// Login user with role validation
+async function loginUser(email, password, rememberMe = false) {
     try {
-        console.log('Attempting login for:', email);
-        
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
-            return { success: false, error: 'Supabase not initialized' };
-        }
-        
-        const { data, error } = await window.supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
         });
         
-        if (error) {
-            console.error('Login error:', error);
-            showToast(error.message, 'error');
-            return { success: false, error: error.message };
+        if (error) throw error;
+        
+        // Get user profile with role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+        
+        // Check if user is active
+        if (profile?.is_active === false) {
+            await supabase.auth.signOut();
+            showToast('Your account has been deactivated. Contact support.', 'error');
+            return { success: false };
         }
         
-        console.log('Login successful! User ID:', data.user.id);
+        // Store role in session
+        sessionStorage.setItem('user_role', profile?.role);
         
-        // Get user profile - if doesn't exist, create it
-        let profile = null;
-        let profileError = null;
-        
-        try {
-            const result = await window.supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', data.user.id)
-                .single();
-            
-            profile = result.data;
-            profileError = result.error;
-        } catch (err) {
-            console.log('Profile fetch error, will create profile:', err);
-        }
-        
-        // If profile doesn't exist, create one
-        if (!profile && profileError?.code === 'PGRST116') {
-            console.log('Creating profile for user...');
-            const { data: newProfile, error: insertError } = await window.supabase
-                .from('profiles')
-                .insert({
-                    id: data.user.id,
-                    name: data.user.user_metadata?.name || email,
-                    email: email,
-                    role: 'user'
-                })
-                .select()
-                .single();
-            
-            if (!insertError) {
-                profile = newProfile;
-                console.log('Profile created successfully');
-            }
-        }
-        
-        const userName = profile?.name || email;
-        showToast(`Welcome back, ${userName}!`, 'success');
-        
-        // Store session if remember me is checked
-        const rememberMe = document.getElementById('rememberMe')?.checked;
-        if (rememberMe) {
-            localStorage.setItem('supabase_session', JSON.stringify(data.session));
-        }
+        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
         
         // Redirect based on role
-        const role = profile?.role || 'user';
-        console.log('Redirecting to role:', role);
-        
-        if (role === 'admin') {
+        if (profile?.role === 'admin') {
             window.location.href = 'admin-dashboard.html';
-        } else if (role === 'driver') {
+        } else if (profile?.role === 'driver') {
             window.location.href = 'driver-dashboard.html';
         } else {
             window.location.href = 'user-dashboard.html';
         }
         
-        return { success: true };
+        return { success: true, user: data.user, profile: profile };
     } catch (error) {
-        console.error('Unexpected error:', error);
-        showToast('Login failed. Please try again.', 'error');
+        showToast(error.message, 'error');
         return { success: false, error: error.message };
     }
 }
-
-// Register user
-async function registerUser(email, password, name, phone, role = 'user', driverLicense = null, avatarUrl = null) {
+// Logout user - clear all local data
+async function logoutUser() {
     try {
-        console.log('Attempting signup for:', email);
+        await supabase.auth.signOut();
+        // Clear all local storage
+        localStorage.removeItem('rayan_user');
+        localStorage.removeItem('supabase_session');
+        localStorage.removeItem('remembered_email');
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+        showToast('Logged out successfully', 'success');
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
+
+// Get current user - check session first
+async function getCurrentUser() {
+    try {
+        // First check sessionStorage for current session
+        const currentUserId = sessionStorage.getItem('current_user_id');
         
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
-            return { success: false, error: 'Supabase not initialized' };
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+            // Check if we have a stored user
+            const storedUser = localStorage.getItem('rayan_user');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                return { id: userData.id, email: userData.email };
+            }
+            return null;
         }
         
-        const { data, error } = await window.supabase.auth.signUp({
+        // Verify this is the same user
+        if (currentUserId && user.id !== currentUserId) {
+            // Different user, clear session
+            await supabase.auth.signOut();
+            localStorage.removeItem('rayan_user');
+            sessionStorage.clear();
+            return null;
+        }
+        
+        sessionStorage.setItem('current_user_id', user.id);
+        return user;
+    } catch (error) {
+        return null;
+    }
+}
+
+/// Register user - role is passed from the signup page
+async function registerUser(email, password, name, phone, role = 'client', driverLicense = null, avatarUrl = null) {
+    try {
+        console.log('Attempting signup for:', email, 'with role:', role);
+        
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('email', email)
+            .single();
+        
+        if (existingUser) {
+            showToast('Email already registered. Please sign in instead.', 'error');
+            return { success: false, error: 'Email already exists' };
+        }
+        
+        // Create user with role in metadata
+        const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
                     name: name,
                     phone: phone,
-                    role: role,
+                    role: role,  // This will be 'client', 'driver', or 'admin'
                     driver_license: driverLicense,
                     avatar_url: avatarUrl
                 }
@@ -115,43 +125,12 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
         
         if (error) {
             console.error('Signup error:', error);
-            if (error.message.includes('User already registered')) {
-                showToast('Email already registered. Please sign in instead.', 'error');
-            } else {
-                showToast(error.message, 'error');
-            }
+            showToast(error.message, 'error');
             return { success: false, error: error.message };
         }
         
-        console.log('Signup successful! User ID:', data.user.id);
-        
-        // Create profile manually after signup
-        const { error: insertError } = await window.supabase
-            .from('profiles')
-            .insert({
-                id: data.user.id,
-                name: name,
-                email: email,
-                phone: phone,
-                role: role,
-                driver_license: driverLicense,
-                avatar_url: avatarUrl
-            });
-        
-        if (insertError) {
-            console.error('Profile creation error:', insertError);
-        }
-        
-        showToast('Account created successfully! Logging you in...', 'success');
-        
-        // Auto login after signup
-        setTimeout(async () => {
-            const loginResult = await loginUser(email, password);
-            if (!loginResult.success) {
-                // If auto-login fails, redirect to login page
-                window.location.href = 'auth.html?role=' + role;
-            }
-        }, 1500);
+        console.log('Signup successful! Role assigned:', role);
+        showToast(`Account created successfully as ${role.toUpperCase()}! Please sign in.`, 'success');
         
         return { success: true, user: data.user };
     } catch (error) {
@@ -161,48 +140,123 @@ async function registerUser(email, password, name, phone, role = 'user', driverL
     }
 }
 
-// Logout user
-async function logoutUser() {
+// Login user with role validation
+async function loginUser(email, password, rememberMe = false) {
     try {
-        await window.supabase.auth.signOut();
-        localStorage.removeItem('supabase_session');
-        window.location.href = 'index.html';
-        showToast('Logged out successfully', 'success');
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
-
-// Get current user
-async function getCurrentUser() {
-    try {
-        const { data: { user }, error } = await window.supabase.auth.getUser();
-        if (error) return null;
-        return user;
-    } catch (error) {
-        return null;
-    }
-}
-
-// Reset password
-async function resetPassword(email) {
-    try {
-        const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/reset-password.html',
+        console.log('Attempting login for:', email);
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
         });
         
         if (error) throw error;
-        showToast('Password reset link sent to your email!', 'success');
-        return { success: true };
+        
+        // Get user profile to check role
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+        
+        if (profileError) {
+            console.error('Profile fetch error:', profileError);
+        }
+        
+        const userRole = profile?.role || 'client';
+        
+        // Store user info in session
+        sessionStorage.setItem('user_role', userRole);
+        sessionStorage.setItem('user_id', data.user.id);
+        sessionStorage.setItem('user_email', email);
+        
+        if (rememberMe) {
+            localStorage.setItem('rayan_user', JSON.stringify({
+                id: data.user.id,
+                email: email,
+                role: userRole,
+                name: profile?.name
+            }));
+        }
+        
+        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
+        
+        // Redirect based on role
+        if (userRole === 'admin') {
+            window.location.href = 'admin-dashboard.html';
+        } else if (userRole === 'driver') {
+            window.location.href = 'driver-dashboard.html';
+        } else {
+            window.location.href = 'user-dashboard.html';
+        }
+        
+        return { success: true, user: data.user, profile: profile };
     } catch (error) {
         showToast(error.message, 'error');
         return { success: false, error: error.message };
     }
 }
 
+// Get current user with role
+async function getCurrentUser() {
+    try {
+        // First check session storage
+        const storedUserId = sessionStorage.getItem('user_id');
+        const storedRole = sessionStorage.getItem('user_role');
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+            // Check localStorage for remember me
+            const storedUser = localStorage.getItem('rayan_user');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                sessionStorage.setItem('user_id', userData.id);
+                sessionStorage.setItem('user_role', userData.role);
+                sessionStorage.setItem('user_email', userData.email);
+                return { id: userData.id, email: userData.email, role: userData.role };
+            }
+            return null;
+        }
+        
+        // Get role from profile if not in session
+        let role = storedRole;
+        if (!role) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+            role = profile?.role || 'client';
+            sessionStorage.setItem('user_role', role);
+        }
+        
+        sessionStorage.setItem('user_id', user.id);
+        return { ...user, role: role };
+    } catch (error) {
+        return null;
+    }
+}
+
+// Check if user has access to a specific page
+async function checkPageAccess(allowedRoles = []) {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    
+    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+        showToast('You do not have access to this page', 'error');
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    
+    return true;
+}
+
 // Make functions global
-window.loginUser = loginUser;
 window.registerUser = registerUser;
+window.loginUser = loginUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
-window.resetPassword = resetPassword;
+window.checkPageAccess = checkPageAccess;

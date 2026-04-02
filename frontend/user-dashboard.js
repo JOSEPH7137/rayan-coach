@@ -1,3 +1,33 @@
+(async function() {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    if (user.role !== 'driver' && user.role !== 'admin') {
+        showToast('Access denied. Driver privileges required.', 'error');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+})();
+// Check for valid session at the start
+async function checkValidSession() {
+    const { data: { session } } = await window.supabase.auth.getSession();
+    const storedUserId = sessionStorage.getItem('current_user_id');
+    const storedUser = localStorage.getItem('rayan_user');
+    
+    if (!session && !storedUser) {
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    
+    if (session) {
+        sessionStorage.setItem('current_user_id', session.user.id);
+    }
+    
+    return true;
+}
+
 // User Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
@@ -643,15 +673,27 @@ async function loadUserData() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
+    
+    // Check valid session first
+    const isValid = await checkValidSession();
+    if (!isValid) return;
+    
     const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session) { window.location.href = 'role-selection.html'; return; }
+    if (!session) { 
+        window.location.href = 'role-selection.html'; 
+        return; 
+    }
+    
     await loadUserData();
     loadPageContent('dashboard');
+    
     document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
-        item.addEventListener('click', (e) => { e.preventDefault(); navigateTo(item.getAttribute('data-page')); });
+        item.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            navigateTo(item.getAttribute('data-page')); 
+        });
     });
 });
-
 // ==================== REVIEW SYSTEM ====================
 
 function initRatingStars() {
@@ -778,8 +820,6 @@ async function loadCompletedTrips() {
     }
 }
 async function submitReview() {
-    console.log('Submit review button clicked'); // Debug log
-    
     const tripSelect = document.getElementById('reviewTripSelect');
     const selectedOption = tripSelect?.options[tripSelect.selectedIndex];
     
@@ -796,26 +836,18 @@ async function submitReview() {
     const driverRating = parseInt(document.getElementById('selectedDriverRating')?.value) || 0;
     const comment = document.getElementById('reviewComment')?.value;
     
-    console.log('Review data:', { tripId, driverId, journeyRating, driverRating, comment }); // Debug log
-    
     if (!tripId) {
         showToast('Please select a valid trip', 'error');
         return;
     }
     
-    if (journeyRating === 0) {
-        showToast('Please rate your journey', 'error');
-        return;
-    }
-    
-    if (driverRating === 0) {
-        showToast('Please rate the driver', 'error');
+    if (journeyRating === 0 || driverRating === 0) {
+        showToast('Please rate both the journey and the driver', 'error');
         return;
     }
     
     const overallRating = Math.round((journeyRating + driverRating) / 2);
     
-    // Disable button and show loading
     const submitBtn = document.getElementById('submitReviewBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -823,6 +855,19 @@ async function submitReview() {
     }
     
     try {
+        // First, check if already reviewed
+        const { data: existingReview } = await window.supabase
+            .from('reviews')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('trip_id', tripId)
+            .single();
+        
+        if (existingReview) {
+            showToast('You have already reviewed this trip', 'warning');
+            return;
+        }
+        
         const { data, error } = await window.supabase
             .from('reviews')
             .insert({
@@ -832,20 +877,16 @@ async function submitReview() {
                 journey_rating: journeyRating,
                 driver_rating: driverRating,
                 overall_rating: overallRating,
-                comment: comment,
+                comment: comment || null,
                 journey_date: journeyDate,
-                route: route
+                route: route,
+                created_at: new Date().toISOString()
             })
             .select();
         
-        if (error) {
-            console.error('Supabase error:', error);
-            throw error;
-        }
+        if (error) throw error;
         
-        console.log('Review submitted successfully:', data); // Debug log
-        
-        showToast('✅ Thank you for your review! Your feedback has been submitted successfully.', 'success');
+        showToast('✅ Thank you for your review!', 'success');
         
         // Reset form
         document.getElementById('selectedRating').value = '0';
@@ -853,27 +894,20 @@ async function submitReview() {
         document.getElementById('reviewComment').value = '';
         
         // Reset stars
-        const journeyStars = document.querySelectorAll('#ratingStars i');
-        const driverStars = document.querySelectorAll('#driverRatingStars i');
-        journeyStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
-        driverStars.forEach(star => { star.className = 'far fa-star'; star.style.color = 'var(--muted)'; });
+        document.querySelectorAll('#ratingStars i, #driverRatingStars i').forEach(star => {
+            star.className = 'far fa-star';
+            star.style.color = 'var(--muted)';
+        });
         
-        // Reset trip select
         if (tripSelect) tripSelect.value = '';
         
-        // Reload reviews
+        // Reload data
         await loadUserReviews();
-        
-        // Show success popup
-        const successPopup = document.createElement('div');
-        successPopup.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--gold); color: #08080F; padding: 20px 40px; border-radius: 12px; font-weight: bold; z-index: 1000; animation: fadeOut 2s forwards;';
-        successPopup.innerHTML = '✨ Review Submitted! ✨';
-        document.body.appendChild(successPopup);
-        setTimeout(() => successPopup.remove(), 2000);
+        await loadCompletedTrips();
         
     } catch (error) {
         console.error('Error submitting review:', error);
-        showToast('Error submitting review. Please try again.', 'error');
+        showToast(error.message || 'Error submitting review', 'error');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
