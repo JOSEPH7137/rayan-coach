@@ -1,56 +1,3 @@
-// Check session on page load
-(async function() {
-    const loggedIn = sessionStorage.getItem('logged_in');
-    const loginTime = sessionStorage.getItem('login_time');
-    
-    if (!loggedIn) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    // Check if session expired (24 hours)
-    if (loginTime && (Date.now() - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
-        sessionStorage.clear();
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    const user = await getCurrentUser();
-    if (!user) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-})();
-(async function() {
-    const user = await getCurrentUser();
-    if (!user) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    if (user.role !== 'driver' && user.role !== 'admin') {
-        showToast('Access denied. Driver privileges required.', 'error');
-        window.location.href = 'role-selection.html';
-        return;
-    }
-})();
-// Check for valid session at the start
-async function checkValidSession() {
-    const { data: { session } } = await window.supabase.auth.getSession();
-    const storedUserId = sessionStorage.getItem('current_user_id');
-    const storedUser = localStorage.getItem('rayan_user');
-    
-    if (!session && !storedUser) {
-        window.location.href = 'role-selection.html';
-        return false;
-    }
-    
-    if (session) {
-        sessionStorage.setItem('current_user_id', session.user.id);
-    }
-    
-    return true;
-}
-
 // User Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
@@ -64,6 +11,50 @@ const locations = [
 
 // Route data cache
 let routeData = {};
+
+// Check session on page load - FIXED
+(async function() {
+    // Get session from Supabase
+    const { data: { session } } = await window.supabase.auth.getSession();
+    
+    if (!session) {
+        console.log('No session found, redirecting to login');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Get user profile to check role
+    const { data: profile, error } = await window.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+    
+    if (error || !profile) {
+        console.log('Profile not found, redirecting');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Check if user is client or admin (admins can access user dashboard too)
+    if (profile.role !== 'client' && profile.role !== 'admin') {
+        showToast('Access denied. Client privileges required.', 'error');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    currentUser = session.user;
+    userProfile = profile;
+    
+    // Update UI with user info
+    document.getElementById('userName').textContent = profile.name || session.user.email;
+    document.getElementById('userAvatar').textContent = (profile.name || session.user.email).charAt(0);
+    
+    console.log('User authenticated:', profile.name);
+    
+    // Load dashboard content
+    loadPageContent('dashboard');
+})();
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
@@ -202,56 +193,56 @@ function loadPageContent(page) {
             </div>
         `,
         reviews: `
-    <div class="dashboard-card">
-        <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
-        <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
-        
-        <div class="form-group">
-            <label>Select Your Trip</label>
-            <select class="input" id="reviewTripSelect">
-                <option value="">Select a completed trip</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Rate Your Journey</label>
-            <div class="rating-stars" id="ratingStars">
-                <i class="far fa-star" data-rating="1"></i>
-                <i class="far fa-star" data-rating="2"></i>
-                <i class="far fa-star" data-rating="3"></i>
-                <i class="far fa-star" data-rating="4"></i>
-                <i class="far fa-star" data-rating="5"></i>
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-star"></i><span>Rate Your Journey</span></div>
+                <p style="color: var(--muted); margin-bottom: 20px;">Help us improve by rating your recent trips. Your feedback helps our drivers and service!</p>
+                
+                <div class="form-group">
+                    <label>Select Your Trip</label>
+                    <select class="input" id="reviewTripSelect">
+                        <option value="">Select a completed trip</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Rate Your Journey</label>
+                    <div class="rating-stars" id="ratingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="selectedRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Rate the Driver</label>
+                    <div class="rating-stars" id="driverRatingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="selectedDriverRating" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Review (Optional)</label>
+                    <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
+                </div>
+                
+                <button class="btn-dashboard btn-primary" id="submitReviewBtn" onclick="submitReview()">Submit Review</button>
             </div>
-            <input type="hidden" id="selectedRating" value="0">
-        </div>
-        
-        <div class="form-group">
-            <label>Rate the Driver</label>
-            <div class="rating-stars" id="driverRatingStars">
-                <i class="far fa-star" data-rating="1"></i>
-                <i class="far fa-star" data-rating="2"></i>
-                <i class="far fa-star" data-rating="3"></i>
-                <i class="far fa-star" data-rating="4"></i>
-                <i class="far fa-star" data-rating="5"></i>
+            
+            <div class="dashboard-card mt-16">
+                <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
+                <div id="userReviewsList">
+                    <div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here</p></div></div>
+                </div>
             </div>
-            <input type="hidden" id="selectedDriverRating" value="0">
-        </div>
-        
-        <div class="form-group">
-            <label>Your Review (Optional)</label>
-            <textarea class="input" id="reviewComment" rows="4" placeholder="Share your experience... What did you like? What could be improved?"></textarea>
-        </div>
-        
-        <button class="btn-dashboard btn-primary" id="submitReviewBtn" onclick="submitReview()">Submit Review</button>
-    </div>
-    
-    <div class="dashboard-card mt-16">
-        <div class="card-title"><i class="fas fa-history"></i><span>My Previous Reviews</span></div>
-        <div id="userReviewsList">
-            <div class="trip-item"><div><h4>No reviews yet</h4><p>Your reviews will appear here</p></div></div>
-        </div>
-    </div>
-`,
+        `,
         safety: `
             <div class="dashboard-card"><div class="card-title"><i class="fas fa-shield-alt"></i><span>Safety & SOS</span></div>
                 <div style="text-align: center; padding: 20px;">
@@ -668,55 +659,18 @@ async function updateProfile() {
 }
 
 function triggerSOS() { showToast('SOS Alert Sent! Emergency services notified. Your location has been shared.', 'error'); }
-async function handleLogout() { await logoutUser(); }
 
-async function loadUserData() {
-    const user = await getCurrentUser();
-    if (user) {
-        currentUser = user;
-        const { data: profile } = await window.supabase.from('profiles').select('*').eq('id', user.id).single();
-        userProfile = profile;
-        document.getElementById('userName').textContent = profile?.name || user.email;
-        document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
-        
-        const profileImg = document.getElementById('profilePictureImg');
-        const fallback = document.getElementById('profileAvatarFallback');
-        if (profile?.avatar_url && profileImg) {
-            profileImg.src = profile.avatar_url;
-            profileImg.style.display = 'block';
-            if (fallback) fallback.style.display = 'none';
-        } else if (fallback) {
-            fallback.style.display = 'flex';
-            fallback.textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
-        }
-        
-        loadUserParcels();
-    }
+async function handleLogout() { 
+    await logoutUser(); 
 }
 
+// Initialize page - FIXED (no duplicate session checks)
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
-    
-    // Check valid session first
-    const isValid = await checkValidSession();
-    if (!isValid) return;
-    
-    const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session) { 
-        window.location.href = 'role-selection.html'; 
-        return; 
-    }
-    
-    await loadUserData();
-    loadPageContent('dashboard');
-    
-    document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
-        item.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            navigateTo(item.getAttribute('data-page')); 
-        });
-    });
+    // Session is already checked in the IIFE at the top
+    // Additional initialization if needed
 });
+
 // ==================== REVIEW SYSTEM ====================
 
 function initRatingStars() {
@@ -776,7 +730,6 @@ async function loadCompletedTrips() {
     try {
         console.log('Loading completed trips...');
         
-        // First, get all bookings for this user
         const { data: bookings, error } = await window.supabase
             .from('bookings')
             .select(`
@@ -792,9 +745,6 @@ async function loadCompletedTrips() {
         
         if (error) throw error;
         
-        console.log('All bookings found:', bookings?.length);
-        
-        // Filter to show only bookings that can be reviewed (not already reviewed)
         const { data: existingReviews } = await window.supabase
             .from('reviews')
             .select('trip_id')
@@ -805,8 +755,6 @@ async function loadCompletedTrips() {
         const availableBookings = bookings?.filter(booking => 
             !reviewedTripIds.includes(booking.trip_id)
         ) || [];
-        
-        console.log('Available bookings for review:', availableBookings.length);
         
         const select = document.getElementById('reviewTripSelect');
         if (select) {
@@ -842,6 +790,7 @@ async function loadCompletedTrips() {
         showToast('Error loading trips. Please refresh the page.', 'error');
     }
 }
+
 async function submitReview() {
     const tripSelect = document.getElementById('reviewTripSelect');
     const selectedOption = tripSelect?.options[tripSelect.selectedIndex];
@@ -878,7 +827,6 @@ async function submitReview() {
     }
     
     try {
-        // First, check if already reviewed
         const { data: existingReview } = await window.supabase
             .from('reviews')
             .select('id')
@@ -911,12 +859,10 @@ async function submitReview() {
         
         showToast('✅ Thank you for your review!', 'success');
         
-        // Reset form
         document.getElementById('selectedRating').value = '0';
         document.getElementById('selectedDriverRating').value = '0';
         document.getElementById('reviewComment').value = '';
         
-        // Reset stars
         document.querySelectorAll('#ratingStars i, #driverRatingStars i').forEach(star => {
             star.className = 'far fa-star';
             star.style.color = 'var(--muted)';
@@ -924,7 +870,6 @@ async function submitReview() {
         
         if (tripSelect) tripSelect.value = '';
         
-        // Reload data
         await loadUserReviews();
         await loadCompletedTrips();
         
@@ -938,6 +883,7 @@ async function submitReview() {
         }
     }
 }
+
 async function loadUserReviews() {
     try {
         const { data: reviews, error } = await window.supabase
@@ -981,6 +927,7 @@ async function loadUserReviews() {
     }
 }
 
+// Make functions global
 window.toggleSidebar = toggleSidebar;
 window.navigateTo = navigateTo;
 window.searchBuses = searchBuses;

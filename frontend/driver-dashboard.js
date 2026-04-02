@@ -1,43 +1,58 @@
-// Check session on page load
-(async function() {
-    const loggedIn = sessionStorage.getItem('logged_in');
-    const loginTime = sessionStorage.getItem('login_time');
-    
-    if (!loggedIn) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    // Check if session expired (24 hours)
-    if (loginTime && (Date.now() - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
-        sessionStorage.clear();
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    const user = await getCurrentUser();
-    if (!user) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-})();
 // Driver Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 let isFirstLogin = false;
 
-// Check driver access at start
+// Check session on page load - FIXED (removed sessionStorage dependency)
 (async function() {
-    const user = await getCurrentUser();
-    if (!user) {
+    // Get session from Supabase directly
+    const { data: { session } } = await window.supabase.auth.getSession();
+    
+    if (!session) {
+        console.log('No session found, redirecting to login');
         window.location.href = 'role-selection.html';
         return;
     }
-    if (user.role !== 'driver') {
+    
+    // Get user profile to check role
+    const { data: profile, error } = await window.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+    
+    if (error || !profile) {
+        console.log('Profile not found, redirecting');
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Check if user is driver
+    if (profile.role !== 'driver') {
         showToast('Access denied. Driver privileges required.', 'error');
         window.location.href = 'role-selection.html';
         return;
+    }
+    
+    currentUser = session.user;
+    userProfile = profile;
+    
+    // Update UI with user info
+    document.getElementById('userName').textContent = profile.name || session.user.email;
+    document.getElementById('userAvatar').textContent = (profile.name || session.user.email).charAt(0);
+    
+    console.log('Driver authenticated:', profile.name);
+    
+    // Load dashboard content
+    loadPageContent('dashboard');
+    
+    // Check if profile needs completion
+    if (!profile.phone || !profile.next_of_kin_name) {
+        setTimeout(() => {
+            navigateTo('profile');
+            showToast('Please complete your profile information', 'info');
+        }, 500);
     }
 })();
 
@@ -200,7 +215,6 @@ function loadPageContent(page) {
 }
 
 function checkProfileCompletion() {
-    // Check if profile is incomplete (first login)
     if (!userProfile?.phone || !userProfile?.next_of_kin_name) {
         showToast('Please complete your profile information', 'info');
     }
@@ -375,73 +389,14 @@ async function loadDriverReviews() {
     }
 }
 
-async function loadUserData() {
-    const user = await getCurrentUser();
-    if (user) {
-        currentUser = user;
-        
-        const { data: profile } = await window.supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        
-        userProfile = profile;
-        
-        document.getElementById('userName').textContent = profile?.name || user.email;
-        document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
-        
-        const profileAvatar = document.getElementById('profileAvatar');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        
-        if (profileAvatar) profileAvatar.textContent = profile?.name?.charAt(0) || 'D';
-        if (profileName) profileName.textContent = profile?.name || 'Driver';
-        if (profileEmail) profileEmail.textContent = profile?.email || '';
-        
-        // Check if profile needs completion
-        if (!profile?.phone || !profile?.next_of_kin_name) {
-            setTimeout(() => {
-                navigateTo('profile');
-                showToast('Please complete your profile information', 'info');
-            }, 500);
-        }
-    }
-}
-
-// Initialize page
+// Initialize page - FIXED (no duplicate session checks)
 document.addEventListener('DOMContentLoaded', async function() {
     loadTheme();
-    
-    const { data: { session } } = await window.supabase.auth.getSession();
-    if (!session) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    const { data: profile } = await window.supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-    
-    if (profile?.role !== 'driver') {
-        showToast('Unauthorized access. Driver privileges required.', 'error');
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    await loadUserData();
-    loadPageContent('dashboard');
-    
-    document.querySelectorAll('.sidebar-nav-item[data-page]').forEach(item => {
-        item.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            navigateTo(item.getAttribute('data-page')); 
-        });
-    });
+    // Session is already checked in the IIFE at the top
+    // No additional redirection here to prevent conflicts
 });
 
+// Make functions global
 window.toggleSidebar = toggleSidebar;
 window.navigateTo = navigateTo;
 window.startTrip = startTrip;
