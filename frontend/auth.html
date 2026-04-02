@@ -31,22 +31,22 @@
     <h2 id="authTitle" class="auth-title">Traveller Sign In</h2>
     <p id="authSubtitle" class="auth-subtitle">Book, track & manage your journeys</p>
 
-    <div class="auth-tabs">
+    <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
       <button class="auth-tab" id="signupTab" onclick="switchTab('signup')">Create Account</button>
     </div>
 
     <div id="loginForm" class="auth-form-container">
       <div class="form-group">
-        <label>Email / Driver Code</label>
+        <label id="emailLabel">Email</label>
         <div class="input-with-icon">
           <i class="fas fa-envelope"></i>
-          <input type="text" placeholder="you@example.com or Driver Code" id="loginEmail">
+          <input type="email" placeholder="you@example.com" id="loginEmail">
         </div>
         <div class="error-message" id="loginEmailError"></div>
       </div>
       <div class="form-group" id="passwordGroup">
-        <label>Password</label>
+        <label id="passwordLabel">Password</label>
         <div class="input-with-icon">
           <i class="fas fa-lock"></i>
           <input type="password" placeholder="••••••••" id="loginPassword">
@@ -158,7 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
     currentRole = role;
     updateAuthUI(role);
     
-    if (role === 'admin') {
+    // For drivers: hide create account tab, change labels
+    if (role === 'driver') {
+      document.getElementById('signupTab').style.display = 'none';
+      document.getElementById('emailLabel').textContent = 'Email';
+      document.getElementById('passwordLabel').textContent = 'Driver Code';
+      document.getElementById('loginPassword').placeholder = 'Enter your driver code';
+      document.getElementById('loginPassword').setAttribute('type', 'text');
+      document.getElementById('forgotPasswordLink').style.display = 'none';
+    } else if (role === 'admin') {
       document.getElementById('signupTab').style.display = 'none';
       document.getElementById('adminNote').style.display = 'flex';
     } else {
@@ -171,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateAuthUI(role) {
   const icons = {user:'🧳', driver:'🚗', admin:'🛡️'};
   const titles = {user:'Traveller Sign In', driver:'Driver Sign In', admin:'Admin Login'};
-  const subtitles = {user:'Book, track & manage your journeys', driver:'Manage your trips & earnings', admin:'Enterprise control panel'};
+  const subtitles = {user:'Book, track & manage your journeys', driver:'Enter your email and driver code', admin:'Enterprise control panel'};
   
   document.getElementById('authRoleIcon').textContent = icons[role];
   document.getElementById('authTitle').textContent = titles[role];
@@ -198,18 +206,18 @@ function switchTab(tab) {
 
 function validateLogin() {
   const emailOrCode = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  const passwordOrCode = document.getElementById('loginPassword').value;
   let isValid = true;
   
   if (!emailOrCode) {
-    document.getElementById('loginEmailError').textContent = 'Email or Driver Code is required';
+    document.getElementById('loginEmailError').textContent = 'Email is required';
     isValid = false;
   } else {
     document.getElementById('loginEmailError').textContent = '';
   }
   
-  if (!password) {
-    document.getElementById('loginPasswordError').textContent = 'Password is required';
+  if (!passwordOrCode) {
+    document.getElementById('loginPasswordError').textContent = currentRole === 'driver' ? 'Driver code is required' : 'Password is required';
     isValid = false;
   } else {
     document.getElementById('loginPasswordError').textContent = '';
@@ -285,20 +293,66 @@ function validateSignup() {
 async function handleLogin() {
   if (!validateLogin()) return;
   
-  const emailOrCode = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  const email = document.getElementById('loginEmail').value.trim();
+  const passwordOrCode = document.getElementById('loginPassword').value;
   
   const loginBtn = document.getElementById('loginBtn');
   loginBtn.disabled = true;
   loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
   
-  // Check if it's a driver code (contains no @ and is 8 characters)
-  const isDriverCode = !emailOrCode.includes('@') && emailOrCode.length >= 6;
-  
-  await loginUser(emailOrCode, password, false, isDriverCode);
+  // For drivers: use driver code as password
+  if (currentRole === 'driver') {
+    await loginDriver(email, passwordOrCode);
+  } else {
+    await loginUser(email, passwordOrCode);
+  }
   
   loginBtn.disabled = false;
   loginBtn.innerHTML = 'Sign In';
+}
+
+async function loginDriver(email, driverCode) {
+  try {
+    console.log('Driver login attempt:', email);
+    
+    // First find driver by email
+    const { data: driver, error: findError } = await window.supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .eq('role', 'driver')
+      .single();
+    
+    if (findError || !driver) {
+      showToast('Driver not found with this email', 'error');
+      return;
+    }
+    
+    // Verify driver code
+    if (driver.driver_code !== driverCode.toUpperCase()) {
+      showToast('Invalid driver code', 'error');
+      return;
+    }
+    
+    // Check if approved
+    if (!driver.is_approved) {
+      showToast('Your account is pending approval', 'error');
+      return;
+    }
+    
+    // Store driver session
+    sessionStorage.setItem('user_role', 'driver');
+    sessionStorage.setItem('user_id', driver.id);
+    sessionStorage.setItem('user_email', driver.email);
+    sessionStorage.setItem('driver_code', driver.driver_code);
+    
+    showToast(`Welcome back, Driver ${driver.name}!`, 'success');
+    window.location.href = 'driver-dashboard.html';
+    
+  } catch (error) {
+    console.error('Driver login error:', error);
+    showToast('Login failed. Please check your email and driver code.', 'error');
+  }
 }
 
 async function handleSignup() {
@@ -345,8 +399,8 @@ function togglePasswordField(id) {
 
 async function handleForgotPassword() {
   const email = document.getElementById('loginEmail').value.trim();
-  if (!email || email.includes('@')) {
-    showToast('Please enter a valid email address', 'error');
+  if (!email) {
+    showToast('Please enter your email address', 'error');
     return;
   }
   await resetPassword(email);
