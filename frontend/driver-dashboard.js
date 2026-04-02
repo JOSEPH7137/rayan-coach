@@ -1,40 +1,27 @@
+// Driver Dashboard Logic
+let currentPage = 'dashboard';
+let currentUser = null;
+let userProfile = null;
+let isFirstLogin = false;
+
+// Check driver access at start
 (async function() {
     const user = await getCurrentUser();
     if (!user) {
         window.location.href = 'role-selection.html';
         return;
     }
-    if (user.role !== 'driver' && user.role !== 'admin') {
+    if (user.role !== 'driver') {
         showToast('Access denied. Driver privileges required.', 'error');
         window.location.href = 'role-selection.html';
         return;
     }
 })();
-// Driver Dashboard Logic
-let currentPage = 'dashboard';
-let currentUser = null;
-let userProfile = null;
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
 }
-// Check for valid session at the start
-async function checkValidSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    const storedUserId = sessionStorage.getItem('current_user_id');
-    const storedUser = localStorage.getItem('rayan_user');
-    
-    if (!session && !storedUser) {
-        window.location.href = 'role-selection.html';
-        return false;
-    }
-    
-    if (session) {
-        sessionStorage.setItem('current_user_id', session.user.id);
-    }
-    
-    return true;
-}
+
 function navigateTo(page) {
     currentPage = page;
     
@@ -154,29 +141,45 @@ function loadPageContent(page) {
             </div>
         `,
         profile: `
-            <div class="dashboard-card"><div class="card-title"><i class="fas fa-user"></i><span>Driver Profile</span></div>
+            <div class="dashboard-card">
+                <div class="card-title"><i class="fas fa-user"></i><span>Complete Your Profile</span></div>
+                <p style="color: var(--muted); margin-bottom: 20px;">Please complete your profile information. Fields marked with * are required.</p>
                 <div style="text-align: center; margin-bottom: 24px;">
                     <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;" id="profileAvatar">${userProfile?.name?.charAt(0) || 'D'}</div>
-                    <h3 id="profileName">${userProfile?.name || 'Loading...'}</h3>
+                    <h3 id="profileName">${userProfile?.name || 'Driver'}</h3>
                     <p style="color: var(--muted);" id="profileEmail">${userProfile?.email || ''}</p>
-                    <p style="color: var(--gold); font-size: 12px; margin-top: 5px;" id="driverLicenseDisplay">${userProfile?.driver_license ? `License: ${userProfile.driver_license}` : ''}</p>
                 </div>
-                <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
-                <div class="form-group"><label>Email</label><input type="email" class="input" id="email" value="${userProfile?.email || ''}" disabled></div>
-                <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || '+254 722 000 001'}"></div>
-                <div class="form-group"><label>PSV License Number</label><input type="text" class="input" id="licenseNumber" value="${userProfile?.driver_license || 'PSV-KE-2024-00821'}"></div>
-                <button class="btn-dashboard btn-primary" onclick="updateDriverProfile()">Save Changes</button>
+                <div class="form-group"><label>Full Name *</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
+                <div class="form-group"><label>Phone Number *</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || ''}" placeholder="0712345678"></div>
+                <div class="form-group"><label>Date of Birth</label><input type="date" class="input" id="dob"></div>
+                <div class="form-group"><label>Next of Kin Name</label><input type="text" class="input" id="nextOfKinName" placeholder="Full name of next of kin"></div>
+                <div class="form-group"><label>Next of Kin Phone</label><input type="tel" class="input" id="nextOfKinPhone" placeholder="Phone number of next of kin"></div>
+                <div class="form-group"><label>Emergency Contact</label><input type="tel" class="input" id="emergencyContact" placeholder="Emergency contact number"></div>
+                <div class="form-group"><label>Home Address</label><textarea class="input" rows="2" id="homeAddress" placeholder="Your residential address"></textarea></div>
+                <div class="form-group"><label>PSV License Number</label><input type="text" class="input" id="licenseNumber" value="${userProfile?.driver_license || ''}" readonly disabled style="background: var(--card2);"></div>
+                <div class="form-group"><label>Driver Code</label><input type="text" class="input" id="driverCodeDisplay" value="${userProfile?.driver_code || ''}" readonly disabled style="background: var(--card2);"></div>
+                <button class="btn-dashboard btn-primary" onclick="updateDriverProfile()">Save Profile</button>
             </div>
         `
     };
     
     content.innerHTML = pages[page] || pages.dashboard;
     
-    // Load reviews when reviews page is opened
     if (page === 'reviews') {
         setTimeout(() => {
             loadDriverReviews();
         }, 100);
+    }
+    
+    if (page === 'profile') {
+        checkProfileCompletion();
+    }
+}
+
+function checkProfileCompletion() {
+    // Check if profile is incomplete (first login)
+    if (!userProfile?.phone || !userProfile?.next_of_kin_name) {
+        showToast('Please complete your profile information', 'info');
     }
 }
 
@@ -245,31 +248,41 @@ function clockOut() {
 async function updateDriverProfile() {
     const fullName = document.getElementById('fullName')?.value;
     const phone = document.getElementById('phone')?.value;
-    const licenseNumber = document.getElementById('licenseNumber')?.value;
+    const dob = document.getElementById('dob')?.value;
+    const nextOfKinName = document.getElementById('nextOfKinName')?.value;
+    const nextOfKinPhone = document.getElementById('nextOfKinPhone')?.value;
+    const emergencyContact = document.getElementById('emergencyContact')?.value;
+    const homeAddress = document.getElementById('homeAddress')?.value;
     
-    if (currentUser && fullName) {
-        const updates = { 
-            name: fullName, 
-            phone: phone,
-            driver_license: licenseNumber
-        };
-        
-        const { error } = await window.supabase
-            .from('profiles')
-            .update(updates)
-            .eq('id', currentUser.id);
-        
-        if (error) {
-            showToast('Error updating profile', 'error');
-        } else {
-            showToast('Profile updated successfully!', 'success');
-            userProfile.name = fullName;
-            userProfile.phone = phone;
-            userProfile.driver_license = licenseNumber;
-            document.getElementById('userName').textContent = fullName;
-            document.getElementById('profileName').textContent = fullName;
-            document.getElementById('driverLicenseDisplay').textContent = `License: ${licenseNumber}`;
-        }
+    if (!fullName || !phone) {
+        showToast('Please fill in your full name and phone number', 'error');
+        return;
+    }
+    
+    const updates = { 
+        name: fullName, 
+        phone: phone,
+        date_of_birth: dob || null,
+        next_of_kin_name: nextOfKinName || null,
+        next_of_kin_phone: nextOfKinPhone || null,
+        emergency_contact: emergencyContact || null,
+        home_address: homeAddress || null
+    };
+    
+    const { error } = await window.supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', currentUser.id);
+    
+    if (error) {
+        showToast('Error updating profile', 'error');
+        console.error(error);
+    } else {
+        showToast('Profile updated successfully!', 'success');
+        userProfile = { ...userProfile, ...updates };
+        document.getElementById('userName').textContent = fullName;
+        document.getElementById('profileName').textContent = fullName;
+        document.getElementById('profileAvatar').textContent = fullName.charAt(0);
     }
 }
 
@@ -277,7 +290,6 @@ async function handleDriverLogout() {
     await logoutUser();
 }
 
-// Load driver reviews (only reviews about this driver)
 async function loadDriverReviews() {
     const driver = await getCurrentUser();
     if (!driver) return;
@@ -339,7 +351,7 @@ async function loadDriverReviews() {
         console.error('Error loading reviews:', error);
     }
 }
-// Load user data on page load
+
 async function loadUserData() {
     const user = await getCurrentUser();
     if (user) {
@@ -356,17 +368,20 @@ async function loadUserData() {
         document.getElementById('userName').textContent = profile?.name || user.email;
         document.getElementById('userAvatar').textContent = profile?.name?.charAt(0) || user.email?.charAt(0);
         
-        // Update profile page elements if they exist
         const profileAvatar = document.getElementById('profileAvatar');
         const profileName = document.getElementById('profileName');
         const profileEmail = document.getElementById('profileEmail');
-        const driverLicenseDisplay = document.getElementById('driverLicenseDisplay');
         
         if (profileAvatar) profileAvatar.textContent = profile?.name?.charAt(0) || 'D';
-        if (profileName) profileName.textContent = profile?.name || 'Loading...';
+        if (profileName) profileName.textContent = profile?.name || 'Driver';
         if (profileEmail) profileEmail.textContent = profile?.email || '';
-        if (driverLicenseDisplay && profile?.driver_license) {
-            driverLicenseDisplay.textContent = `License: ${profile.driver_license}`;
+        
+        // Check if profile needs completion
+        if (!profile?.phone || !profile?.next_of_kin_name) {
+            setTimeout(() => {
+                navigateTo('profile');
+                showToast('Please complete your profile information', 'info');
+            }, 500);
         }
     }
 }
@@ -381,7 +396,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
     
-    // Check if user is driver
     const { data: profile } = await window.supabase
         .from('profiles')
         .select('role')
@@ -405,7 +419,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 });
 
-// Make functions global
 window.toggleSidebar = toggleSidebar;
 window.navigateTo = navigateTo;
 window.startTrip = startTrip;

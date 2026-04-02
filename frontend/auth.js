@@ -1,11 +1,56 @@
-// Login user with better error handling
-async function loginUser(email, password, rememberMe = false) {
+// auth.js - Authentication functions
+
+// Login user with driver code support
+async function loginUser(emailOrCode, passwordOrCode, rememberMe = false, isDriverLogin = false) {
     try {
-        console.log('Attempting login for:', email);
+        console.log('Attempting login for:', emailOrCode);
         
+        // Check if this is a driver login attempt
+        if (isDriverLogin) {
+            // Try driver login with code
+            const { data: driver, error: driverError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('driver_code', emailOrCode.toUpperCase())
+                .eq('role', 'driver')
+                .single();
+            
+            if (!driverError && driver) {
+                // Driver found, check if approved
+                if (!driver.is_approved) {
+                    showToast('Your account is pending approval. Please contact admin.', 'error');
+                    return { success: false };
+                }
+                
+                // Store driver session
+                sessionStorage.setItem('user_role', 'driver');
+                sessionStorage.setItem('user_id', driver.id);
+                sessionStorage.setItem('user_email', driver.email);
+                sessionStorage.setItem('driver_code', driver.driver_code);
+                
+                if (rememberMe) {
+                    localStorage.setItem('rayan_user', JSON.stringify({
+                        id: driver.id,
+                        email: driver.email,
+                        role: 'driver',
+                        name: driver.name,
+                        driver_code: driver.driver_code
+                    }));
+                }
+                
+                showToast(`Welcome back, Driver ${driver.name}!`, 'success');
+                window.location.href = 'driver-dashboard.html';
+                return { success: true, user: driver };
+            } else {
+                showToast('Invalid driver code. Please check and try again.', 'error');
+                return { success: false, error: 'Invalid driver code' };
+            }
+        }
+        
+        // Regular email/password login for clients and admins
         const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
+            email: emailOrCode,
+            password: passwordOrCode
         });
         
         if (error) {
@@ -39,18 +84,18 @@ async function loginUser(email, password, rememberMe = false) {
         // Store user info
         sessionStorage.setItem('user_role', userRole);
         sessionStorage.setItem('user_id', data.user.id);
-        sessionStorage.setItem('user_email', email);
+        sessionStorage.setItem('user_email', emailOrCode);
         
         if (rememberMe) {
             localStorage.setItem('rayan_user', JSON.stringify({
                 id: data.user.id,
-                email: email,
+                email: emailOrCode,
                 role: userRole,
                 name: profile?.name
             }));
         }
         
-        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
+        showToast(`Welcome back, ${profile?.name || emailOrCode}!`, 'success');
         
         // Redirect based on role
         if (userRole === 'admin') {
@@ -68,6 +113,7 @@ async function loginUser(email, password, rememberMe = false) {
         return { success: false, error: error.message };
     }
 }
+
 // Logout user - clear all local data
 async function logoutUser() {
     try {
@@ -84,149 +130,24 @@ async function logoutUser() {
     }
 }
 
-// Get current user - check session first
-async function getCurrentUser() {
-    try {
-        // First check sessionStorage for current session
-        const currentUserId = sessionStorage.getItem('current_user_id');
-        
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-            // Check if we have a stored user
-            const storedUser = localStorage.getItem('rayan_user');
-            if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                return { id: userData.id, email: userData.email };
-            }
-            return null;
-        }
-        
-        // Verify this is the same user
-        if (currentUserId && user.id !== currentUserId) {
-            // Different user, clear session
-            await supabase.auth.signOut();
-            localStorage.removeItem('rayan_user');
-            sessionStorage.clear();
-            return null;
-        }
-        
-        sessionStorage.setItem('current_user_id', user.id);
-        return user;
-    } catch (error) {
-        return null;
-    }
-}
-
-/// Register user - role is passed from the signup page
-async function registerUser(email, password, name, phone, role = 'client', driverLicense = null, avatarUrl = null) {
-    try {
-        console.log('Attempting signup for:', email, 'with role:', role);
-        
-        // Check if user already exists
-        const { data: existingUser } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('email', email)
-            .single();
-        
-        if (existingUser) {
-            showToast('Email already registered. Please sign in instead.', 'error');
-            return { success: false, error: 'Email already exists' };
-        }
-        
-        // Create user with role in metadata
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    name: name,
-                    phone: phone,
-                    role: role,  // This will be 'client', 'driver', or 'admin'
-                    driver_license: driverLicense,
-                    avatar_url: avatarUrl
-                }
-            }
-        });
-        
-        if (error) {
-            console.error('Signup error:', error);
-            showToast(error.message, 'error');
-            return { success: false, error: error.message };
-        }
-        
-        console.log('Signup successful! Role assigned:', role);
-        showToast(`Account created successfully as ${role.toUpperCase()}! Please sign in.`, 'success');
-        
-        return { success: true, user: data.user };
-    } catch (error) {
-        console.error('Unexpected error:', error);
-        showToast(error.message, 'error');
-        return { success: false, error: error.message };
-    }
-}
-
-// Login user with role validation
-async function loginUser(email, password, rememberMe = false) {
-    try {
-        console.log('Attempting login for:', email);
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) throw error;
-        
-        // Get user profile to check role
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-        
-        if (profileError) {
-            console.error('Profile fetch error:', profileError);
-        }
-        
-        const userRole = profile?.role || 'client';
-        
-        // Store user info in session
-        sessionStorage.setItem('user_role', userRole);
-        sessionStorage.setItem('user_id', data.user.id);
-        sessionStorage.setItem('user_email', email);
-        
-        if (rememberMe) {
-            localStorage.setItem('rayan_user', JSON.stringify({
-                id: data.user.id,
-                email: email,
-                role: userRole,
-                name: profile?.name
-            }));
-        }
-        
-        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
-        
-        // Redirect based on role
-        if (userRole === 'admin') {
-            window.location.href = 'admin-dashboard.html';
-        } else if (userRole === 'driver') {
-            window.location.href = 'driver-dashboard.html';
-        } else {
-            window.location.href = 'user-dashboard.html';
-        }
-        
-        return { success: true, user: data.user, profile: profile };
-    } catch (error) {
-        showToast(error.message, 'error');
-        return { success: false, error: error.message };
-    }
-}
-
 // Get current user with role
 async function getCurrentUser() {
     try {
-        // First check session storage
+        // Check for driver session first
+        const driverCode = sessionStorage.getItem('driver_code');
+        if (driverCode) {
+            const { data: driver } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('driver_code', driverCode)
+                .single();
+            
+            if (driver) {
+                return { id: driver.id, email: driver.email, role: 'driver', name: driver.name };
+            }
+        }
+        
+        // Check session storage
         const storedUserId = sessionStorage.getItem('user_id');
         const storedRole = sessionStorage.getItem('user_role');
         
@@ -263,6 +184,60 @@ async function getCurrentUser() {
     }
 }
 
+// Register user - only for clients
+async function registerUser(email, password, name, phone, role = 'client', driverLicense = null, avatarUrl = null) {
+    try {
+        console.log('Attempting signup for:', email, 'with role:', role);
+        
+        // Only clients can register themselves
+        if (role !== 'client') {
+            showToast('Only customer accounts can be created directly. Please contact admin for other roles.', 'error');
+            return { success: false, error: 'Invalid registration' };
+        }
+        
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('email', email)
+            .single();
+        
+        if (existingUser) {
+            showToast('Email already registered. Please sign in instead.', 'error');
+            return { success: false, error: 'Email already exists' };
+        }
+        
+        // Create user with role in metadata
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    name: name,
+                    phone: phone,
+                    role: role,
+                    avatar_url: avatarUrl
+                }
+            }
+        });
+        
+        if (error) {
+            console.error('Signup error:', error);
+            showToast(error.message, 'error');
+            return { success: false, error: error.message };
+        }
+        
+        console.log('Signup successful! Role assigned:', role);
+        showToast(`Account created successfully! Please sign in.`, 'success');
+        
+        return { success: true, user: data.user };
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        showToast(error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
 // Check if user has access to a specific page
 async function checkPageAccess(allowedRoles = []) {
     const user = await getCurrentUser();
@@ -280,9 +255,32 @@ async function checkPageAccess(allowedRoles = []) {
     return true;
 }
 
+// Admin function to add a driver
+async function addDriverByAdmin(name, email, phone, driverLicense) {
+    try {
+        const { data, error } = await supabase
+            .rpc('add_driver', {
+                driver_name: name,
+                driver_email: email,
+                driver_phone: phone,
+                driver_license: driverLicense
+            });
+        
+        if (error) throw error;
+        
+        showToast(`Driver added successfully! Driver Code: ${data}`, 'success');
+        return { success: true, driverCode: data };
+    } catch (error) {
+        console.error('Error adding driver:', error);
+        showToast(error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
 // Make functions global
 window.registerUser = registerUser;
 window.loginUser = loginUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
 window.checkPageAccess = checkPageAccess;
+window.addDriverByAdmin = addDriverByAdmin;
