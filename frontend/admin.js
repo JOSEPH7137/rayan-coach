@@ -1,3 +1,26 @@
+// Check session on page load
+(async function() {
+    const loggedIn = sessionStorage.getItem('logged_in');
+    const loginTime = sessionStorage.getItem('login_time');
+    
+    if (!loggedIn) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    // Check if session expired (24 hours)
+    if (loginTime && (Date.now() - parseInt(loginTime)) > 24 * 60 * 60 * 1000) {
+        sessionStorage.clear();
+        window.location.href = 'role-selection.html';
+        return;
+    }
+    
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return;
+    }
+})();
 // Admin Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;

@@ -5,6 +5,11 @@ async function loginUser(email, password) {
     try {
         console.log('Attempting login for:', email);
         
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
         const { data, error } = await window.supabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -13,7 +18,9 @@ async function loginUser(email, password) {
         if (error) {
             console.error('Login error:', error);
             if (error.message === 'Invalid login credentials') {
-                showToast('Invalid email or password. Please try again.', 'error');
+                showToast('❌ Invalid email or password. Please check your credentials and try again.', 'error');
+            } else if (error.message.includes('Email not confirmed')) {
+                showToast('📧 Please verify your email address before logging in.', 'error');
             } else {
                 showToast(error.message, 'error');
             }
@@ -31,15 +38,30 @@ async function loginUser(email, password) {
         
         if (profileError) {
             console.error('Profile fetch error:', profileError);
+            // Create profile if it doesn't exist
+            if (profileError.code === 'PGRST116') {
+                const { error: insertError } = await window.supabase
+                    .from('profiles')
+                    .insert({
+                        id: data.user.id,
+                        name: data.user.email.split('@')[0],
+                        email: data.user.email,
+                        role: 'client',
+                        is_approved: true
+                    });
+                if (insertError) console.error('Profile creation error:', insertError);
+            }
         }
         
         const userRole = profile?.role || 'client';
         console.log('User role:', userRole);
         
-        // Store user info
+        // Store user info in session (cleared when browser closes)
         sessionStorage.setItem('user_role', userRole);
         sessionStorage.setItem('user_id', data.user.id);
         sessionStorage.setItem('user_email', email);
+        sessionStorage.setItem('logged_in', 'true');
+        sessionStorage.setItem('login_time', Date.now().toString());
         
         const rememberMe = document.getElementById('rememberMe');
         if (rememberMe && rememberMe.checked) {
@@ -47,20 +69,24 @@ async function loginUser(email, password) {
                 id: data.user.id,
                 email: email,
                 role: userRole,
-                name: profile?.name
+                name: profile?.name,
+                login_time: Date.now()
             }));
         }
         
-        showToast(`Welcome back, ${profile?.name || email}!`, 'success');
+        showToast(`✅ Welcome back, ${profile?.name || email}!`, 'success');
         
-        // Redirect based on role
-        if (userRole === 'admin') {
-            window.location.href = 'admin-dashboard.html';
-        } else if (userRole === 'client') {
-            window.location.href = 'user-dashboard.html';
-        } else {
-            window.location.href = 'user-dashboard.html';
-        }
+        // Small delay before redirect to ensure session is saved
+        setTimeout(() => {
+            // Redirect based on role
+            if (userRole === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (userRole === 'driver') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+        }, 500);
         
         return { success: true, user: data.user, profile: profile };
     } catch (error) {
@@ -75,6 +101,11 @@ async function loginDriver(email, driverCode) {
     try {
         console.log('Driver login attempt for:', email);
         
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return;
+        }
+        
         // First find driver by email
         const { data: driver, error: findError } = await window.supabase
             .from('profiles')
@@ -85,7 +116,7 @@ async function loginDriver(email, driverCode) {
         
         if (findError || !driver) {
             console.error('Driver not found:', findError);
-            showToast('Driver not found with this email', 'error');
+            showToast('❌ Driver not found with this email', 'error');
             return;
         }
         
@@ -93,13 +124,13 @@ async function loginDriver(email, driverCode) {
         
         // Verify driver code
         if (driver.driver_code !== driverCode.toUpperCase()) {
-            showToast('Invalid driver code', 'error');
+            showToast('❌ Invalid driver code. Please check and try again.', 'error');
             return;
         }
         
         // Check if approved
         if (!driver.is_approved) {
-            showToast('Your account is pending approval', 'error');
+            showToast('⏳ Your account is pending approval. Please contact admin.', 'error');
             return;
         }
         
@@ -108,9 +139,14 @@ async function loginDriver(email, driverCode) {
         sessionStorage.setItem('user_id', driver.id);
         sessionStorage.setItem('user_email', driver.email);
         sessionStorage.setItem('driver_code', driver.driver_code);
+        sessionStorage.setItem('logged_in', 'true');
+        sessionStorage.setItem('login_time', Date.now().toString());
         
-        showToast(`Welcome back, Driver ${driver.name}!`, 'success');
-        window.location.href = 'driver-dashboard.html';
+        showToast(`✅ Welcome back, Driver ${driver.name}!`, 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'driver-dashboard.html';
+        }, 500);
         
     } catch (error) {
         console.error('Driver login error:', error);
@@ -123,6 +159,11 @@ async function registerUser(email, password, name, phone, role = 'client') {
     try {
         console.log('Attempting signup for:', email);
         
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
         // Check if user already exists
         const { data: existingUser } = await window.supabase
             .from('profiles')
@@ -131,7 +172,7 @@ async function registerUser(email, password, name, phone, role = 'client') {
             .single();
         
         if (existingUser) {
-            showToast('Email already registered. Please sign in instead.', 'error');
+            showToast('❌ Email already registered. Please sign in instead.', 'error');
             return { success: false, error: 'Email already exists' };
         }
         
@@ -149,12 +190,16 @@ async function registerUser(email, password, name, phone, role = 'client') {
         
         if (error) {
             console.error('Signup error:', error);
-            showToast(error.message, 'error');
+            if (error.message.includes('User already registered')) {
+                showToast('❌ Email already registered. Please sign in instead.', 'error');
+            } else {
+                showToast(error.message, 'error');
+            }
             return { success: false, error: error.message };
         }
         
         console.log('Signup successful!');
-        showToast(`Account created successfully! Please sign in.`, 'success');
+        showToast(`✅ Account created successfully! Please sign in.`, 'success');
         return { success: true, user: data.user };
     } catch (error) {
         console.error('Unexpected error:', error);
@@ -166,7 +211,9 @@ async function registerUser(email, password, name, phone, role = 'client') {
 // Logout user
 async function logoutUser() {
     try {
-        await window.supabase.auth.signOut();
+        if (window.supabase) {
+            await window.supabase.auth.signOut();
+        }
         localStorage.clear();
         sessionStorage.clear();
         window.location.href = 'index.html';
@@ -176,9 +223,27 @@ async function logoutUser() {
     }
 }
 
-// Get current user
+// Get current user - check session validity
 async function getCurrentUser() {
     try {
+        // Check if session is still valid (not expired)
+        const loginTime = sessionStorage.getItem('login_time');
+        if (loginTime) {
+            const timeSinceLogin = Date.now() - parseInt(loginTime);
+            // Session expires after 24 hours
+            if (timeSinceLogin > 24 * 60 * 60 * 1000) {
+                console.log('Session expired');
+                sessionStorage.clear();
+                window.location.href = 'role-selection.html';
+                return null;
+            }
+        }
+        
+        const loggedIn = sessionStorage.getItem('logged_in');
+        if (!loggedIn) {
+            return null;
+        }
+        
         // Check for driver session first
         const driverCode = sessionStorage.getItem('driver_code');
         if (driverCode) {
@@ -198,8 +263,12 @@ async function getCurrentUser() {
             const storedUser = localStorage.getItem('rayan_user');
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
-                return { id: userData.id, email: userData.email, role: userData.role, name: userData.name };
+                // Check if stored session is still valid (within 7 days)
+                if (userData.login_time && (Date.now() - userData.login_time) < 7 * 24 * 60 * 60 * 1000) {
+                    return { id: userData.id, email: userData.email, role: userData.role, name: userData.name };
+                }
             }
+            sessionStorage.clear();
             return null;
         }
         
@@ -209,6 +278,10 @@ async function getCurrentUser() {
             .select('role')
             .eq('id', user.id)
             .single();
+        
+        // Refresh session storage
+        sessionStorage.setItem('logged_in', 'true');
+        sessionStorage.setItem('login_time', Date.now().toString());
         
         return { ...user, role: profile?.role || 'client' };
     } catch (error) {
@@ -224,10 +297,20 @@ async function resetPassword(email) {
         });
         
         if (error) throw error;
-        showToast('Password reset link sent to your email!', 'success');
+        showToast('✅ Password reset link sent to your email!', 'success');
     } catch (error) {
         showToast(error.message, 'error');
     }
+}
+
+// Check if user is logged in (for page protection)
+async function checkAuth() {
+    const user = await getCurrentUser();
+    if (!user) {
+        window.location.href = 'role-selection.html';
+        return false;
+    }
+    return true;
 }
 
 // Make functions global
@@ -237,3 +320,4 @@ window.registerUser = registerUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
 window.resetPassword = resetPassword;
+window.checkAuth = checkAuth;
