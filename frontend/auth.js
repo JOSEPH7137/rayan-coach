@@ -74,6 +74,97 @@ async function loginUser(email, password) {
     }
 }
 
+// Register user - FIXED
+async function registerUser(email, password, name, phone, role = 'client') {
+    try {
+        console.log('Attempting signup for:', email);
+        
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
+        const { data, error } = await window.supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    name: name,
+                    phone: phone,
+                    role: role
+                }
+            }
+        });
+        
+        if (error) {
+            console.error('Signup error:', error);
+            showToast(error.message, 'error');
+            return { success: false, error: error.message };
+        }
+        
+        console.log('Signup successful!');
+        showToast(`✅ Account created successfully! Please sign in.`, 'success');
+        
+        return { success: true, user: data.user };
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        showToast(error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
+// Login driver with email and driver code
+async function loginDriver(email, driverCode) {
+    try {
+        console.log('Driver login attempt for:', email);
+        
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return;
+        }
+        
+        const { data: driver, error: findError } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', email)
+            .eq('role', 'driver')
+            .single();
+        
+        if (findError || !driver) {
+            showToast('Driver not found with this email', 'error');
+            return;
+        }
+        
+        if (driver.driver_code !== driverCode.toUpperCase()) {
+            showToast('Invalid driver code', 'error');
+            return;
+        }
+        
+        if (!driver.is_approved) {
+            showToast('Your account is pending approval', 'error');
+            return;
+        }
+        
+        const userData = {
+            id: driver.id,
+            email: driver.email,
+            role: 'driver',
+            name: driver.name,
+            driver_code: driver.driver_code,
+            login_time: Date.now()
+        };
+        
+        localStorage.setItem('rayan_user', JSON.stringify(userData));
+        
+        showToast(`✅ Welcome back, Driver ${driver.name}!`, 'success');
+        window.location.href = 'driver-dashboard.html';
+        
+    } catch (error) {
+        console.error('Driver login error:', error);
+        showToast('Login failed. Please check your email and driver code.', 'error');
+    }
+}
+
 // Logout user
 async function logoutUser() {
     try {
@@ -89,7 +180,7 @@ async function logoutUser() {
     }
 }
 
-// Get current user from localStorage
+// Get current user
 async function getCurrentUser() {
     try {
         const storedUser = localStorage.getItem('rayan_user');
@@ -97,7 +188,6 @@ async function getCurrentUser() {
         
         const userData = JSON.parse(storedUser);
         
-        // Check if session is still valid (within 7 days)
         if (userData.login_time && (Date.now() - userData.login_time) > 7 * 24 * 60 * 60 * 1000) {
             localStorage.removeItem('rayan_user');
             return null;
@@ -109,7 +199,9 @@ async function getCurrentUser() {
     }
 }
 
-// Make functions global
+// Make all functions global
 window.loginUser = loginUser;
+window.registerUser = registerUser;
+window.loginDriver = loginDriver;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;

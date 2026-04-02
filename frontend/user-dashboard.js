@@ -3,6 +3,15 @@ let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 
+// Locations list (same as trips) - MUST BE DEFINED AT THE TOP
+const locations = [
+    'BANGAL', 'GARISSA', 'KANYONYO', 'KITHIMANI', 'KITHYOKA', 
+    'KITHYOKO', 'MATUU', 'MWINGI', 'NAIROBI', 'NGUNI', 'THIKA', 'UKASI'
+];
+
+// Route data cache
+let routeData = {};
+
 // Check session on page load - USING LOCALSTORAGE
 (async function() {
     // Get user from localStorage
@@ -37,8 +46,6 @@ let userProfile = null;
     // Load dashboard content
     loadPageContent('dashboard');
 })();
-
-// Rest of your user-dashboard.js functions remain the same...
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
@@ -648,11 +655,8 @@ async function handleLogout() {
     await logoutUser(); 
 }
 
-// Initialize page - FIXED (no duplicate session checks)
 document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
-    // Session is already checked in the IIFE at the top
-    // Additional initialization if needed
 });
 
 // ==================== REVIEW SYSTEM ====================
