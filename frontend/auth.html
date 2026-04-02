@@ -31,7 +31,7 @@
     <h2 id="authTitle" class="auth-title">Traveller Sign In</h2>
     <p id="authSubtitle" class="auth-subtitle">Book, track & manage your journeys</p>
 
-    <div class="auth-tabs" id="authTabs">
+    <div id="authTabs" class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
       <button class="auth-tab" id="signupTab" onclick="switchTab('signup')">Create Account</button>
     </div>
@@ -41,7 +41,7 @@
         <label id="emailLabel">Email</label>
         <div class="input-with-icon">
           <i class="fas fa-envelope"></i>
-          <input type="email" placeholder="you@example.com" id="loginEmail">
+          <input type="text" placeholder="you@example.com" id="loginEmail">
         </div>
         <div class="error-message" id="loginEmailError"></div>
       </div>
@@ -60,7 +60,7 @@
         <label class="checkbox">
           <input type="checkbox" id="rememberMe"> Remember me
         </label>
-        <a href="#" onclick="handleForgotPassword()" class="forgot-link">Forgot password?</a>
+        <a href="#" onclick="handleForgotPassword()" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
       </div>
       <button class="btn-auth-primary" onclick="handleLogin()" id="loginBtn">Sign In</button>
       <div class="auth-divider">Or sign in with</div>
@@ -152,6 +152,14 @@ let currentRole = 'user';
 
 document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
+  
+  // Check if supabase is initialized
+  if (typeof window.supabase === 'undefined') {
+    console.error('Supabase not initialized!');
+    showToast('Database connection error. Please refresh the page.', 'error');
+    return;
+  }
+  
   const urlParams = new URLSearchParams(window.location.search);
   const role = urlParams.get('role');
   if (role) {
@@ -160,18 +168,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // For drivers: hide create account tab, change labels
     if (role === 'driver') {
-      document.getElementById('signupTab').style.display = 'none';
-      document.getElementById('emailLabel').textContent = 'Email';
-      document.getElementById('passwordLabel').textContent = 'Driver Code';
-      document.getElementById('loginPassword').placeholder = 'Enter your driver code';
-      document.getElementById('loginPassword').setAttribute('type', 'text');
-      document.getElementById('forgotPasswordLink').style.display = 'none';
+      const signupTab = document.getElementById('signupTab');
+      if (signupTab) signupTab.style.display = 'none';
+      
+      const emailLabel = document.getElementById('emailLabel');
+      const passwordLabel = document.getElementById('passwordLabel');
+      const loginPassword = document.getElementById('loginPassword');
+      const forgotLink = document.getElementById('forgotPasswordLink');
+      
+      if (emailLabel) emailLabel.textContent = 'Email';
+      if (passwordLabel) passwordLabel.textContent = 'Driver Code';
+      if (loginPassword) {
+        loginPassword.placeholder = 'Enter your driver code';
+        loginPassword.type = 'text';
+      }
+      if (forgotLink) forgotLink.style.display = 'none';
     } else if (role === 'admin') {
-      document.getElementById('signupTab').style.display = 'none';
-      document.getElementById('adminNote').style.display = 'flex';
+      const signupTab = document.getElementById('signupTab');
+      const adminNote = document.getElementById('adminNote');
+      if (signupTab) signupTab.style.display = 'none';
+      if (adminNote) adminNote.style.display = 'flex';
     } else {
-      document.getElementById('signupTab').style.display = 'flex';
-      document.getElementById('adminNote').style.display = 'none';
+      const signupTab = document.getElementById('signupTab');
+      const adminNote = document.getElementById('adminNote');
+      if (signupTab) signupTab.style.display = 'flex';
+      if (adminNote) adminNote.style.display = 'none';
     }
   }
 });
@@ -181,9 +202,13 @@ function updateAuthUI(role) {
   const titles = {user:'Traveller Sign In', driver:'Driver Sign In', admin:'Admin Login'};
   const subtitles = {user:'Book, track & manage your journeys', driver:'Enter your email and driver code', admin:'Enterprise control panel'};
   
-  document.getElementById('authRoleIcon').textContent = icons[role];
-  document.getElementById('authTitle').textContent = titles[role];
-  document.getElementById('authSubtitle').textContent = subtitles[role];
+  const roleIcon = document.getElementById('authRoleIcon');
+  const title = document.getElementById('authTitle');
+  const subtitle = document.getElementById('authSubtitle');
+  
+  if (roleIcon) roleIcon.textContent = icons[role];
+  if (title) title.textContent = titles[role];
+  if (subtitle) subtitle.textContent = subtitles[role];
 }
 
 function switchTab(tab) {
@@ -191,100 +216,107 @@ function switchTab(tab) {
   const loginForm = document.getElementById('loginForm');
   const signupForm = document.getElementById('signupForm');
   
+  if (!tabs.length) return;
+  
   tabs.forEach(t => t.classList.remove('active'));
   
   if (tab === 'login') {
     if (tabs[0]) tabs[0].classList.add('active');
-    loginForm.style.display = 'block';
-    signupForm.style.display = 'none';
+    if (loginForm) loginForm.style.display = 'block';
+    if (signupForm) signupForm.style.display = 'none';
   } else {
     if (tabs[1]) tabs[1].classList.add('active');
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'block';
+    if (loginForm) loginForm.style.display = 'none';
+    if (signupForm) signupForm.style.display = 'block';
   }
 }
 
 function validateLogin() {
-  const emailOrCode = document.getElementById('loginEmail').value.trim();
-  const passwordOrCode = document.getElementById('loginPassword').value;
+  const email = document.getElementById('loginEmail')?.value.trim();
+  const password = document.getElementById('loginPassword')?.value;
   let isValid = true;
   
-  if (!emailOrCode) {
-    document.getElementById('loginEmailError').textContent = 'Email is required';
+  const emailError = document.getElementById('loginEmailError');
+  const passwordError = document.getElementById('loginPasswordError');
+  
+  if (!email) {
+    if (emailError) emailError.textContent = 'Email is required';
     isValid = false;
   } else {
-    document.getElementById('loginEmailError').textContent = '';
+    if (emailError) emailError.textContent = '';
   }
   
-  if (!passwordOrCode) {
-    document.getElementById('loginPasswordError').textContent = currentRole === 'driver' ? 'Driver code is required' : 'Password is required';
+  if (!password) {
+    if (passwordError) passwordError.textContent = currentRole === 'driver' ? 'Driver code is required' : 'Password is required';
     isValid = false;
   } else {
-    document.getElementById('loginPasswordError').textContent = '';
+    if (passwordError) passwordError.textContent = '';
   }
   
   return isValid;
 }
 
 function validateSignup() {
-  const fname = document.getElementById('signupFname').value.trim();
-  const lname = document.getElementById('signupLname').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const phone = document.getElementById('signupPhone').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirmPassword = document.getElementById('signupConfirmPassword').value;
+  const fname = document.getElementById('signupFname')?.value.trim();
+  const lname = document.getElementById('signupLname')?.value.trim();
+  const email = document.getElementById('signupEmail')?.value.trim();
+  const phone = document.getElementById('signupPhone')?.value.trim();
+  const password = document.getElementById('signupPassword')?.value;
+  const confirmPassword = document.getElementById('signupConfirmPassword')?.value;
   let isValid = true;
   
   if (!fname) {
-    document.getElementById('fnameError').textContent = 'First name is required';
+    const error = document.getElementById('fnameError');
+    if (error) error.textContent = 'First name is required';
     isValid = false;
   } else {
-    document.getElementById('fnameError').textContent = '';
+    const error = document.getElementById('fnameError');
+    if (error) error.textContent = '';
   }
   
   if (!lname) {
-    document.getElementById('lnameError').textContent = 'Last name is required';
+    const error = document.getElementById('lnameError');
+    if (error) error.textContent = 'Last name is required';
     isValid = false;
   } else {
-    document.getElementById('lnameError').textContent = '';
+    const error = document.getElementById('lnameError');
+    if (error) error.textContent = '';
   }
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email) {
-    document.getElementById('signupEmailError').textContent = 'Email is required';
+    const error = document.getElementById('signupEmailError');
+    if (error) error.textContent = 'Email is required';
     isValid = false;
   } else if (!emailRegex.test(email)) {
-    document.getElementById('signupEmailError').textContent = 'Enter a valid email address';
+    const error = document.getElementById('signupEmailError');
+    if (error) error.textContent = 'Enter a valid email address';
     isValid = false;
   } else {
-    document.getElementById('signupEmailError').textContent = '';
-  }
-  
-  if (phone) {
-    const phoneRegex = /^[0-9]{10,12}$/;
-    if (!phoneRegex.test(phone.replace(/[^0-9]/g, ''))) {
-      document.getElementById('phoneError').textContent = 'Enter a valid phone number (10-12 digits)';
-      isValid = false;
-    } else {
-      document.getElementById('phoneError').textContent = '';
-    }
+    const error = document.getElementById('signupEmailError');
+    if (error) error.textContent = '';
   }
   
   if (!password) {
-    document.getElementById('passwordError').textContent = 'Password is required';
+    const error = document.getElementById('passwordError');
+    if (error) error.textContent = 'Password is required';
     isValid = false;
   } else if (password.length < 6) {
-    document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+    const error = document.getElementById('passwordError');
+    if (error) error.textContent = 'Password must be at least 6 characters';
     isValid = false;
   } else {
-    document.getElementById('passwordError').textContent = '';
+    const error = document.getElementById('passwordError');
+    if (error) error.textContent = '';
   }
   
   if (password !== confirmPassword) {
-    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+    const error = document.getElementById('confirmPasswordError');
+    if (error) error.textContent = 'Passwords do not match';
     isValid = false;
   } else {
-    document.getElementById('confirmPasswordError').textContent = '';
+    const error = document.getElementById('confirmPasswordError');
+    if (error) error.textContent = '';
   }
   
   return isValid;
@@ -293,22 +325,31 @@ function validateSignup() {
 async function handleLogin() {
   if (!validateLogin()) return;
   
-  const email = document.getElementById('loginEmail').value.trim();
-  const passwordOrCode = document.getElementById('loginPassword').value;
+  const email = document.getElementById('loginEmail')?.value.trim();
+  const password = document.getElementById('loginPassword')?.value;
   
   const loginBtn = document.getElementById('loginBtn');
-  loginBtn.disabled = true;
-  loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-  
-  // For drivers: use driver code as password
-  if (currentRole === 'driver') {
-    await loginDriver(email, passwordOrCode);
-  } else {
-    await loginUser(email, passwordOrCode);
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
   }
   
-  loginBtn.disabled = false;
-  loginBtn.innerHTML = 'Sign In';
+  try {
+    // For drivers: use driver code as password
+    if (currentRole === 'driver') {
+      await loginDriver(email, password);
+    } else {
+      await loginUser(email, password);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    showToast('Login failed. Please try again.', 'error');
+  } finally {
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = 'Sign In';
+    }
+  }
 }
 
 async function loginDriver(email, driverCode) {
@@ -358,30 +399,41 @@ async function loginDriver(email, driverCode) {
 async function handleSignup() {
   if (!validateSignup()) return;
   
-  const fname = document.getElementById('signupFname').value.trim();
-  const lname = document.getElementById('signupLname').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const phone = document.getElementById('signupPhone').value.trim();
-  const password = document.getElementById('signupPassword').value;
+  const fname = document.getElementById('signupFname')?.value.trim();
+  const lname = document.getElementById('signupLname')?.value.trim();
+  const email = document.getElementById('signupEmail')?.value.trim();
+  const phone = document.getElementById('signupPhone')?.value.trim();
+  const password = document.getElementById('signupPassword')?.value;
   
   const fullName = `${fname} ${lname}`;
   
   const signupBtn = document.getElementById('signupBtn');
-  signupBtn.disabled = true;
-  signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+  if (signupBtn) {
+    signupBtn.disabled = true;
+    signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+  }
   
   const result = await registerUser(email, password, fullName, phone, 'client');
   
-  signupBtn.disabled = false;
-  signupBtn.innerHTML = 'Create Account';
+  if (signupBtn) {
+    signupBtn.disabled = false;
+    signupBtn.innerHTML = 'Create Account';
+  }
   
-  if (result.success) {
-    document.getElementById('signupFname').value = '';
-    document.getElementById('signupLname').value = '';
-    document.getElementById('signupEmail').value = '';
-    document.getElementById('signupPhone').value = '';
-    document.getElementById('signupPassword').value = '';
-    document.getElementById('signupConfirmPassword').value = '';
+  if (result && result.success) {
+    const signupFname = document.getElementById('signupFname');
+    const signupLname = document.getElementById('signupLname');
+    const signupEmail = document.getElementById('signupEmail');
+    const signupPhone = document.getElementById('signupPhone');
+    const signupPassword = document.getElementById('signupPassword');
+    const signupConfirmPassword = document.getElementById('signupConfirmPassword');
+    
+    if (signupFname) signupFname.value = '';
+    if (signupLname) signupLname.value = '';
+    if (signupEmail) signupEmail.value = '';
+    if (signupPhone) signupPhone.value = '';
+    if (signupPassword) signupPassword.value = '';
+    if (signupConfirmPassword) signupConfirmPassword.value = '';
     
     setTimeout(() => {
       switchTab('login');
@@ -398,7 +450,7 @@ function togglePasswordField(id) {
 }
 
 async function handleForgotPassword() {
-  const email = document.getElementById('loginEmail').value.trim();
+  const email = document.getElementById('loginEmail')?.value.trim();
   if (!email) {
     showToast('Please enter your email address', 'error');
     return;

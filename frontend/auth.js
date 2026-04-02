@@ -5,6 +5,11 @@ async function loginUser(email, password) {
     try {
         console.log('Attempting login for:', email);
         
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
         const { data, error } = await window.supabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -52,6 +57,11 @@ async function registerUser(email, password, name, phone, role = 'client') {
     try {
         console.log('Attempting signup for:', email);
         
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
         // Check if user already exists
         const { data: existingUser } = await window.supabase
             .from('profiles')
@@ -90,7 +100,9 @@ async function registerUser(email, password, name, phone, role = 'client') {
 // Logout user
 async function logoutUser() {
     try {
-        await window.supabase.auth.signOut();
+        if (window.supabase) {
+            await window.supabase.auth.signOut();
+        }
         localStorage.clear();
         sessionStorage.clear();
         window.location.href = 'index.html';
@@ -103,6 +115,8 @@ async function logoutUser() {
 // Get current user
 async function getCurrentUser() {
     try {
+        if (!window.supabase) return null;
+        
         // Check for driver session first
         const driverCode = sessionStorage.getItem('driver_code');
         if (driverCode) {
@@ -132,8 +146,28 @@ async function getCurrentUser() {
     }
 }
 
+// Reset password
+async function resetPassword(email) {
+    try {
+        if (!window.supabase) {
+            showToast('Database connection error', 'error');
+            return;
+        }
+        
+        const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/reset-password.html',
+        });
+        
+        if (error) throw error;
+        showToast('Password reset link sent to your email!', 'success');
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
+
 // Make functions global
 window.registerUser = registerUser;
 window.loginUser = loginUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
+window.resetPassword = resetPassword;
