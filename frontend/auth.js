@@ -4,12 +4,6 @@
 async function loginUser(email, password) {
     try {
         console.log('Attempting login for:', email);
-        console.log('Supabase available:', typeof window.supabase !== 'undefined');
-        
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
-            return { success: false };
-        }
         
         const { data, error } = await window.supabase.auth.signInWithPassword({
             email: email,
@@ -47,7 +41,8 @@ async function loginUser(email, password) {
         sessionStorage.setItem('user_id', data.user.id);
         sessionStorage.setItem('user_email', email);
         
-        if (document.getElementById('rememberMe')?.checked) {
+        const rememberMe = document.getElementById('rememberMe');
+        if (rememberMe && rememberMe.checked) {
             localStorage.setItem('rayan_user', JSON.stringify({
                 id: data.user.id,
                 email: email,
@@ -61,8 +56,8 @@ async function loginUser(email, password) {
         // Redirect based on role
         if (userRole === 'admin') {
             window.location.href = 'admin-dashboard.html';
-        } else if (userRole === 'driver') {
-            window.location.href = 'driver-dashboard.html';
+        } else if (userRole === 'client') {
+            window.location.href = 'user-dashboard.html';
         } else {
             window.location.href = 'user-dashboard.html';
         }
@@ -75,15 +70,58 @@ async function loginUser(email, password) {
     }
 }
 
+// Login driver with email and driver code
+async function loginDriver(email, driverCode) {
+    try {
+        console.log('Driver login attempt for:', email);
+        
+        // First find driver by email
+        const { data: driver, error: findError } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', email)
+            .eq('role', 'driver')
+            .single();
+        
+        if (findError || !driver) {
+            console.error('Driver not found:', findError);
+            showToast('Driver not found with this email', 'error');
+            return;
+        }
+        
+        console.log('Driver found:', driver.name);
+        
+        // Verify driver code
+        if (driver.driver_code !== driverCode.toUpperCase()) {
+            showToast('Invalid driver code', 'error');
+            return;
+        }
+        
+        // Check if approved
+        if (!driver.is_approved) {
+            showToast('Your account is pending approval', 'error');
+            return;
+        }
+        
+        // Store driver session
+        sessionStorage.setItem('user_role', 'driver');
+        sessionStorage.setItem('user_id', driver.id);
+        sessionStorage.setItem('user_email', driver.email);
+        sessionStorage.setItem('driver_code', driver.driver_code);
+        
+        showToast(`Welcome back, Driver ${driver.name}!`, 'success');
+        window.location.href = 'driver-dashboard.html';
+        
+    } catch (error) {
+        console.error('Driver login error:', error);
+        showToast('Login failed. Please check your email and driver code.', 'error');
+    }
+}
+
 // Register user - only for clients
 async function registerUser(email, password, name, phone, role = 'client') {
     try {
         console.log('Attempting signup for:', email);
-        
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
-            return { success: false };
-        }
         
         // Check if user already exists
         const { data: existingUser } = await window.supabase
@@ -125,62 +163,10 @@ async function registerUser(email, password, name, phone, role = 'client') {
     }
 }
 
-// Login driver with email and driver code
-async function loginDriver(email, driverCode) {
-    try {
-        console.log('Driver login attempt:', email);
-        
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
-            return;
-        }
-        
-        // First find driver by email
-        const { data: driver, error: findError } = await window.supabase
-            .from('profiles')
-            .select('*')
-            .eq('email', email)
-            .eq('role', 'driver')
-            .single();
-        
-        if (findError || !driver) {
-            showToast('Driver not found with this email', 'error');
-            return;
-        }
-        
-        // Verify driver code
-        if (driver.driver_code !== driverCode.toUpperCase()) {
-            showToast('Invalid driver code', 'error');
-            return;
-        }
-        
-        // Check if approved
-        if (!driver.is_approved) {
-            showToast('Your account is pending approval', 'error');
-            return;
-        }
-        
-        // Store driver session
-        sessionStorage.setItem('user_role', 'driver');
-        sessionStorage.setItem('user_id', driver.id);
-        sessionStorage.setItem('user_email', driver.email);
-        sessionStorage.setItem('driver_code', driver.driver_code);
-        
-        showToast(`Welcome back, Driver ${driver.name}!`, 'success');
-        window.location.href = 'driver-dashboard.html';
-        
-    } catch (error) {
-        console.error('Driver login error:', error);
-        showToast('Login failed. Please check your email and driver code.', 'error');
-    }
-}
-
 // Logout user
 async function logoutUser() {
     try {
-        if (window.supabase) {
-            await window.supabase.auth.signOut();
-        }
+        await window.supabase.auth.signOut();
         localStorage.clear();
         sessionStorage.clear();
         window.location.href = 'index.html';
@@ -193,8 +179,6 @@ async function logoutUser() {
 // Get current user
 async function getCurrentUser() {
     try {
-        if (!window.supabase) return null;
-        
         // Check for driver session first
         const driverCode = sessionStorage.getItem('driver_code');
         if (driverCode) {
@@ -235,11 +219,6 @@ async function getCurrentUser() {
 // Reset password
 async function resetPassword(email) {
     try {
-        if (!window.supabase) {
-            showToast('Database connection error', 'error');
-            return;
-        }
-        
         const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + '/reset-password.html',
         });
@@ -253,8 +232,8 @@ async function resetPassword(email) {
 
 // Make functions global
 window.loginUser = loginUser;
+window.loginDriver = loginDriver;
 window.registerUser = registerUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
 window.resetPassword = resetPassword;
-window.loginDriver = loginDriver;

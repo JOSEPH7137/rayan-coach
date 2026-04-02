@@ -336,11 +336,11 @@ async function handleLogin() {
   }
   
   try {
-    // For drivers: use driver code as password
+    // For drivers: use driver code login
     if (currentRole === 'driver') {
-      await loginDriver(email, password);
+      await window.loginDriver(email, password);
     } else {
-      await loginUser(email, password);
+      await window.loginUser(email, password);
     }
   } catch (error) {
     console.error('Login error:', error);
