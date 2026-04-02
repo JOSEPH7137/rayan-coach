@@ -3,58 +3,42 @@ let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 
-// Locations list (same as trips)
-const locations = [
-    'BANGAL', 'GARISSA', 'KANYONYO', 'KITHIMANI', 'KITHYOKA', 
-    'KITHYOKO', 'MATUU', 'MWINGI', 'NAIROBI', 'NGUNI', 'THIKA', 'UKASI'
-];
-
-// Route data cache
-let routeData = {};
-
-// Check session on page load - FIXED
+// Check session on page load - USING LOCALSTORAGE
 (async function() {
-    // Get session from Supabase
-    const { data: { session } } = await window.supabase.auth.getSession();
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('rayan_user');
     
-    if (!session) {
-        console.log('No session found, redirecting to login');
+    if (!storedUser) {
+        console.log('No user found, redirecting to login');
         window.location.href = 'role-selection.html';
         return;
     }
     
-    // Get user profile to check role
-    const { data: profile, error } = await window.supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+    const userData = JSON.parse(storedUser);
     
-    if (error || !profile) {
-        console.log('Profile not found, redirecting');
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    // Check if user is client or admin (admins can access user dashboard too)
-    if (profile.role !== 'client' && profile.role !== 'admin') {
+    // Check if user is client or admin
+    if (userData.role !== 'client' && userData.role !== 'admin') {
         showToast('Access denied. Client privileges required.', 'error');
         window.location.href = 'role-selection.html';
         return;
     }
     
-    currentUser = session.user;
-    userProfile = profile;
+    currentUser = userData;
+    userProfile = userData;
     
     // Update UI with user info
-    document.getElementById('userName').textContent = profile.name || session.user.email;
-    document.getElementById('userAvatar').textContent = (profile.name || session.user.email).charAt(0);
+    const userNameElement = document.getElementById('userName');
+    const userAvatarElement = document.getElementById('userAvatar');
+    if (userNameElement) userNameElement.textContent = userData.name || userData.email;
+    if (userAvatarElement) userAvatarElement.textContent = (userData.name || userData.email).charAt(0);
     
-    console.log('User authenticated:', profile.name);
+    console.log('User authenticated:', userData.name);
     
     // Load dashboard content
     loadPageContent('dashboard');
 })();
+
+// Rest of your user-dashboard.js functions remain the same...
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');

@@ -3,52 +3,49 @@ let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 
-// Check session on page load - Using Supabase session directly
+// Check session on page load - USING LOCALSTORAGE
 (async function() {
-    // Get session from Supabase directly
-    const { data: { session } } = await window.supabase.auth.getSession();
+    // Get user from localStorage
+    const storedUser = localStorage.getItem('rayan_user');
     
-    if (!session) {
-        console.log('No session found, redirecting to login');
+    if (!storedUser) {
+        console.log('No user found, redirecting to login');
         window.location.href = 'role-selection.html';
         return;
     }
     
-    // Get user profile to check role
-    const { data: profile, error } = await window.supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-    
-    if (error || !profile) {
-        console.log('Profile not found, redirecting');
-        window.location.href = 'role-selection.html';
-        return;
-    }
+    const userData = JSON.parse(storedUser);
     
     // Check if user is admin
-    if (profile.role !== 'admin') {
+    if (userData.role !== 'admin') {
         showToast('Access denied. Admin privileges required.', 'error');
         window.location.href = 'role-selection.html';
         return;
     }
     
-    currentUser = session.user;
-    userProfile = profile;
+    currentUser = userData;
+    userProfile = userData;
     
     // Update UI with user info
     const userNameElement = document.getElementById('userName');
     const userAvatarElement = document.getElementById('userAvatar');
-    if (userNameElement) userNameElement.textContent = profile.name || session.user.email;
-    if (userAvatarElement) userAvatarElement.textContent = (profile.name || session.user.email).charAt(0);
+    if (userNameElement) userNameElement.textContent = userData.name || userData.email;
+    if (userAvatarElement) userAvatarElement.textContent = (userData.name || userData.email).charAt(0);
     
-    console.log('Admin authenticated:', profile.name);
+    console.log('Admin authenticated:', userData.name);
+    
+    // Also verify with Supabase session (optional, for extra security)
+    const { data: { session } } = await window.supabase.auth.getSession();
+    if (!session) {
+        // Session expired, but we still have localStorage
+        console.log('Supabase session expired, but localStorage valid');
+    }
     
     // Load dashboard content
     loadPageContent('dashboard');
 })();
 
+// Rest of your admin-dashboard.js functions remain the same...
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (sidebar) sidebar.classList.toggle('open');

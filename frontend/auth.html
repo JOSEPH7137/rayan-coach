@@ -324,35 +324,33 @@ function validateSignup() {
 }
 
 async function handleLogin() {
-  if (!validateLogin()) return;
-  
-  const email = document.getElementById('loginEmail')?.value.trim();
-  const password = document.getElementById('loginPassword')?.value;
-  
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-  }
-  
-  try {
-    // For drivers: use driver code login
-    if (currentRole === 'driver') {
-      await window.loginDriver(email, password);
-    } else {
-      await window.loginUser(email, password);
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    showToast('Login failed. Please try again.', 'error');
-  } finally {
+    if (!validateLogin()) return;
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = 'Sign In';
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
     }
-  }
+    
+    try {
+        // For drivers: use driver code login
+        if (currentRole === 'driver') {
+            await loginDriver(email, password);
+        } else {
+            await loginUser(email, password);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showToast('Login failed. Please try again.', 'error');
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = 'Sign In';
+        }
+    }
 }
-
 async function loginDriver(email, driverCode) {
   try {
     console.log('Driver login attempt:', email);

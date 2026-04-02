@@ -1,208 +1,115 @@
-// auth.js - PRODUCTION READY (FIXED)
+// auth.js - Authentication functions
 
-// ===============================
-// LOGIN USER
-// ===============================
+// Login user for clients and admins
 async function loginUser(email, password) {
     try {
         console.log('Attempting login for:', email);
-
+        
+        if (!window.supabase) {
+            showToast('Database connection error. Please refresh the page.', 'error');
+            return { success: false };
+        }
+        
         const { data, error } = await window.supabase.auth.signInWithPassword({
-            email,
-            password
+            email: email,
+            password: password
         });
-
+        
         if (error) {
-            console.error('Login error:', error.message);
-            showToast('❌ Invalid email or password', 'error');
-            return { success: false };
+            console.error('Login error:', error);
+            showToast('❌ Invalid email or password. Please try again.', 'error');
+            return { success: false, error: error.message };
         }
-
-        // ✅ VERY IMPORTANT: wait for session to be ready
-        const { data: sessionData } = await window.supabase.auth.getSession();
-
-        if (!sessionData.session) {
-            showToast('Session error. Try again.', 'error');
-            return { success: false };
-        }
-
-        const user = sessionData.session.user;
-
-        // ===============================
-        // FETCH ROLE FROM DATABASE
-        // ===============================
-        let role = 'client';
-        let name = email.split('@')[0];
-
-        const { data: profile, error: profileError } = await window.supabase
-            .from('profiles')
-            .select('role, name')
-            .eq('id', user.id)
-            .single();
-
-        if (!profileError && profile) {
-            role = profile.role || 'client';
-            name = profile.name || name;
-        } else {
-            console.warn('No profile found, defaulting to client');
-        }
-
-        console.log('User role:', role);
-
-        // ===============================
-        // STORE USER LOCALLY (OPTIONAL CACHE)
-        // ===============================
-        const userData = {
-            id: user.id,
-            email: user.email,
-            role,
-            name
-        };
-
-        localStorage.setItem('rayan_user', JSON.stringify(userData));
-
-        showToast(`✅ Welcome ${name}`, 'success');
-
-        // ===============================
-        // SAFE REDIRECT
-        // ===============================
-        setTimeout(() => {
-            if (role === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else if (role === 'driver') {
-                window.location.href = 'driver-dashboard.html';
-            } else {
-                window.location.href = 'user-dashboard.html';
+        
+        console.log('Login successful for:', data.user.email);
+        
+        // Get user profile
+        let profile = null;
+        let userRole = 'client';
+        
+        try {
+            const { data: profileData, error: profileError } = await window.supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+            
+            if (!profileError && profileData) {
+                profile = profileData;
+                userRole = profileData.role || 'client';
             }
-        }, 300);
-
-        return { success: true };
-
-    } catch (err) {
-        console.error('Unexpected error:', err);
-        showToast('Login failed', 'error');
-        return { success: false };
+        } catch (err) {
+            console.log('Profile not found, using default client role');
+        }
+        
+        console.log('User role:', userRole);
+        
+        // Store user info in localStorage (persists across page reloads)
+        const userData = {
+            id: data.user.id,
+            email: email,
+            role: userRole,
+            name: profile?.name || email.split('@')[0],
+            login_time: Date.now()
+        };
+        
+        localStorage.setItem('rayan_user', JSON.stringify(userData));
+        
+        showToast(`✅ Welcome back, ${userData.name}!`, 'success');
+        
+        // Redirect based on role
+        if (userRole === 'admin') {
+            window.location.href = 'admin-dashboard.html';
+        } else if (userRole === 'driver') {
+            window.location.href = 'driver-dashboard.html';
+        } else {
+            window.location.href = 'user-dashboard.html';
+        }
+        
+        return { success: true, user: data.user, profile: profile };
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        showToast('Login failed. Please try again.', 'error');
+        return { success: false, error: error.message };
     }
 }
 
-
-// ===============================
-// REGISTER USER (FIXED)
-// ===============================
-async function registerUser(email, password, name, phone, role = 'client') {
-    try {
-        console.log('Signing up:', email);
-
-        const { data, error } = await window.supabase.auth.signUp({
-            email,
-            password
-        });
-
-        if (error) {
-            console.error(error.message);
-            showToast(error.message, 'error');
-            return { success: false };
-        }
-
-        const user = data.user;
-
-        // ✅ INSERT ROLE INTO PROFILES TABLE
-        const { error: insertError } = await window.supabase
-            .from('profiles')
-            .insert([{
-                id: user.id,
-                email,
-                name,
-                phone,
-                role
-            }]);
-
-        if (insertError) {
-            console.error('Profile insert error:', insertError.message);
-        }
-
-        showToast('✅ Account created. Please login.', 'success');
-
-        return { success: true };
-
-    } catch (err) {
-        console.error(err);
-        showToast('Signup failed', 'error');
-        return { success: false };
-    }
-}
-
-
-// ===============================
-// LOGOUT USER
-// ===============================
+// Logout user
 async function logoutUser() {
-    await window.supabase.auth.signOut();
-
-    localStorage.removeItem('rayan_user');
-
-    window.location.href = 'index.html';
-}
-
-
-// ===============================
-// GET CURRENT USER (REAL SESSION)
-// ===============================
-async function getCurrentUser() {
-    const { data } = await window.supabase.auth.getSession();
-
-    if (!data.session) return null;
-
-    return data.session.user;
-}
-
-
-// ===============================
-// PROTECT PAGE (VERY IMPORTANT)
-// ===============================
-async function protectPage(requiredRole = null) {
-    const { data } = await window.supabase.auth.getSession();
-
-    if (!data.session) {
-        window.location.href = 'login.html';
-        return;
-    }
-
-    const user = data.session.user;
-
-    // fetch role
-    const { data: profile } = await window.supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-    const role = profile?.role || 'client';
-
-    // role restriction
-    if (requiredRole && role !== requiredRole) {
-        showToast('Access denied', 'error');
+    try {
+        if (window.supabase) {
+            await window.supabase.auth.signOut();
+        }
+        localStorage.removeItem('rayan_user');
+        sessionStorage.clear();
         window.location.href = 'index.html';
+        showToast('Logged out successfully', 'success');
+    } catch (error) {
+        showToast(error.message, 'error');
     }
 }
 
-
-// ===============================
-// AUTH STATE LISTENER (FIXED)
-// ===============================
-window.supabase.auth.onAuthStateChange((event, session) => {
-    console.log('Auth event:', event);
-
-    // ❌ DO NOT redirect on INITIAL null
-    if (event === 'SIGNED_OUT') {
-        window.location.href = 'login.html';
+// Get current user from localStorage
+async function getCurrentUser() {
+    try {
+        const storedUser = localStorage.getItem('rayan_user');
+        if (!storedUser) return null;
+        
+        const userData = JSON.parse(storedUser);
+        
+        // Check if session is still valid (within 7 days)
+        if (userData.login_time && (Date.now() - userData.login_time) > 7 * 24 * 60 * 60 * 1000) {
+            localStorage.removeItem('rayan_user');
+            return null;
+        }
+        
+        return userData;
+    } catch (error) {
+        return null;
     }
-});
+}
 
-
-// ===============================
+// Make functions global
 window.loginUser = loginUser;
-window.registerUser = registerUser;
 window.logoutUser = logoutUser;
 window.getCurrentUser = getCurrentUser;
-window.protectPage = protectPage;
