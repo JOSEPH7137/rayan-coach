@@ -1,79 +1,94 @@
 // auth.js - Authentication functions
 
 // Login user for clients and admins
-async function loginUser(email, password) {
+async function loginUser(email, password, selectedRole) {
     try {
-        console.log('Attempting login for:', email);
-        
-        if (!window.supabase) {
-            showToast('Database connection error. Please refresh the page.', 'error');
+        email = email.trim();
+        password = password.trim();
+
+        console.log("Login attempt:", email, "as", selectedRole);
+
+        // 1️⃣ Authenticate user
+        const { data, error } = await window.supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            showToast("❌ Wrong email or password", "error");
             return { success: false };
         }
-        
-        const { data, error } = await window.supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) {
-            console.error('Login error:', error);
-            showToast('❌ Invalid email or password. Please try again.', 'error');
-            return { success: false, error: error.message };
+
+        // 2️⃣ Get session
+        const { data: sessionData } = await window.supabase.auth.getSession();
+        if (!sessionData.session) {
+            showToast("Session error. Try again.", "error");
+            return { success: false };
         }
-        
-        console.log('Login successful for:', data.user.email);
-        
-        // Get user profile
-        let profile = null;
-        let userRole = 'client';
-        
-        try {
-            const { data: profileData, error: profileError } = await window.supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', data.user.id)
-                .single();
-            
-            if (!profileError && profileData) {
-                profile = profileData;
-                userRole = profileData.role || 'client';
-            }
-        } catch (err) {
-            console.log('Profile not found, using default client role');
+
+        const user = sessionData.session.user;
+
+        // 3️⃣ Fetch user role
+        const { data: profile, error: profileError } = await window.supabase
+            .from('profiles')
+            .select('role, name')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError || !profile) {
+            await window.supabase.auth.signOut();
+            showToast("❌ Account setup incomplete. Contact support.", "error");
+            return { success: false };
         }
-        
-        console.log('User role:', userRole);
-        
-        // Store user info in localStorage (persists across page reloads)
+
+        const actualRole = profile.role;
+        const name = profile.name || email.split('@')[0];
+
+        console.log("Actual role:", actualRole);
+
+        // 4️⃣ 🚨 STRICT ROLE CHECK (THIS IS THE FIX)
+        if (actualRole !== selectedRole) {
+            await window.supabase.auth.signOut(); // 🔥 FORCE LOGOUT
+
+            showToast(
+                `❌ Access denied. You are registered as "${actualRole}", not "${selectedRole}".`,
+                "error"
+            );
+
+            return { success: false };
+        }
+
+        // 5️⃣ Store user (optional)
         const userData = {
-            id: data.user.id,
-            email: email,
-            role: userRole,
-            name: profile?.name || email.split('@')[0],
-            login_time: Date.now()
+            id: user.id,
+            email,
+            role: actualRole,
+            name
         };
-        
-        localStorage.setItem('rayan_user', JSON.stringify(userData));
-        
-        showToast(`✅ Welcome back, ${userData.name}!`, 'success');
-        
-        // Redirect based on role
-        if (userRole === 'admin') {
-            window.location.href = 'admin-dashboard.html';
-        } else if (userRole === 'driver') {
-            window.location.href = 'driver-dashboard.html';
-        } else {
-            window.location.href = 'user-dashboard.html';
-        }
-        
-        return { success: true, user: data.user, profile: profile };
-    } catch (error) {
-        console.error('Unexpected error:', error);
-        showToast('Login failed. Please try again.', 'error');
-        return { success: false, error: error.message };
+
+        localStorage.setItem("rayan_user", JSON.stringify(userData));
+
+        showToast(`✅ Welcome ${name}`, "success");
+
+        // 6️⃣ Redirect ONLY if role matches
+        setTimeout(() => {
+            if (actualRole === "admin") {
+                window.location.href = "admin-dashboard.html";
+            } else if (actualRole === "driver") {
+                window.location.href = "driver-dashboard.html";
+            } else {
+                window.location.href = "user-dashboard.html";
+            }
+        }, 300);
+
+        return { success: true };
+
+    } catch (err) {
+        console.error(err);
+        showToast("Login failed", "error");
+        return { success: false };
     }
 }
-
 // Register user - FIXED
 async function registerUser(email, password, name, phone, role = 'client') {
     try {
