@@ -1,5 +1,8 @@
 // auth.js - Authentication functions
-
+function getCurrentUser() {
+    const user = localStorage.getItem('rayan_user');
+    return user ? JSON.parse(user) : null;
+}
 // Login user for clients and admins
 async function loginUser(email, password, selectedRole) {
     try {

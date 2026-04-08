@@ -161,8 +161,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  const urlParams = new URLSearchParams(window.location.search);
-  const role = urlParams.get('role');
+const params = new URLSearchParams(window.location.search);
+const role = params.get('role');
   if (role) {
     currentRole = role;
     updateAuthUI(role);
@@ -322,7 +322,11 @@ function validateSignup() {
   
   return isValid;
 }
-
+if (!role) {
+    showToast('Role not specified. Please select role again.', 'error');
+    window.location.href = 'role-selection.html';
+    return;
+}
 async function handleLogin() {
     if (!validateLogin()) return;
 
@@ -336,31 +340,53 @@ async function handleLogin() {
     }
 
     try {
-        // Determine the role user is trying to log in as
-        const selectedRole = currentRole; // 'admin', 'driver', or 'client'
+        // ✅ GET ROLE (VERY IMPORTANT FIX)
+        const selectedRole = currentRole;
 
-        // Login user (handles clients & admins)
+        // ✅ CHECK ROLE FIRST (PLACE IT HERE)
+        if (!selectedRole) {
+            showToast('Role not specified. Please select role again.', 'error');
+            window.location.href = 'role-selection.html';
+            return;
+        }
+
+        console.log('Login attempt:', email, 'as', selectedRole);
+
+        // 🔐 LOGIN USER
         const result = await loginUser(email, password);
 
         if (!result.success) {
-            // Invalid credentials
             showToast('❌ Invalid email or password.', 'error');
             throw new Error('Invalid credentials');
         }
 
-        // Check role after login
         const userProfile = result.profile;
-        if (!userProfile || userProfile.role !== selectedRole) {
-            // Role mismatch
-            await logoutUser(); // sign out immediately
-            showToast(`❌ Access denied for role "${selectedRole}".`, 'error');
+
+        // ✅ CHECK PROFILE EXISTS
+        if (!userProfile) {
+            showToast('❌ User profile not found.', 'error');
+            throw new Error('Missing profile');
+        }
+
+        // 🚫 ROLE MISMATCH CHECK
+        if (userProfile.role !== selectedRole) {
+            await logoutUser();
+
+            showToast(
+                `❌ Access denied.\nYou are registered as "${userProfile.role}", not "${selectedRole}".`,
+                'error'
+            );
+
             throw new Error('Role mismatch');
         }
 
-        // Login successful & role matches
-        showToast(`✅ Welcome back, ${userProfile.name}!`, 'success');
+        // ✅ SUCCESS
+        showToast(`✅ Welcome back, ${userProfile.name || 'User'}!`, 'success');
 
-        // Redirect to correct dashboard
+        // Save user locally (important for dashboard)
+        localStorage.setItem('rayan_user', JSON.stringify(userProfile));
+
+        // 🚀 REDIRECT
         setTimeout(() => {
             if (selectedRole === 'admin') {
                 window.location.href = 'admin-dashboard.html';
@@ -373,6 +399,16 @@ async function handleLogin() {
 
     } catch (error) {
         console.error('Login error:', error);
+
+        // ✅ FRIENDLY ERROR HANDLING
+        if (error.message.includes('Invalid credentials')) {
+            showToast('❌ Incorrect email or password', 'error');
+        } else if (error.message.includes('Role mismatch')) {
+            // already handled above
+        } else {
+            showToast('⚠️ Login failed. Please try again.', 'error');
+        }
+
     } finally {
         if (loginBtn) {
             loginBtn.disabled = false;
