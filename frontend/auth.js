@@ -9,26 +9,19 @@ async function loginUser(email, password, selectedRole) {
         console.log("Login attempt:", email, "as", selectedRole);
 
         // 1️⃣ Authenticate user
-        const { data, error } = await window.supabase.auth.signInWithPassword({
+        const { data: authData, error: authError } = await window.supabase.auth.signInWithPassword({
             email,
             password
         });
 
-        if (error) {
+        if (authError || !authData.user) {
             showToast("❌ Wrong email or password", "error");
             return { success: false };
         }
 
-        // 2️⃣ Get session
-        const { data: sessionData } = await window.supabase.auth.getSession();
-        if (!sessionData.session) {
-            showToast("Session error. Try again.", "error");
-            return { success: false };
-        }
+        const user = authData.user;
 
-        const user = sessionData.session.user;
-
-        // 3️⃣ Fetch user role
+        // 2️⃣ Fetch profile for this user
         const { data: profile, error: profileError } = await window.supabase
             .from('profiles')
             .select('role, name')
@@ -46,47 +39,43 @@ async function loginUser(email, password, selectedRole) {
 
         console.log("Actual role:", actualRole);
 
-        // 4️⃣ 🚨 STRICT ROLE CHECK (THIS IS THE FIX)
+        // 3️⃣ STRICT ROLE CHECK
         if (actualRole !== selectedRole) {
-            await window.supabase.auth.signOut(); // 🔥 FORCE LOGOUT
-
+            await window.supabase.auth.signOut();
             showToast(
                 `❌ Access denied. You are registered as "${actualRole}", not "${selectedRole}".`,
                 "error"
             );
-
             return { success: false };
         }
 
-        // 5️⃣ Store user (optional)
+        // 4️⃣ Store session consistently
         const userData = {
             id: user.id,
             email,
             role: actualRole,
-            name
+            name,
+            login_time: Date.now()
         };
 
         localStorage.setItem("rayan_user", JSON.stringify(userData));
+        sessionStorage.setItem("rayan_session", JSON.stringify(userData));
 
         showToast(`✅ Welcome ${name}`, "success");
 
-        // 6️⃣ Redirect ONLY if role matches
+        // 5️⃣ Redirect based on role
         setTimeout(() => {
-            if (actualRole === "admin") {
-                window.location.href = "admin-dashboard.html";
-            } else if (actualRole === "driver") {
-                window.location.href = "driver-dashboard.html";
-            } else {
-                window.location.href = "user-dashboard.html";
-            }
+            if (actualRole === "admin") window.location.href = "admin-dashboard.html";
+            else if (actualRole === "driver") window.location.href = "driver-dashboard.html";
+            else window.location.href = "user-dashboard.html";
         }, 300);
 
-        return { success: true };
+        return { success: true, user, profile };
 
     } catch (err) {
-        console.error(err);
-        showToast("Login failed", "error");
-        return { success: false };
+        console.error("Login error:", err);
+        showToast("Login failed. Please try again.", "error");
+        return { success: false, error: err.message };
     }
 }
 // Register user - FIXED

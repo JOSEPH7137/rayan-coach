@@ -256,6 +256,13 @@ function submitContactForm(event) {
   }, 1500);
   return false;
 }
+(async () => {
+    const user = await getCurrentUser();
+    if (user) {
+        console.log(`Logged in as ${user.name}, role: ${user.role}`);
+        // Optionally update nav links, show logout button, etc.
+    }
+})();
 </script>
 </body>
 </html>

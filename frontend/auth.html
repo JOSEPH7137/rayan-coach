@@ -325,26 +325,55 @@ function validateSignup() {
 
 async function handleLogin() {
     if (!validateLogin()) return;
-    
+
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
+
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
     }
-    
+
     try {
-        // For drivers: use driver code login
-        if (currentRole === 'driver') {
-            await loginDriver(email, password);
-        } else {
-            await loginUser(email, password);
+        // Determine the role user is trying to log in as
+        const selectedRole = currentRole; // 'admin', 'driver', or 'client'
+
+        // Login user (handles clients & admins)
+        const result = await loginUser(email, password);
+
+        if (!result.success) {
+            // Invalid credentials
+            showToast('❌ Invalid email or password.', 'error');
+            throw new Error('Invalid credentials');
         }
+
+        // Check role after login
+        const userProfile = result.profile;
+        if (!userProfile || userProfile.role !== selectedRole) {
+            // Role mismatch
+            await logoutUser(); // sign out immediately
+            showToast(`❌ Access denied for role "${selectedRole}".`, 'error');
+            throw new Error('Role mismatch');
+        }
+
+        // Login successful & role matches
+        showToast(`✅ Welcome back, ${userProfile.name}!`, 'success');
+
+        // Redirect to correct dashboard
+        setTimeout(() => {
+            if (selectedRole === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (selectedRole === 'driver') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+        }, 500);
+
     } catch (error) {
         console.error('Login error:', error);
-        showToast('Login failed. Please try again.', 'error');
+    } finally {
         if (loginBtn) {
             loginBtn.disabled = false;
             loginBtn.innerHTML = 'Sign In';
@@ -352,49 +381,80 @@ async function handleLogin() {
     }
 }
 async function loginDriver(email, driverCode) {
-  try {
-    console.log('Driver login attempt:', email);
-    
-    // First find driver by email
-    const { data: driver, error: findError } = await window.supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email)
-      .eq('role', 'driver')
-      .single();
-    
-    if (findError || !driver) {
-      showToast('Driver not found with this email', 'error');
-      return;
-    }
-    
-    // Verify driver code
-    if (driver.driver_code !== driverCode.toUpperCase()) {
-      showToast('Invalid driver code', 'error');
-      return;
-    }
-    
-    // Check if approved
-    if (!driver.is_approved) {
-      showToast('Your account is pending approval', 'error');
-      return;
-    }
-    
-    // Store driver session
-    sessionStorage.setItem('user_role', 'driver');
-    sessionStorage.setItem('user_id', driver.id);
-    sessionStorage.setItem('user_email', driver.email);
-    sessionStorage.setItem('driver_code', driver.driver_code);
-    
-    showToast(`Welcome back, Driver ${driver.name}!`, 'success');
-    window.location.href = 'driver-dashboard.html';
-    
-  } catch (error) {
-    console.error('Driver login error:', error);
-    showToast('Login failed. Please check your email and driver code.', 'error');
-  }
-}
+    try {
+        console.log('Driver login attempt:', email);
 
+        // First, find driver by email and role
+        const { data: driver, error: findError } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', email)
+            .eq('role', 'driver')
+            .single();
+
+        if (findError || !driver) {
+            showToast('❌ Driver not found with this email', 'error');
+            return { success: false };
+        }
+
+        // Verify driver code
+        if (driver.driver_code !== driverCode.toUpperCase()) {
+            showToast('❌ Invalid driver code', 'error');
+            return { success: false };
+        }
+
+        // Check if approved
+        if (!driver.is_approved) {
+            showToast('⚠️ Your account is pending approval', 'error');
+            return { success: false };
+        }
+
+        // ✅ Sign in with Supabase Auth
+        const { data: authData, error: authError } = await window.supabase.auth.signInWithPassword({
+            email: email,
+            password: driverCode // assuming driverCode is used as password
+        });
+
+        if (authError) {
+            showToast('❌ Invalid login credentials', 'error');
+            console.error('Driver Auth Error:', authError);
+            return { success: false };
+        }
+
+        console.log('Driver logged in successfully:', authData.user.email);
+
+        // Store session/profile locally
+        const userData = {
+            id: authData.user.id,
+            email: authData.user.email,
+            role: 'driver',
+            name: driver.name || email.split('@')[0],
+            login_time: Date.now()
+        };
+
+        // Local and session storage
+        localStorage.setItem('rayan_user', JSON.stringify(userData));
+        sessionStorage.setItem('rayan_session', JSON.stringify(userData));
+        sessionStorage.setItem('user_role', 'driver');
+        sessionStorage.setItem('user_id', driver.id);
+        sessionStorage.setItem('user_email', driver.email);
+        sessionStorage.setItem('driver_code', driver.driver_code);
+
+        showToast(`✅ Welcome back, Driver ${driver.name || email.split('@')[0]}!`, 'success');
+
+        // Redirect to driver dashboard
+        setTimeout(() => {
+            window.location.href = 'driver-dashboard.html';
+        }, 500);
+
+        return { success: true, user: authData.user, profile: driver };
+
+    } catch (error) {
+        console.error('Driver login error:', error);
+        showToast('Login failed. Please check your email and driver code.', 'error');
+        return { success: false, error: error.message };
+    }
+}
 async function handleSignup() {
   if (!validateSignup()) return;
   

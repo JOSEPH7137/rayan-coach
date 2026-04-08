@@ -1,3 +1,20 @@
+(async () => {
+    const user = await getCurrentUser();
+
+    if (!user) {
+        showToast("❌ Please log in first", "error");
+        window.location.href = "auth.html";
+        return;
+    }
+
+    if (user.role !== "client") {
+        showToast("❌ Access denied. You are not a traveller.", "error");
+        await logoutUser();
+        return;
+    }
+
+    console.log(`✅ Welcome ${user.name}, role: ${user.role}`);
+})();
 // User Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;

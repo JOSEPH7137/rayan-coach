@@ -337,6 +337,13 @@ function initCounters() {
   const statsDiv = document.querySelector('.stats-container-horizontal');
   if(statsDiv) observer.observe(statsDiv);
 }
+(async () => {
+    const user = await getCurrentUser();
+    if (user) {
+        console.log(`Logged in as ${user.name}, role: ${user.role}`);
+        // Optionally update nav links, show logout button, etc.
+    }
+})();
 </script>
 
 </body>
