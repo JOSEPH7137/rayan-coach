@@ -1,5 +1,11 @@
 {
   "installCommand": "exit 0",
   "buildCommand": "exit 0",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "routes": [
+    {
+      "src": "/reset-password.html",
+      "dest": "/reset-password.html"
+    }
+  ]
 }

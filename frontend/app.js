@@ -7,7 +7,7 @@ function toggleTheme() {
   if (body.classList.contains('light-mode')) {
     body.classList.remove('light-mode');
     body.classList.add('dark-mode');
-    if (themeIcon) themeIcon.className = 'fas fa-moon';
+    if (themeIcon) themeIcon.className = 'fas fa-sun';
     if (themeText) themeText.textContent = 'Dark';
     localStorage.setItem('theme', 'dark');
   } else {
@@ -43,9 +43,6 @@ function loadTheme() {
 }
 
 // Make sure theme loads on every page
-document.addEventListener('DOMContentLoaded', function() {
-  loadTheme();
-});
 
 // Also run immediately to prevent flash
 loadTheme();
@@ -120,7 +117,7 @@ function initCarousel() {
   const prevBtn = document.querySelector('.carousel-prev');
   const nextBtn = document.querySelector('.carousel-next');
   let currentIndex = 0;
-  const totalSlides = 3;
+const totalSlides = document.querySelectorAll('.carousel-slide').length;
   let autoSlideInterval;
 
   startTypingForSlide(0);
@@ -275,7 +272,12 @@ window.addEventListener('scroll', function() {
 });
 
 // Make functions globally available
-window.toggleTheme = toggleTheme;
+window.App = {
+  toggleTheme,
+  loadTheme,
+  showToast,
+  initCarousel
+};
 window.loadTheme = loadTheme;
 window.showToast = showToast;
 window.initCarousel = initCarousel;
