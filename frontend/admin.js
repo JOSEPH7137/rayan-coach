@@ -248,7 +248,171 @@ async function addBus() {
     showToast('Bus added', 'success');
 }
 
+// ========== FUEL & TRIP CALCULATOR ==========
+function openFuelCalculator() {
+    const html = `
+        <div class="dashboard-card">
+            <h3>⛽ Fuel & Trip Calculator</h3>
+            
+            <input id="distanceKm" class="input" placeholder="Distance (km)">
+            <input id="fuelEfficiency" class="input" placeholder="Fuel Efficiency (km/L)">
+            <input id="fuelPrice" class="input" placeholder="Fuel Price (KES/L)">
 
+            <button class="btn-dashboard btn-primary" onclick="calculateTrip()">Calculate</button>
+
+            <div id="calcResults" style="margin-top:15px;"></div>
+        </div>
+    `;
+    document.getElementById('pageContent').innerHTML = html;
+}
+//=====================fuel calculator======
+function calculateTrip() {
+    const distance = parseFloat(document.getElementById('distanceKm').value);
+    const efficiency = parseFloat(document.getElementById('fuelEfficiency').value);
+    const price = parseFloat(document.getElementById('fuelPrice').value);
+
+    if (!distance || !efficiency || !price) {
+        showToast("Fill all fields", "error");
+        return;
+    }
+
+    const fuelNeeded = distance / efficiency;
+    const cost = fuelNeeded * price;
+    const time = distance / 80;
+
+    document.getElementById('calcResults').innerHTML = `
+        <p>⛽ Fuel Needed: <strong>${fuelNeeded.toFixed(2)} L</strong></p>
+        <p>💰 Fuel Cost: <strong>KES ${cost.toFixed(2)}</strong></p>
+        <p>⏱ Travel Time @80km/h: <strong>${time.toFixed(2)} hrs</strong></p>
+    `;
+}
+//==============live tracking  system======
+// ========== LIVE TRACKING ==========
+function openLiveTracking() {
+    document.getElementById('pageContent').innerHTML = `
+        <div class="dashboard-card">
+            <h3>📍 Live Driver Tracking</h3>
+            <div id="trackingList">Loading...</div>
+        </div>
+    `;
+    loadLiveLocations();
+}
+
+async function loadLiveLocations() {
+    const { data } = await window.supabase
+        .from('driver_locations')
+        .select('*');
+
+    const container = document.getElementById('trackingList');
+
+    container.innerHTML = data.map(d => `
+        <div class="trip-item">
+            <strong>${d.driver_name}</strong><br>
+            Lat: ${d.latitude} | Lng: ${d.longitude}<br>
+            Updated: ${new Date(d.updated_at).toLocaleTimeString()}
+        </div>
+    `).join('');
+}
+
+// REALTIME
+window.supabase
+.channel('locations')
+.on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'driver_locations'
+}, payload => {
+    loadLiveLocations();
+})
+.subscribe();
+
+// ========== REALTIME CHAT ==========
+function subscribeChat() {
+    chatRealtimeSubscription = window.supabase
+        .channel('chat')
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'driver_admin_chat'
+        }, payload => {
+            appendChatMessage(payload.new);
+        })
+        .subscribe();
+}
+//=======realtime chats======
+function appendChatMessage(msg) {
+    const box = document.getElementById('chatMessages');
+
+    const isAdmin = msg.sender === 'admin';
+
+    const div = document.createElement('div');
+    div.style.textAlign = isAdmin ? 'right' : 'left';
+
+    div.innerHTML = `
+        <div style="
+            display:inline-block;
+            background:${isAdmin ? '#F5B041' : '#1F2937'};
+            color:${isAdmin ? '#000' : '#fff'};
+            padding:10px;
+            border-radius:10px;
+            margin:5px;
+            max-width:70%;
+        ">
+            ${msg.message}
+            ${msg.file_url ? `<br><a href="${msg.file_url}" target="_blank">📎 File</a>` : ''}
+        </div>
+    `;
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+//==========live maps====
+let map;
+let markers = {};
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: -1.286389, lng: 36.817223 }, // Nairobi
+        zoom: 10,
+    });
+
+    loadDriverLocationsOnMap();
+}
+
+async function loadDriverLocationsOnMap() {
+    const { data } = await window.supabase
+        .from('driver_locations')
+        .select('*');
+
+    data.forEach(driver => {
+        const position = {
+            lat: driver.latitude,
+            lng: driver.longitude
+        };
+
+        if (!markers[driver.driver_id]) {
+            markers[driver.driver_id] = new google.maps.Marker({
+                position,
+                map,
+                title: driver.driver_name
+            });
+        } else {
+            markers[driver.driver_id].setPosition(position);
+        }
+    });
+}
+
+// REALTIME UPDATE
+window.supabase
+.channel('map-tracking')
+.on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'driver_locations'
+}, payload => {
+    loadDriverLocationsOnMap();
+})
+.subscribe();
 // ================= REVIEWS =================
 async function loadAllReviews() {
     const { data } = await window.supabase.from('reviews').select('*');
@@ -256,8 +420,25 @@ async function loadAllReviews() {
     document.getElementById('allReviewsList').innerHTML =
         data.map(r => `<div>${r.comment || 'No comment'}</div>`).join('');
 }
+//===============admin password change========
+async function changeAdminPassword() {
+    const newPassword = document.getElementById('newPassword').value;
 
+    if (newPassword.length < 6) {
+        showToast("Password must be at least 6 characters", "error");
+        return;
+    }
 
+    const { error } = await window.supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        showToast("❌ Failed to update password", "error");
+    } else {
+        showToast("✅ Password changed successfully", "success");
+    }
+}
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
     initRealtimeMessages();

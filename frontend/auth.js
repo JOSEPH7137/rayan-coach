@@ -3,7 +3,6 @@ function getCurrentUser() {
     const user = localStorage.getItem('rayan_user');
     return user ? JSON.parse(user) : null;
 }
-// Login user for clients and admins
 async function loginUser(email, password, selectedRole) {
     try {
         email = email.trim();
@@ -11,48 +10,53 @@ async function loginUser(email, password, selectedRole) {
 
         console.log("Login attempt:", email, "as", selectedRole);
 
-        // 1️⃣ Authenticate user
-        const { data: authData, error: authError } = await window.supabase.auth.signInWithPassword({
-            email,
-            password
-        });
+        // 1️⃣ Authenticate
+        const { data: authData, error: authError } =
+            await window.supabase.auth.signInWithPassword({
+                email,
+                password
+            });
 
         if (authError || !authData.user) {
-            showToast("❌ Wrong email or password", "error");
-            return { success: false };
+            return {
+                success: false,
+                error: "Invalid credentials"
+            };
         }
 
         const user = authData.user;
 
-        // 2️⃣ Fetch profile for this user
-        const { data: profile, error: profileError } = await window.supabase
-            .from('profiles')
-            .select('role, name')
-            .eq('id', user.id)
-            .single();
+        // 2️⃣ Get profile
+        const { data: profile, error: profileError } =
+            await window.supabase
+                .from('profiles')
+                .select('role, name')
+                .eq('id', user.id)
+                .single();
 
         if (profileError || !profile) {
             await window.supabase.auth.signOut();
-            showToast("❌ Account setup incomplete. Contact support.", "error");
-            return { success: false };
+
+            return {
+                success: false,
+                error: "Profile not found"
+            };
         }
 
         const actualRole = profile.role;
         const name = profile.name || email.split('@')[0];
 
-        console.log("Actual role:", actualRole);
-
-        // 3️⃣ STRICT ROLE CHECK
+        // 3️⃣ Role validation
         if (actualRole !== selectedRole) {
             await window.supabase.auth.signOut();
-            showToast(
-                `❌ Access denied. You are registered as "${actualRole}", not "${selectedRole}".`,
-                "error"
-            );
-            return { success: false };
+
+            return {
+                success: false,
+                error: `Access denied for role ${selectedRole}`
+            };
         }
 
-        // 4️⃣ Store session consistently
+        // 4️⃣ Save session
         const userData = {
             id: user.id,
             email,
@@ -64,21 +68,19 @@ async function loginUser(email, password, selectedRole) {
         localStorage.setItem("rayan_user", JSON.stringify(userData));
         sessionStorage.setItem("rayan_session", JSON.stringify(userData));
 
-        showToast(`✅ Welcome ${name}`, "success");
-
-        // 5️⃣ Redirect based on role
-        setTimeout(() => {
-            if (actualRole === "admin") window.location.href = "admin-dashboard.html";
-            else if (actualRole === "driver") window.location.href = "driver-dashboard.html";
-            else window.location.href = "user-dashboard.html";
-        }, 300);
-
-        return { success: true, user, profile };
+        return {
+            success: true,
+            user,
+            profile: userData
+        };
 
     } catch (err) {
         console.error("Login error:", err);
-        showToast("Login failed. Please try again.", "error");
-        return { success: false, error: err.message };
+
+        return {
+            success: false,
+            error: err.message
+        };
     }
 }
 // Register user - FIXED

@@ -60,7 +60,7 @@
         <label class="checkbox">
           <input type="checkbox" id="rememberMe"> Remember me
         </label>
-        <a href="#" onclick="handleForgotPassword()" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
+       <a href="#" onclick="handleForgotPassword(); return false;" class="forgot-link">
       </div>
       <button class="btn-auth-primary" onclick="handleLogin()" id="loginBtn">Sign In</button>
       <div class="auth-divider">Or sign in with</div>
@@ -322,11 +322,6 @@ function validateSignup() {
   
   return isValid;
 }
-if (!role) {
-    showToast('Role not specified. Please select role again.', 'error');
-    window.location.href = 'role-selection.html';
-    return;
-}
 async function handleLogin() {
     if (!validateLogin()) return;
 
@@ -340,57 +335,41 @@ async function handleLogin() {
     }
 
     try {
-        // ✅ GET ROLE (VERY IMPORTANT FIX)
-        const selectedRole = currentRole;
+        // ✅ GET ROLE FROM URL (VERY IMPORTANT FIX)
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role'); // admin / driver / client
 
-        // ✅ CHECK ROLE FIRST (PLACE IT HERE)
-        if (!selectedRole) {
+        if (!role) {
             showToast('Role not specified. Please select role again.', 'error');
             window.location.href = 'role-selection.html';
-            return;
+            return; // ✅ NOW VALID (inside function)
         }
 
-        console.log('Login attempt:', email, 'as', selectedRole);
-
-        // 🔐 LOGIN USER
-        const result = await loginUser(email, password);
+        // ✅ LOGIN
+  const result = await loginUser(email, password, role);
 
         if (!result.success) {
             showToast('❌ Invalid email or password.', 'error');
-            throw new Error('Invalid credentials');
+            return;
         }
 
         const userProfile = result.profile;
 
-        // ✅ CHECK PROFILE EXISTS
-        if (!userProfile) {
-            showToast('❌ User profile not found.', 'error');
-            throw new Error('Missing profile');
-        }
-
-        // 🚫 ROLE MISMATCH CHECK
-        if (userProfile.role !== selectedRole) {
+        // ✅ ROLE CHECK
+        if (!userProfile || userProfile.role !== role) {
             await logoutUser();
-
-            showToast(
-                `❌ Access denied.\nYou are registered as "${userProfile.role}", not "${selectedRole}".`,
-                'error'
-            );
-
-            throw new Error('Role mismatch');
+            showToast(`❌ Access denied. You are not registered as ${role}.`, 'error');
+            return;
         }
 
         // ✅ SUCCESS
-        showToast(`✅ Welcome back, ${userProfile.name || 'User'}!`, 'success');
+        showToast(`✅ Welcome back, ${userProfile.name}!`, 'success');
 
-        // Save user locally (important for dashboard)
-        localStorage.setItem('rayan_user', JSON.stringify(userProfile));
-
-        // 🚀 REDIRECT
+        // ✅ REDIRECT
         setTimeout(() => {
-            if (selectedRole === 'admin') {
+            if (role === 'admin') {
                 window.location.href = 'admin-dashboard.html';
-            } else if (selectedRole === 'driver') {
+            } else if (role === 'driver') {
                 window.location.href = 'driver-dashboard.html';
             } else {
                 window.location.href = 'user-dashboard.html';
@@ -400,11 +379,9 @@ async function handleLogin() {
     } catch (error) {
         console.error('Login error:', error);
 
-        // ✅ FRIENDLY ERROR HANDLING
-        if (error.message.includes('Invalid credentials')) {
+        // 🔥 HANDLE SUPABASE ERRORS CLEANLY
+        if (error.message.includes('Invalid login credentials')) {
             showToast('❌ Incorrect email or password', 'error');
-        } else if (error.message.includes('Role mismatch')) {
-            // already handled above
         } else {
             showToast('⚠️ Login failed. Please try again.', 'error');
         }
@@ -534,11 +511,28 @@ function togglePasswordField(id) {
 
 async function handleForgotPassword() {
   const email = document.getElementById('loginEmail')?.value.trim();
+
   if (!email) {
     showToast('Please enter your email address', 'error');
     return;
   }
-  await resetPassword(email);
+
+  try {
+    const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://rayan-coach.vercel.app/reset-password.html"
+    });
+
+    if (error) {
+      console.error(error);
+      showToast('❌ Failed to send reset email', 'error');
+    } else {
+      showToast('📩 Password reset link sent to your email', 'success');
+    }
+
+  } catch (err) {
+    console.error(err);
+    showToast('⚠️ Something went wrong', 'error');
+  }
 }
 </script>
 </body>
