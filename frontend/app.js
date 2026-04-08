@@ -7,7 +7,7 @@ function toggleTheme() {
   if (body.classList.contains('light-mode')) {
     body.classList.remove('light-mode');
     body.classList.add('dark-mode');
-    if (themeIcon) themeIcon.className = 'fas fa-sun';
+    if (themeIcon) themeIcon.className = 'fas fa-moon';
     if (themeText) themeText.textContent = 'Dark';
     localStorage.setItem('theme', 'dark');
   } else {
