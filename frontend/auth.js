@@ -1,8 +1,4 @@
-// auth.js - Authentication functions
-function getCurrentUser() {
-    const user = localStorage.getItem('rayan_user');
-    return user ? JSON.parse(user) : null;
-}
+
 async function loginUser(email, password, selectedRole) {
   try {
     email = email.trim();
