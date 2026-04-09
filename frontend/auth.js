@@ -199,41 +199,15 @@ async function logoutUser() {
 }
 
 // Get current user
-async function getCurrentUser() {
+function getCurrentUser() {
   try {
-    // 🔥 Wait until supabase is ready
-    if (!window.supabase) {
-      console.warn("Supabase not ready yet");
-      return null;
-    }
-
-    const { data, error } = await window.supabase.auth.getSession();
-
-    if (error || !data.session) {
-      return null;
-    }
-
-    const user = data.session.user;
-
-    const { data: profile } = await window.supabase
-      .from('profiles')
-      .select('role, name')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    return {
-      id: user.id,
-      email: user.email,
-      role: profile?.role || 'client',
-      name: profile?.name || user.email.split('@')[0]
-    };
-
+    const user = localStorage.getItem('rayan_user');
+    return user ? JSON.parse(user) : null;
   } catch (err) {
     console.error("getCurrentUser error:", err);
     return null;
   }
 }
-
 // Make all functions global
 window.loginUser = loginUser;
 window.registerUser = registerUser;
