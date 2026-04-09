@@ -4,84 +4,91 @@ function getCurrentUser() {
     return user ? JSON.parse(user) : null;
 }
 async function loginUser(email, password, selectedRole) {
-    try {
-        email = email.trim();
-        password = password.trim();
+  try {
+    email = email.trim();
+    password = password.trim();
 
-        console.log("Login attempt:", email, "as", selectedRole);
+    console.log("Login attempt:", email, "as", selectedRole);
 
-        // 1️⃣ Authenticate
-        const { data: authData, error: authError } =
-            await window.supabase.auth.signInWithPassword({
-                email,
-                password
-            });
+    // 1️⃣ Authenticate user
+    const { data: authData, error: authError } =
+      await window.supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-        if (authError || !authData.user) {
-            return {
-                success: false,
-                error: "Invalid credentials"
-            };
-        }
-
-        const user = authData.user;
-
-        // 2️⃣ Get profile
-        const { data: profile, error: profileError } =
-            await window.supabase
-                .from('profiles')
-                .select('role, name')
-                .eq('id', user.id)
-                .single();
-
-        if (profileError || !profile) {
-            await window.supabase.auth.signOut();
-
-            return {
-                success: false,
-                error: "Profile not found"
-            };
-        }
-
-        const actualRole = profile.role;
-        const name = profile.name || email.split('@')[0];
-
-        // 3️⃣ Role validation
-        if (actualRole !== selectedRole) {
-            await window.supabase.auth.signOut();
-
-            return {
-                success: false,
-                error: `Access denied for role ${selectedRole}`
-            };
-        }
-
-        // 4️⃣ Save session
-        const userData = {
-            id: user.id,
-            email,
-            role: actualRole,
-            name,
-            login_time: Date.now()
-        };
-
-        localStorage.setItem("rayan_user", JSON.stringify(userData));
-        sessionStorage.setItem("rayan_session", JSON.stringify(userData));
-
-        return {
-            success: true,
-            user,
-            profile: userData
-        };
-
-    } catch (err) {
-        console.error("Login error:", err);
-
-        return {
-            success: false,
-            error: err.message
-        };
+    if (authError || !authData.user) {
+      return {
+        success: false,
+        error: "Invalid email or password"
+      };
     }
+
+    const user = authData.user;
+
+    // 2️⃣ Get profile (SAFE version)
+    const { data: profile, error: profileError } =
+      await window.supabase
+        .from('profiles')
+        .select('role, name')
+        .eq('id', user.id)
+        .maybeSingle(); // ✅ IMPORTANT FIX
+
+    if (profileError) {
+      console.error("Profile error:", profileError);
+
+      return {
+        success: false,
+        error: "Failed to load profile"
+      };
+    }
+
+    if (!profile) {
+      return {
+        success: false,
+        error: "Profile not found. Contact support."
+      };
+    }
+
+    const actualRole = profile.role;
+    const name = profile.name || email.split('@')[0];
+
+    // 3️⃣ Role validation (NO FORCED LOGOUT)
+    if (actualRole !== selectedRole) {
+      return {
+        success: false,
+        error: `Access denied. You are registered as ${actualRole}`
+      };
+    }
+
+    // 4️⃣ Save session
+    const userData = {
+      id: user.id,
+      email,
+      role: actualRole,
+      name,
+      login_time: Date.now()
+    };
+
+    localStorage.setItem("rayan_user", JSON.stringify(userData));
+    sessionStorage.setItem("rayan_session", JSON.stringify(userData));
+
+    console.log("✅ Login successful:", userData);
+
+    return {
+      success: true,
+      user,
+      profile: userData
+    };
+
+  } catch (err) {
+    console.error("Login error:", err);
+
+    return {
+      success: false,
+      error: "Something went wrong"
+    };
+  }
 }
 // Register user - FIXED
 async function registerUser(email, password, name, phone, role = 'client') {
@@ -180,10 +187,16 @@ async function logoutUser() {
         if (window.supabase) {
             await window.supabase.auth.signOut();
         }
+
         localStorage.removeItem('rayan_user');
         sessionStorage.clear();
-        window.location.href = 'index.html';
+
         showToast('Logged out successfully', 'success');
+
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 800);
+
     } catch (error) {
         showToast(error.message, 'error');
     }

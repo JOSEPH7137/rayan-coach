@@ -1,3 +1,30 @@
+document.addEventListener('DOMContentLoaded', async () => {
+  loadTheme();
+
+  try {
+    // 🔥 Wait for session properly
+    const { data, error } = await window.supabase.auth.getSession();
+
+    if (error) {
+      console.error(error);
+      return redirectToLogin();
+    }
+
+    if (!data.session) {
+      return redirectToLogin();
+    }
+
+    console.log("✅ Session OK:", data.session.user.email);
+
+  } catch (err) {
+    console.error(err);
+    redirectToLogin();
+  }
+});
+
+function redirectToLogin() {
+  window.location.href = "auth.html?role=user";
+}
 (async () => {
     const user = await getCurrentUser();
 
