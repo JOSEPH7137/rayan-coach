@@ -1,4 +1,4 @@
-const supabase = window.supabase;
+const supabase = window.supabase || supabaseClient;
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
 
@@ -62,30 +62,34 @@ let routeData = {};
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
 }
+function navigateTo(page) {
+  currentPage = page;
 
-// Make navigateTo a global function that works with onclick
-window.navigateTo = function(page) {
-    currentPage = page;
-    
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-page') === page) {
-            item.classList.add('active');
-        }
-    });
-    
-    const titles = {
-        dashboard: 'Dashboard', booking: 'Book Ticket', tracking: 'Live Tracking',
-        parcel: 'Parcel Delivery', tickets: 'My Tickets', rewards: 'Loyalty & Rewards',
-        messages: 'Messages', profile: 'My Profile', safety: 'Safety & SOS',
-        reviews: 'Rate Your Journey'
-    };
-    const pageTitle = document.getElementById('pageTitle');
-    if (pageTitle) pageTitle.textContent = titles[page] || 'Dashboard';
-    
-    loadPageContent(page);
-};
+  document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('data-page') === page) {
+      item.classList.add('active');
+    }
+  });
+
+  const titles = {
+    dashboard: 'Dashboard',
+    booking: 'Book Ticket',
+    tracking: 'Live Tracking',
+    parcel: 'Parcel Delivery',
+    tickets: 'My Tickets',
+    rewards: 'Loyalty & Rewards',
+    messages: 'Messages',
+    profile: 'My Profile',
+    safety: 'Safety & SOS',
+    reviews: 'Rate Your Journey'
+  };
+
+  const pageTitle = document.getElementById('pageTitle');
+  if (pageTitle) pageTitle.textContent = titles[page] || 'Dashboard';
+
+  loadPageContent(page);
+}
 
 function loadPageContent(page) {
     const content = document.getElementById('pageContent');
@@ -570,9 +574,11 @@ async function sendChatMessage() {
   const input = document.getElementById("chatInput");
   const fileInput = document.getElementById("fileInput");
 
+  
+
   let fileUrl = null;
 
-  // Upload file
+  // ✅ Upload file
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
 
@@ -587,29 +593,29 @@ async function sendChatMessage() {
     }
   }
 
-  // Check user
+  // ✅ Save message
   if (!currentUser || !currentUser.id) {
-    showToast("User session not ready", "error");
-    return;
-  }
+  showToast("User session not ready", "error");
+  return;
+}
 
-  if (!input.value && !fileInput.files.length) return;
+if (!input.value && !fileInput.files.length) {
+  return;
+}
+const { error } = await supabase.from('messages').insert({
+  user_id: currentUser.id,
+  message: input.value,
+  file_url: fileUrl,
+  role: "client"
+});
 
-  const { error } = await supabase.from('messages').insert({
-    user_id: currentUser.id,
-    message: input.value,
-    file_url: fileUrl,
-    role: "client"
-  });
+if (error) {
+  showToast("❌ Failed to send message", "error");
+  return;
+}
 
-  if (error) {
-    showToast("❌ Failed to send message", "error");
-    return;
-  }
-
-  // ✅ clear inputs
-  input.value = "";
-  fileInput.value = "";
+input.value = "";
+fileInput.value = "";
 }
 //=========display messages=========
 function displayMessage(msg) {

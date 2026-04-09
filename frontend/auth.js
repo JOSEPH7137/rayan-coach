@@ -86,38 +86,74 @@ async function loginUser(email, password, selectedRole) {
     };
   }
 }
-// Register user - FIXED
+// Register user - FIXED + AUTO LOGIN
 async function registerUser(email, password, name, phone, role = 'client') {
     try {
         console.log('Attempting signup for:', email);
-        
+
         if (!window.supabase) {
             showToast('Database connection error. Please refresh the page.', 'error');
             return { success: false };
         }
-        
+
+        // ✅ SIGN UP
         const { data, error } = await window.supabase.auth.signUp({
-            email: email,
-            password: password,
+            email,
+            password,
             options: {
                 data: {
-                    name: name,
-                    phone: phone,
-                    role: role
+                    name,
+                    phone,
+                    role
                 }
             }
         });
-        
+
         if (error) {
             console.error('Signup error:', error);
             showToast(error.message, 'error');
             return { success: false, error: error.message };
         }
-        
-        console.log('Signup successful!');
-        showToast(`✅ Account created successfully! Please sign in.`, 'success');
-        
-        return { success: true, user: data.user };
+
+        console.log('Signup successful!', data);
+
+        // ⚠️ Supabase may require email confirmation
+        if (!data.session) {
+            showToast('📧 Check your email to confirm your account', 'info');
+            return { success: true };
+        }
+
+        // ✅ FORCE LOGIN (if session exists)
+        const user = data.user;
+
+        // ✅ Ensure profile exists (VERY IMPORTANT)
+        const { data: existingProfile } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (!existingProfile) {
+            await window.supabase.from('profiles').insert({
+                id: user.id,
+                email: user.email,
+                name,
+                phone,
+                role
+            });
+        }
+
+        showToast('✅ Account created & logged in!', 'success');
+
+        // ✅ REDIRECT BASED ON ROLE
+        if (role === 'admin') {
+            window.location.href = "admin-dashboard.html";
+        } else {
+            window.location.href = "user-dashboard.html";
+        }
+
+        return { success: true, user };
+
     } catch (error) {
         console.error('Unexpected error:', error);
         showToast(error.message, 'error');
