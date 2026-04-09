@@ -34,16 +34,18 @@ function redirectToLogin() {
         return;
     }
 
-    // ✅ ACCEPT BOTH 'client' AND 'user' (fix inconsistency)
-    if (user.role !== "client" && user.role !== "user") {
+    if (user.role !== "client") {
         showToast("❌ Access denied", "error");
-
-        // ❌ DO NOT LOG OUT
         window.location.href = "index.html";
         return;
     }
 
-    console.log(`✅ Welcome ${user.name}, role: ${user.role}`);
+    // ✅ SET UI
+    document.getElementById("userName").textContent = user.name;
+    document.getElementById("userAvatar").textContent =
+        user.name.substring(0, 2).toUpperCase();
+
+    console.log("✅ Logged in:", user);
 })();
 // User Dashboard Logic
 let currentPage = 'dashboard';

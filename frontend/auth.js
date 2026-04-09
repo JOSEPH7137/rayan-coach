@@ -200,21 +200,35 @@ async function logoutUser() {
 
 // Get current user
 async function getCurrentUser() {
-    try {
-        const storedUser = localStorage.getItem('rayan_user');
-        if (!storedUser) return null;
-        
-        const userData = JSON.parse(storedUser);
-        
-        if (userData.login_time && (Date.now() - userData.login_time) > 7 * 24 * 60 * 60 * 1000) {
-            localStorage.removeItem('rayan_user');
-            return null;
-        }
-        
-        return userData;
-    } catch (error) {
-        return null;
+  try {
+    // 1️⃣ Check Supabase session FIRST
+    const { data, error } = await window.supabase.auth.getSession();
+
+    if (error || !data.session) {
+      return null;
     }
+
+    const user = data.session.user;
+
+    // 2️⃣ Get profile from DB
+    const { data: profile } = await window.supabase
+      .from('profiles')
+      .select('role, name')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    // 3️⃣ Return combined user
+    return {
+      id: user.id,
+      email: user.email,
+      role: profile?.role || 'client',
+      name: profile?.name || user.email.split('@')[0]
+    };
+
+  } catch (err) {
+    console.error("getCurrentUser error:", err);
+    return null;
+  }
 }
 
 // Make all functions global
