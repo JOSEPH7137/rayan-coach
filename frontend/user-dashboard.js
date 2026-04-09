@@ -1,4 +1,4 @@
-const supabase = window.supabase || supabaseClient;
+const supabase = window.supabase;
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
 
@@ -18,9 +18,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile) {
-      return redirectToLogin();
-    }
+   if (!profile) {
+  console.warn("No profile found, creating one...");
+
+  await supabase.from('profiles').insert({
+    id: user.id,
+    name: user.user_metadata?.name || '',
+    phone: user.user_metadata?.phone || '',
+    role: user.user_metadata?.role || 'client'
+  });
+
+  // reload profile
+  const { data: newProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  userProfile = newProfile;
+} else {
+  userProfile = profile;
+}
 
     userProfile = profile;
 
