@@ -323,75 +323,69 @@ function validateSignup() {
   return isValid;
 }
 async function handleLogin() {
-    if (!validateLogin()) return;
+  if (!validateLogin()) return;
 
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
 
-    const loginBtn = document.getElementById('loginBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  }
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');
+
+    if (!role) {
+      showToast('Role not selected', 'error');
+      window.location.href = 'role-selection.html';
+      return;
+    }
+
+    // 🔥 LOGIN (FAST)
+    const { data, error } = await window.supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error || !data.user) {
+      showToast('❌ Invalid email or password', 'error');
+      return;
+    }
+
+    // 🔥 REDIRECT IMMEDIATELY (NO DELAY)
+    if (role === 'admin') window.location.href = 'admin-dashboard.html';
+    else if (role === 'driver') window.location.href = 'driver-dashboard.html';
+    else window.location.href = 'user-dashboard.html';
+
+    // 🔥 LOAD PROFILE IN BACKGROUND (no delay)
+    window.supabase
+      .from('profiles')
+      .select('role, name')
+      .eq('id', data.user.id)
+      .maybeSingle()
+      .then(({ data: profile }) => {
+        if (profile) {
+          localStorage.setItem("rayan_user", JSON.stringify({
+            id: data.user.id,
+            email,
+            role: profile.role,
+            name: profile.name
+          }));
+        }
+      });
+
+  } catch (err) {
+    console.error(err);
+    showToast('Login failed', 'error');
+  } finally {
     if (loginBtn) {
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = 'Sign In';
     }
-
-    try {
-        // ✅ GET ROLE FROM URL (VERY IMPORTANT FIX)
-        const params = new URLSearchParams(window.location.search);
-        const role = params.get('role'); // admin / driver / client
-
-        if (!role) {
-            showToast('Role not specified. Please select role again.', 'error');
-            window.location.href = 'role-selection.html';
-            return; // ✅ NOW VALID (inside function)
-        }
-
-        // ✅ LOGIN
-  const result = await loginUser(email, password, role);
-
-        if (!result.success) {
-            showToast('❌ Invalid email or password.', 'error');
-            return;
-        }
-
-        const userProfile = result.profile;
-
-        // ✅ ROLE CHECK
-        if (!userProfile || userProfile.role !== role) {
-            await logoutUser();
-            showToast(`❌ Access denied. You are not registered as ${role}.`, 'error');
-            return;
-        }
-
-        // ✅ SUCCESS
-        showToast(`✅ Welcome back, ${userProfile.name}!`, 'success');
-
-        // ✅ REDIRECT
-        setTimeout(() => {
-            if (role === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else if (role === 'driver') {
-                window.location.href = 'driver-dashboard.html';
-            } else {
-                window.location.href = 'user-dashboard.html';
-            }
-        }, 500);
-
-    } catch (error) {
-        console.error('Login error:', error);
-
-        // 🔥 HANDLE SUPABASE ERRORS CLEANLY
-        if (error.message.includes('Invalid login credentials')) {
-            showToast('❌ Incorrect email or password', 'error');
-        } else {
-            showToast('⚠️ Login failed. Please try again.', 'error');
-        }
-
-    } finally {
-        if (loginBtn) {
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = 'Sign In';
-        }
-    }
+  }
 }
 async function loginDriver(email, driverCode) {
     try {
@@ -513,9 +507,12 @@ async function handleForgotPassword() {
   const email = document.getElementById('loginEmail')?.value.trim();
 
   if (!email) {
-    showToast('Please enter your email address', 'error');
+    showToast('Enter your email first', 'error');
     return;
   }
+
+  // 🔥 Instant feedback (feels fast)
+  showToast('📧 Sending reset email...', 'info');
 
   try {
     const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
@@ -523,17 +520,32 @@ async function handleForgotPassword() {
     });
 
     if (error) {
-      console.error(error);
-      showToast('❌ Failed to send reset email', 'error');
+      if (error.message.includes('security purposes')) {
+        showToast('⏳ Please wait 60 seconds before retrying', 'error');
+      } else {
+        showToast('❌ Failed to send email', 'error');
+      }
     } else {
-      showToast('📩 Password reset link sent to your email', 'success');
+      // ✅ SUCCESS
+      showToast('✅ Check your email to reset password', 'success');
     }
 
   } catch (err) {
     console.error(err);
-    showToast('⚠️ Something went wrong', 'error');
+    showToast('Something went wrong', 'error');
   }
 }
+let seconds = 60;
+const interval = setInterval(() => {
+  seconds--;
+  link.innerText = `Wait ${seconds}s`;
+
+  if (seconds <= 0) {
+    clearInterval(interval);
+    link.innerText = "Forgot password?";
+    link.style.pointerEvents = "auto";
+  }
+}, 1000);
 </script>
 </body>
 </html>
