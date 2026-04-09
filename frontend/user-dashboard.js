@@ -30,13 +30,16 @@ function redirectToLogin() {
 
     if (!user) {
         showToast("❌ Please log in first", "error");
-        window.location.href = "auth.html";
+        window.location.href = "auth.html?role=user";
         return;
     }
 
-    if (user.role !== "client") {
-        showToast("❌ Access denied. You are not a traveller.", "error");
-        await logoutUser();
+    // ✅ ACCEPT BOTH 'client' AND 'user' (fix inconsistency)
+    if (user.role !== "client" && user.role !== "user") {
+        showToast("❌ Access denied", "error");
+
+        // ❌ DO NOT LOG OUT
+        window.location.href = "index.html";
         return;
     }
 
