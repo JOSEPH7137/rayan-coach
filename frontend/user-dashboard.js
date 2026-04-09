@@ -594,7 +594,29 @@ window.triggerSOS = triggerSOS;
 window.handleLogout = handleLogout;
 window.submitReview = submitReview;
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     loadTheme();
+
+    try {
+        const { data, error } = await window.supabase.auth.getSession();
+
+        if (error) {
+            console.error(error);
+            window.location.href = "auth.html?role=user";
+            return;
+        }
+
+        if (!data.session) {
+            // ❌ No session → redirect
+            window.location.href = "auth.html?role=user";
+            return;
+        }
+
+        // ✅ User is logged in
+        console.log("Logged in user:", data.session.user);
+
+    } catch (err) {
+        console.error(err);
+        window.location.href = "auth.html?role=user";
+    }
 });

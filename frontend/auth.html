@@ -60,8 +60,11 @@
         <label class="checkbox">
           <input type="checkbox" id="rememberMe"> Remember me
         </label>
-       <a href="#" id="forgotPasswordLink" onclick="handleForgotPassword(); return false;" class="forgot-link">
-  Forgot password?
+       <a id="forgotPasswordLink"
+   href="#"
+   class="forgot-link"
+   onclick="handleForgotPassword(event)">
+   Forgot password?
 </a>
       </div>
       <button class="btn-auth-primary" onclick="handleLogin()" id="loginBtn">Sign In</button>
@@ -513,33 +516,37 @@ function togglePasswordField(id) {
   }
 }
 
-async function handleForgotPassword() {
-  const email = document.getElementById('loginEmail')?.value.trim();
+async function handleForgotPassword(e) {
+  if (e) e.preventDefault();
+
+  console.log("🔥 Forgot password clicked");
+
+  const emailInput = document.getElementById('loginEmail');
   const link = document.getElementById('forgotPasswordLink');
 
+  const email = emailInput?.value.trim();
+
+  // ❌ No email
   if (!email) {
     showToast('Enter your email first', 'error');
     return;
   }
 
-  if (!link) return;
+  // ❌ Invalid email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showToast('Enter a valid email address', 'error');
+    return;
+  }
 
-  // Disable link
+  if (!link) {
+    console.error("Forgot password link not found");
+    return;
+  }
+
+  // ✅ UI: show loading
   link.style.pointerEvents = "none";
-
-  let seconds = 60;
-  link.innerText = `Wait ${seconds}s`;
-
-  const countdown = setInterval(() => {
-    seconds--;
-    link.innerText = `Wait ${seconds}s`;
-
-    if (seconds <= 0) {
-      clearInterval(countdown);
-      link.innerText = "Forgot password?";
-      link.style.pointerEvents = "auto";
-    }
-  }, 1000);
+  link.innerText = "Sending...";
 
   try {
     const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
@@ -547,14 +554,40 @@ async function handleForgotPassword() {
     });
 
     if (error) {
+      console.error(error);
       showToast('❌ ' + error.message, 'error');
-    } else {
-      showToast('📧 Password reset email sent!', 'success');
+
+      // 🔁 Reset link immediately
+      link.innerText = "Forgot password?";
+      link.style.pointerEvents = "auto";
+      return;
     }
+
+    // ✅ Success
+    showToast('📧 Reset email sent! Check your inbox', 'success');
+
+    // ✅ Start countdown ONLY after success
+    let seconds = 30;
+    link.innerText = `Wait ${seconds}s`;
+
+    const countdown = setInterval(() => {
+      seconds--;
+      link.innerText = `Wait ${seconds}s`;
+
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        link.innerText = "Forgot password?";
+        link.style.pointerEvents = "auto";
+      }
+    }, 1000);
 
   } catch (err) {
     console.error(err);
     showToast('Something went wrong', 'error');
+
+    // 🔁 Reset on crash
+    link.innerText = "Forgot password?";
+    link.style.pointerEvents = "auto";
   }
 }
 
