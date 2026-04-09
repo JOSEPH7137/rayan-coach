@@ -1,52 +1,48 @@
+const supabase = window.supabase;
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
 
   try {
-    // 🔥 Wait for session properly
-    const { data, error } = await window.supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error(error);
+    if (error || !data.session) {
       return redirectToLogin();
     }
 
-    if (!data.session) {
+    const user = data.session.user;
+    currentUser = user;
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
       return redirectToLogin();
     }
 
-    console.log("✅ Session OK:", data.session.user.email);
+    userProfile = profile;
+
+    if (profile.role !== "client") {
+      showToast("❌ Access denied", "error");
+      return;
+    }
+
+    document.getElementById("userName").textContent = profile.name || user.email;
+document.getElementById("userAvatar").textContent =
+  (profile.name || "U").substring(0, 2).toUpperCase();
+
 
   } catch (err) {
     console.error(err);
     redirectToLogin();
   }
 });
-
 function redirectToLogin() {
   window.location.href = "auth.html?role=user";
 }
-(async () => {
-    const user = await getCurrentUser();
 
-    if (!user) {
-        showToast("❌ Please log in first", "error");
-        window.location.href = "auth.html?role=user";
-        return;
-    }
-
-if (user.role !== "client") {
-  console.warn("Wrong role detected:", user.role);
-  showToast("❌ Access denied. You are not a traveller.", "error");
-  return; // ❌ DO NOT LOG OUT
-}
-
-    // ✅ SET UI
-    document.getElementById("userName").textContent = user.name;
-    document.getElementById("userAvatar").textContent =
-        user.name.substring(0, 2).toUpperCase();
-
-    console.log("✅ Logged in:", user);
-})();
 // User Dashboard Logic
 let currentPage = 'dashboard';
 let currentUser = null;
@@ -61,33 +57,7 @@ const locations = [
 // Route data cache
 let routeData = {};
 
-// Check session on page load
-(async function() {
-    const storedUser = localStorage.getItem('rayan_user');
-    
-    if (!storedUser) {
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    const userData = JSON.parse(storedUser);
-    
-    if (userData.role !== 'client' && userData.role !== 'admin') {
-        showToast('Access denied. Client privileges required.', 'error');
-        window.location.href = 'role-selection.html';
-        return;
-    }
-    
-    currentUser = userData;
-    userProfile = userData;
-    
-    const userNameElement = document.getElementById('userName');
-    const userAvatarElement = document.getElementById('userAvatar');
-    if (userNameElement) userNameElement.textContent = userData.name || userData.email;
-    if (userAvatarElement) userAvatarElement.textContent = (userData.name || userData.email).charAt(0);
-    
-    loadPageContent('dashboard');
-})();
+
 
 function toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
@@ -212,10 +182,15 @@ function loadPageContent(page) {
                 </div>
                 <div class="input-group" style="display: flex; gap: 12px; margin-top: 16px;">
                     <input type="text" class="input" placeholder="Type your message..." id="chatInput">
+<input type="file" id="fileInput">
                     <button class="btn-dashboard btn-primary" onclick="sendChatMessage()">Send</button>
                 </div>
             </div>
         `;
+        setTimeout(() => {
+        loadMessages(); 
+        initRealtimeChat();
+    }, 100);
         return;
     }
     
@@ -361,7 +336,7 @@ function initParcelPage() {
 
 async function loadRouteData() {
     try {
-        const { data, error } = await window.supabase.from('routes').select('*');
+        const { data, error } = await supabase.from('routes').select('*');
         if (error) throw error;
         routeData = {};
         data.forEach(route => { routeData[`${route.origin}|${route.destination}`] = route; });
@@ -521,13 +496,6 @@ function trackBus() {
 
 function redeemReward() { showToast('Reward redeemed! Check your email.', 'success'); }
 
-function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    if (input?.value.trim()) {
-        showToast(`Message sent: ${input.value}`, 'success');
-        input.value = '';
-    }
-}
 
 async function updateProfile() {
     const fullName = document.getElementById('fullName')?.value;
@@ -580,37 +548,146 @@ async function loadCompletedTrips() {
     }
 }
 
-async function loadUserReviews() {
-    const reviewsList = document.getElementById('userReviewsList');
-    if (reviewsList) {
-        reviewsList.innerHTML = '<div class="trip-item"><div><h4>No reviews yet</h4></div></div>';
+
+
+
+//=======chat admin===============
+let chatChannel = null;
+
+function initRealtimeChat() {
+  if (chatChannel) return;
+
+  chatChannel = supabase
+    .channel('messages')
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages' },
+      payload => displayMessage(payload.new)
+    )
+    .subscribe();
+}
+//=============send message=========
+async function sendChatMessage() {
+  const input = document.getElementById("chatInput");
+  const fileInput = document.getElementById("fileInput");
+
+  let fileUrl = null;
+
+  // Upload file
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+
+    const { data, error } = await supabase.storage
+      .from('chat-files')
+      .upload(`chat/${Date.now()}_${file.name}`, file);
+
+    if (!error) {
+      fileUrl = supabase.storage
+        .from('chat-files')
+        .getPublicUrl(data.path).data.publicUrl;
     }
+  }
+
+  // Check user
+  if (!currentUser || !currentUser.id) {
+    showToast("User session not ready", "error");
+    return;
+  }
+
+  if (!input.value && !fileInput.files.length) return;
+
+  const { error } = await supabase.from('messages').insert({
+    user_id: currentUser.id,
+    message: input.value,
+    file_url: fileUrl,
+    role: "client"
+  });
+
+  if (error) {
+    showToast("❌ Failed to send message", "error");
+    return;
+  }
+
+  // ✅ clear inputs
+  input.value = "";
+  fileInput.value = "";
+}
+//=========display messages=========
+function displayMessage(msg) {
+  const chatBox = document.getElementById("chatMessages");
+  if (!chatBox) return; // ✅ prevent crash
+
+  const div = document.createElement("div");
+  div.className = "chat-message";
+
+  div.innerHTML = `
+    <strong>${msg.role === 'admin' ? 'Admin' : 'You'}:</strong>
+    ${msg.message || ''}
+    ${msg.file_url ? `<br><a href="${msg.file_url}" target="_blank">📎 File</a>` : ''}
+  `;
+
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+//=============load messages========
+async function loadMessages() {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) return console.error(error);
+
+  const chatBox = document.getElementById("chatMessages");
+  if (!chatBox) return;
+
+  chatBox.innerHTML = "";
+
+  data.forEach(displayMessage);
 }
 
+//============= working with db reviews========
 async function submitReview() {
-    const journeyRating = document.getElementById('selectedRating')?.value;
-    const driverRating = document.getElementById('selectedDriverRating')?.value;
-    
-    if (!journeyRating || journeyRating === '0') {
-        showToast('Please rate your journey', 'error');
-        return;
-    }
-    if (!driverRating || driverRating === '0') {
-        showToast('Please rate the driver', 'error');
-        return;
-    }
-    
-    showToast('✅ Thank you for your review!', 'success');
-    document.getElementById('selectedRating').value = '0';
-    document.getElementById('selectedDriverRating').value = '0';
-    document.getElementById('reviewComment').value = '';
-    
-    const stars = document.querySelectorAll('#ratingStars i, #driverRatingStars i');
-    stars.forEach(star => {
-        star.className = 'far fa-star';
-        star.style.color = 'var(--muted)';
-    });
+  const rating = document.getElementById('selectedRating').value;
+  const comment = document.getElementById('reviewComment').value;
+
+  if (!rating || rating === "0") {
+    return showToast("Rate first", "error");
+  }
+
+  await supabase.from('reviews').insert({
+    user_id: currentUser.id,
+    rating,
+    comment
+  });
+
+  showToast("✅ Review submitted", "success");
+
+  loadUserReviews();
 }
+//=============load reviews==========
+async function loadUserReviews() {
+  const { data } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('user_id', currentUser.id);
+
+  const container = document.getElementById("userReviewsList");
+
+  container.innerHTML = data.map(r => `
+    <div class="trip-item">
+      ⭐ ${r.rating} <br>
+      ${r.comment}
+    </div>
+  `).join("");
+}
+//==========auto refreshing========
+supabase.auth.onAuthStateChange((event, session) => {
+  if (!session) {
+    redirectToLogin();
+  } else {
+    currentUser = session.user;
+  }
+});
 
 // Make all functions global
 window.toggleSidebar = toggleSidebar;
@@ -625,30 +702,3 @@ window.updateProfile = updateProfile;
 window.triggerSOS = triggerSOS;
 window.handleLogout = handleLogout;
 window.submitReview = submitReview;
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadTheme();
-
-  const user = getCurrentUser(); // ✅ FAST & RELIABLE
-
-  if (!user) {
-    window.location.href = "auth.html?role=user";
-    return;
-  }
-
-  // ✅ Optional role protection
-  if (user.role !== "client") {
-    console.warn("Access denied:", user.role);
-    showToast("❌ Access denied", "error");
-    return;
-  }
-
-  console.log("✅ Logged in:", user);
-
-  // Optional UI update
-  const nameEl = document.getElementById("userName");
-  const avatarEl = document.getElementById("userAvatar");
-
-  if (nameEl) nameEl.textContent = user.name || "User";
-  if (avatarEl) avatarEl.textContent = (user.name || "U")[0].toUpperCase();
-});
