@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
   startHeroTyping();
 });
-(async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const user = await getCurrentUser();
     if (user) {
         console.log(`Logged in as ${user.name}, role: ${user.role}`);

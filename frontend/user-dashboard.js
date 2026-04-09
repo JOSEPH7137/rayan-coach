@@ -34,11 +34,11 @@ function redirectToLogin() {
         return;
     }
 
-    if (user.role !== "client") {
-        showToast("❌ Access denied", "error");
-        window.location.href = "index.html";
-        return;
-    }
+if (user.role !== "client") {
+  console.warn("Wrong role detected:", user.role);
+  showToast("❌ Access denied. You are not a traveller.", "error");
+  return; // ❌ DO NOT LOG OUT
+}
 
     // ✅ SET UI
     document.getElementById("userName").textContent = user.name;
@@ -626,29 +626,29 @@ window.triggerSOS = triggerSOS;
 window.handleLogout = handleLogout;
 window.submitReview = submitReview;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    loadTheme();
+document.addEventListener('DOMContentLoaded', () => {
+  loadTheme();
 
-    try {
-        const { data, error } = await window.supabase.auth.getSession();
+  const user = getCurrentUser(); // ✅ FAST & RELIABLE
 
-        if (error) {
-            console.error(error);
-            window.location.href = "auth.html?role=user";
-            return;
-        }
+  if (!user) {
+    window.location.href = "auth.html?role=user";
+    return;
+  }
 
-        if (!data.session) {
-            // ❌ No session → redirect
-            window.location.href = "auth.html?role=user";
-            return;
-        }
+  // ✅ Optional role protection
+  if (user.role !== "client") {
+    console.warn("Access denied:", user.role);
+    showToast("❌ Access denied", "error");
+    return;
+  }
 
-        // ✅ User is logged in
-        console.log("Logged in user:", data.session.user);
+  console.log("✅ Logged in:", user);
 
-    } catch (err) {
-        console.error(err);
-        window.location.href = "auth.html?role=user";
-    }
+  // Optional UI update
+  const nameEl = document.getElementById("userName");
+  const avatarEl = document.getElementById("userAvatar");
+
+  if (nameEl) nameEl.textContent = user.name || "User";
+  if (avatarEl) avatarEl.textContent = (user.name || "U")[0].toUpperCase();
 });

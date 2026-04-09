@@ -201,7 +201,12 @@ async function logoutUser() {
 // Get current user
 async function getCurrentUser() {
   try {
-    // 1️⃣ Check Supabase session FIRST
+    // 🔥 Wait until supabase is ready
+    if (!window.supabase) {
+      console.warn("Supabase not ready yet");
+      return null;
+    }
+
     const { data, error } = await window.supabase.auth.getSession();
 
     if (error || !data.session) {
@@ -210,14 +215,12 @@ async function getCurrentUser() {
 
     const user = data.session.user;
 
-    // 2️⃣ Get profile from DB
     const { data: profile } = await window.supabase
       .from('profiles')
       .select('role, name')
       .eq('id', user.id)
       .maybeSingle();
 
-    // 3️⃣ Return combined user
     return {
       id: user.id,
       email: user.email,
