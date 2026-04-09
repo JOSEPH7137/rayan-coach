@@ -60,7 +60,9 @@
         <label class="checkbox">
           <input type="checkbox" id="rememberMe"> Remember me
         </label>
-       <a href="#" onclick="handleForgotPassword(); return false;" class="forgot-link">
+       <a href="#" id="forgotPasswordLink" onclick="handleForgotPassword(); return false;" class="forgot-link">
+  Forgot password?
+</a>
       </div>
       <button class="btn-auth-primary" onclick="handleLogin()" id="loginBtn">Sign In</button>
       <div class="auth-divider">Or sign in with</div>
@@ -151,67 +153,75 @@
 <script>
 let currentRole = 'user';
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   loadTheme();
-  
-  // Check if supabase is initialized
+
+  // Check Supabase
   if (typeof window.supabase === 'undefined') {
     console.error('Supabase not initialized!');
     showToast('Database connection error. Please refresh the page.', 'error');
     return;
   }
-  
-const params = new URLSearchParams(window.location.search);
-const role = params.get('role');
+
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get('role');
+
   if (role) {
     currentRole = role;
     updateAuthUI(role);
-    
-    // For drivers: hide create account tab, change labels
+
+    // Elements
+    const signupTab = document.getElementById('signupTab');
+    const adminNote = document.getElementById('adminNote');
+    const forgotLink = document.getElementById('forgotPasswordLink');
+    const emailLabel = document.getElementById('emailLabel');
+    const passwordLabel = document.getElementById('passwordLabel');
+    const loginPassword = document.getElementById('loginPassword');
+
     if (role === 'driver') {
-      const signupTab = document.getElementById('signupTab');
       if (signupTab) signupTab.style.display = 'none';
-      
-      const emailLabel = document.getElementById('emailLabel');
-      const passwordLabel = document.getElementById('passwordLabel');
-      const loginPassword = document.getElementById('loginPassword');
-      const forgotLink = document.getElementById('forgotPasswordLink');
-      
+
       if (emailLabel) emailLabel.textContent = 'Email';
       if (passwordLabel) passwordLabel.textContent = 'Driver Code';
+
       if (loginPassword) {
         loginPassword.placeholder = 'Enter your driver code';
         loginPassword.type = 'text';
       }
+
       if (forgotLink) forgotLink.style.display = 'none';
+      if (adminNote) adminNote.style.display = 'none';
+
     } else if (role === 'admin') {
-      const signupTab = document.getElementById('signupTab');
-      const adminNote = document.getElementById('adminNote');
       if (signupTab) signupTab.style.display = 'none';
       if (adminNote) adminNote.style.display = 'flex';
+      if (forgotLink) forgotLink.style.display = 'none';
+
     } else {
-      const signupTab = document.getElementById('signupTab');
-      const adminNote = document.getElementById('adminNote');
+      // CLIENT
       if (signupTab) signupTab.style.display = 'flex';
       if (adminNote) adminNote.style.display = 'none';
+      if (forgotLink) forgotLink.style.display = 'inline';
     }
   }
-});
-
+}); 
 function updateAuthUI(role) {
-  const icons = {user:'🧳', driver:'🚗', admin:'🛡️'};
-  const titles = {user:'Traveller Sign In', driver:'Driver Sign In', admin:'Admin Login'};
-  const subtitles = {user:'Book, track & manage your journeys', driver:'Enter your email and driver code', admin:'Enterprise control panel'};
-  
-  const roleIcon = document.getElementById('authRoleIcon');
-  const title = document.getElementById('authTitle');
-  const subtitle = document.getElementById('authSubtitle');
-  
-  if (roleIcon) roleIcon.textContent = icons[role];
-  if (title) title.textContent = titles[role];
-  if (subtitle) subtitle.textContent = subtitles[role];
-}
+  const icons = { user: '🧳', driver: '🚗', admin: '🛡️' };
+  const titles = {
+    user: 'Traveller Sign In',
+    driver: 'Driver Sign In',
+    admin: 'Admin Login'
+  };
+  const subtitles = {
+    user: 'Book, track & manage your journeys',
+    driver: 'Enter your email and driver code',
+    admin: 'Enterprise control panel'
+  };
 
+  document.getElementById('authRoleIcon').textContent = icons[role];
+  document.getElementById('authTitle').textContent = titles[role];
+  document.getElementById('authSubtitle').textContent = subtitles[role];
+}
 function switchTab(tab) {
   const tabs = document.querySelectorAll('.auth-tab');
   const loginForm = document.getElementById('loginForm');
@@ -505,14 +515,31 @@ function togglePasswordField(id) {
 
 async function handleForgotPassword() {
   const email = document.getElementById('loginEmail')?.value.trim();
+  const link = document.getElementById('forgotPasswordLink');
 
   if (!email) {
     showToast('Enter your email first', 'error');
     return;
   }
 
-  // 🔥 Instant feedback (feels fast)
-  showToast('📧 Sending reset email...', 'info');
+  if (!link) return;
+
+  // Disable link
+  link.style.pointerEvents = "none";
+
+  let seconds = 60;
+  link.innerText = `Wait ${seconds}s`;
+
+  const countdown = setInterval(() => {
+    seconds--;
+    link.innerText = `Wait ${seconds}s`;
+
+    if (seconds <= 0) {
+      clearInterval(countdown);
+      link.innerText = "Forgot password?";
+      link.style.pointerEvents = "auto";
+    }
+  }, 1000);
 
   try {
     const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
@@ -520,14 +547,9 @@ async function handleForgotPassword() {
     });
 
     if (error) {
-      if (error.message.includes('security purposes')) {
-        showToast('⏳ Please wait 60 seconds before retrying', 'error');
-      } else {
-        showToast('❌ Failed to send email', 'error');
-      }
+      showToast('❌ ' + error.message, 'error');
     } else {
-      // ✅ SUCCESS
-      showToast('✅ Check your email to reset password', 'success');
+      showToast('📧 Password reset email sent!', 'success');
     }
 
   } catch (err) {
@@ -535,17 +557,7 @@ async function handleForgotPassword() {
     showToast('Something went wrong', 'error');
   }
 }
-let seconds = 60;
-const interval = setInterval(() => {
-  seconds--;
-  link.innerText = `Wait ${seconds}s`;
 
-  if (seconds <= 0) {
-    clearInterval(interval);
-    link.innerText = "Forgot password?";
-    link.style.pointerEvents = "auto";
-  }
-}, 1000);
 </script>
 </body>
 </html>
