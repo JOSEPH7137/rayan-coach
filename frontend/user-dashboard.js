@@ -649,13 +649,19 @@ let chatChannel = null;
 function initRealtimeChat() {
   if (chatChannel) return;
 
-  chatChannel = sb
-    .channel('messages')
-    .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'messages' },
-      payload => displayMessage(payload.new)
-    )
-    .subscribe();
+chatChannel = sb
+  .channel('messages')
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `user_id=eq.${currentUser.id}`
+    },
+    payload => displayMessage(payload.new)
+  )
+  .subscribe();
 }
 //=============send message=========
 async function sendChatMessage() {
@@ -728,11 +734,12 @@ function displayMessage(msg) {
 }
 //=============load messages========
 async function loadMessages() {
-  const { data, error } = await sb
-    .from('messages')
-    .select('*')
-    .order('created_at', { ascending: true });
-
+const { data, error } = await sb
+  .from('messages')
+  .select('*')
+  .eq('user_id', currentUser.id)
+  .order('created_at', { ascending: true });
+  
   if (error) return console.error(error);
 
   const chatBox = document.getElementById("chatMessages");
