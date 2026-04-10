@@ -1,4 +1,8 @@
 const supabase = window.supabase;
+
+if (!supabase) {
+  console.error("Supabase not initialized!");
+}
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
 
@@ -21,31 +25,40 @@ document.addEventListener('DOMContentLoaded', async () => {
    if (!profile) {
   console.warn("No profile found, creating one...");
 
-  await supabase.from('profiles').insert({
+  const { error: insertError } = await supabase.from('profiles').insert({
     id: user.id,
     name: user.user_metadata?.name || '',
     phone: user.user_metadata?.phone || '',
     role: user.user_metadata?.role || 'client'
   });
 
-  // reload profile
-  const { data: newProfile } = await supabase
+  if (insertError) {
+    console.error(insertError);
+    showToast("Failed to create profile", "error");
+    return;
+  }
+
+  const { data: newProfile, error: fetchError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single();
 
+  if (fetchError || !newProfile) {
+    showToast("Failed to load profile", "error");
+    return;
+  }
+
   userProfile = newProfile;
+
 } else {
   userProfile = profile;
 }
 
-    userProfile = profile;
-
-    if (profile.role !== "client") {
-      showToast("❌ Access denied", "error");
-      return;
-    }
+if (userProfile.role !== "client") {
+  showToast("❌ Access denied", "error");
+  return;
+}
 
     document.getElementById("userName").textContent = profile.name || user.email;
 document.getElementById("userAvatar").textContent =
