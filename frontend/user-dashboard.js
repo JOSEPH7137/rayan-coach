@@ -700,7 +700,7 @@ const { error } = await sb.from('messages').insert([
 ]);
 
 if (error) {
-  console.error(error); // 👈 ADD THIS
+  console.error(error);
   showToast("❌ Failed to send message", "error");
   return;
 }
