@@ -690,14 +690,17 @@ async function sendChatMessage() {
 if (!input.value && !fileInput.files.length) {
   return;
 }
-const { error } = await sb.from('messages').insert({
-  user_id: currentUser.id,
-  message: input.value,
-  file_url: fileUrl,
-  role: "client"
-});
+const { error } = await sb.from('messages').insert([
+  {
+    user_id: currentUser.id,
+    message: input.value || '',
+    file_url: fileUrl || null,
+    role: "client"
+  }
+]);
 
 if (error) {
+  console.error(error); // 👈 ADD THIS
   showToast("❌ Failed to send message", "error");
   return;
 }
@@ -705,6 +708,7 @@ if (error) {
 input.value = "";
 fileInput.value = "";
 }
+
 //=========display messages=========
 function displayMessage(msg) {
   const chatBox = document.getElementById("chatMessages");
