@@ -217,11 +217,11 @@ async function loginDriver(email, driverCode) {
 async function logoutUser() {
     try {
         if (window.supabase) {
-            await window.supabase.auth.signOut();
+            await window.supabase.auth.signOut(); // ✅ local logout only
         }
 
+        // ✅ remove only what you added
         localStorage.removeItem('rayan_user');
-        sessionStorage.clear();
 
         showToast('Logged out successfully', 'success');
 
@@ -230,6 +230,7 @@ async function logoutUser() {
         }, 800);
 
     } catch (error) {
+        console.error(error);
         showToast(error.message, 'error');
     }
 }
