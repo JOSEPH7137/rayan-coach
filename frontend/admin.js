@@ -26,7 +26,7 @@ let userProfile = null;
 
 // ================= SESSION CHECK =================
 (async function() {
-    const storedUser = localStorage.getItem('rayan_user');
+    const { data: { user } } = await sb.auth.getUser();
 
     if (!storedUser) {
         window.location.href = 'role-selection.html';
@@ -65,7 +65,28 @@ function navigateTo(page) {
 
     loadPageContent(page);
 }
+function navigateAdmin(page) {
+  const content = document.getElementById("adminContent");
 
+  if (!content) return;
+
+  const pages = {
+    tracking: "<h2>Live Tracking</h2>",
+    drivers: "<h2>Drivers</h2>",
+    fleet: "<h2>Fleet</h2>",
+    dispatch: "<h2>Dispatch</h2>",
+    payments: "<h2>Payments</h2>",
+    compliance: "<h2>Compliance</h2>",
+    analytics: "<h2>Analytics</h2>",
+    logs: "<h2>Audit Logs</h2>",
+    settings: "<h2>Settings</h2>",
+    reviews: "<h2>Reviews</h2>"
+  };
+
+  content.innerHTML = pages[page] || "<h2>Dashboard</h2>";
+}
+
+window.navigateAdmin = navigateAdmin;
 
 // ================= PAGE LOADER =================
 function loadPageContent(page) {
@@ -226,8 +247,90 @@ async function uploadFile(file) {
 
     return window.supabase.storage.from('chat-files').getPublicUrl(name).data.publicUrl;
 }
+//============load users=======
+async function loadUsers() {
+const { data } = await sb
+  .from('messages')
+  .select('*')
+  .or(`
+    and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),
+    and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})
+  `)
+  .order('created_at', { ascending: true });
 
+  const uniqueUsers = [...new Set(data.map(m => m.user_id))];
+const users = new Set();
 
+data.forEach(m => {
+  if (m.sender_id !== currentUser.id) users.add(m.sender_id);
+  if (m.receiver_id !== currentUser.id) users.add(m.receiver_id);
+});
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+
+  uniqueUsers.forEach(id => {
+    const div = document.createElement("div");
+    div.textContent = id;
+    div.onclick = () => loadAdminChat(id);
+    list.appendChild(div);
+  });
+}
+//===========load messages==========
+let selectedUserId = null;
+
+async function loadAdminChat(userId) {
+  selectedUserId = userId;
+
+  const { data } = await sb
+    .from('messages')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  const chatBox = document.getElementById("adminChat");
+  chatBox.innerHTML = "";
+
+  data.forEach(msg => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <strong>${msg.role === 'admin' ? 'Admin' : 'User'}:</strong>
+      ${msg.message || ''}
+      ${msg.file_url ? `<br><img src="${msg.file_url}" width="120">` : ''}
+    `;
+    chatBox.appendChild(div);
+  });
+}
+//============admin send message=======
+async function sendAdminMessage() {
+  const input = document.getElementById("adminInput");
+  const fileInput = document.getElementById("adminFile");
+
+  let fileUrl = null;
+
+  if (fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+
+    const { data } = await sb.storage
+      .from('chat-files')
+      .upload(`admin/${Date.now()}_${file.name}`, file);
+
+    fileUrl = sb.storage
+      .from('chat-files')
+      .getPublicUrl(data.path).data.publicUrl;
+  }
+
+await sb.from('messages').insert({
+  sender_id: currentUser.id,
+  receiver_id: selectedUserId,
+  message: input.value,
+  file_url: fileUrl
+});
+
+  input.value = "";
+  fileInput.value = "";
+
+  loadAdminChat(selectedUserId);
+}
 // ================= BUSES =================
 async function addBus() {
     const name = document.getElementById('busName').value;

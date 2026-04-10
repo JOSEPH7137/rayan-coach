@@ -699,6 +699,7 @@ if (!input.value && !fileInput.files.length) {
 const { error } = await sb.from('messages').insert([
   {
     user_id: currentUser.id,
+    receiver_id: adminId,
     message: input.value || '',
     file_url: fileUrl || null,
     role: "client"
