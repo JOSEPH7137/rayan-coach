@@ -1,13 +1,13 @@
-const supabase = window.supabase;
+const sb = window.supabase;
 
-if (!supabase) {
+if (!sb) {
   console.error("Supabase not initialized!");
 }
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
 
   try {
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await sb.auth.getSession();
 
     if (error || !data.session) {
       return redirectToLogin();
@@ -16,19 +16,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = data.session.user;
     currentUser = user;
 
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await sb
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
 
-   if (!profile) {
+   if (profileError || !profile) {
   console.warn("No profile found, creating one...");
-
-  const { error: insertError } = await supabase.from('profiles').insert({
+navigateTo('dashboard');
+  const { error: insertError } = await sb.from('profiles').insert({
     id: user.id,
     name: user.user_metadata?.name || '',
     phone: user.user_metadata?.phone || '',
+    email: user.email,
     role: user.user_metadata?.role || 'client'
   });
 
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const { data: newProfile, error: fetchError } = await supabase
+  const { data: newProfile, error: fetchError } = await sb
     .from('profiles')
     .select('*')
     .eq('id', user.id)
@@ -60,9 +61,9 @@ if (userProfile.role !== "client") {
   return;
 }
 
-    document.getElementById("userName").textContent = profile.name || user.email;
+    document.getElementById("userName").textContent = userProfile.name || user.email;
 document.getElementById("userAvatar").textContent =
-  (profile.name || "U").substring(0, 2).toUpperCase();
+  (userProfile.name || "U").substring(0, 2).toUpperCase();
 
 
   } catch (err) {
@@ -72,6 +73,62 @@ document.getElementById("userAvatar").textContent =
 });
 function redirectToLogin() {
   window.location.href = "auth.html?role=user";
+}
+async function saveProfile() {
+  const { data: { user } } = await sb.auth.getUser();
+
+  if (!user) {
+    showToast("User not found", "error");
+    return;
+  }
+
+  const fullName = document.getElementById('fullName').value;
+  const phone = document.getElementById('phone').value;
+  const nokName = document.getElementById('nokName').value;
+  const nokPhone = document.getElementById('nokPhone').value;
+
+  const { error } = await sb.from('profiles')
+    .update({
+      name: fullName,
+      phone: phone,
+      next_of_kin: nokName,
+      next_of_kin_phone: nokPhone
+    })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error(error);
+    showToast("Failed to update profile", "error");
+    return;
+  }
+
+  showToast("✅ Profile updated successfully", "success");
+}
+
+async function loadProfile() {
+  const { data: { user } } = await sb.auth.getUser();
+
+  if (!user) return;
+
+  const { data: profile, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !profile) return;
+
+  if (document.getElementById('fullName'))
+    document.getElementById('fullName').value = profile.name || '';
+
+  if (document.getElementById('phone'))
+    document.getElementById('phone').value = profile.phone || '';
+
+  if (document.getElementById('nokName'))
+    document.getElementById('nokName').value = profile.next_of_kin || '';
+
+  if (document.getElementById('nokPhone'))
+    document.getElementById('nokPhone').value = profile.next_of_kin_phone || '';
 }
 
 // User Dashboard Logic
@@ -236,13 +293,25 @@ function loadPageContent(page) {
                 <div style="text-align: center; margin-bottom: 24px;">
                     <div class="user-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 16px;">${userProfile?.name?.charAt(0) || 'U'}</div>
                     <h3>${userProfile?.name || 'User'}</h3>
-                    <p style="color: var(--muted);">${userProfile?.email || ''}</p>
+<p style="color: var(--muted);">${currentUser?.email || ''}</p>
                 </div>
+                <div class="form-group">
+  <label>Next of Kin Name</label>
+  <input type="text" class="input" id="nokName" value="${userProfile?.next_of_kin || ''}">
+</div>
+
+<div class="form-group">
+  <label>Next of Kin Phone</label>
+  <input type="text" class="input" id="nokPhone" value="${userProfile?.next_of_kin_phone || ''}">
+</div>
                 <div class="form-group"><label>Full Name</label><input type="text" class="input" id="fullName" value="${userProfile?.name || ''}"></div>
                 <div class="form-group"><label>Phone</label><input type="tel" class="input" id="phone" value="${userProfile?.phone || ''}"></div>
-                <button class="btn-dashboard btn-primary" onclick="updateProfile()">Save Changes</button>
+                <button class="btn-dashboard btn-primary" onclick="saveProfile()">Save Changes</button>
             </div>
         `;
+        setTimeout(() => {
+  loadProfile();
+}, 100);
         return;
     }
     
@@ -371,7 +440,7 @@ function initParcelPage() {
 
 async function loadRouteData() {
     try {
-        const { data, error } = await supabase.from('routes').select('*');
+        const { data, error } = await sb.from('routes').select('*');
         if (error) throw error;
         routeData = {};
         data.forEach(route => { routeData[`${route.origin}|${route.destination}`] = route; });
@@ -532,18 +601,6 @@ function trackBus() {
 function redeemReward() { showToast('Reward redeemed! Check your email.', 'success'); }
 
 
-async function updateProfile() {
-    const fullName = document.getElementById('fullName')?.value;
-    const phone = document.getElementById('phone')?.value;
-    
-    if (fullName) {
-        showToast('Profile updated successfully!', 'success');
-        if (userProfile) userProfile.name = fullName;
-        if (userProfile) userProfile.phone = phone;
-        localStorage.setItem('rayan_user', JSON.stringify(userProfile));
-        document.getElementById('userName').textContent = fullName;
-    }
-}
 
 function triggerSOS() { showToast('SOS Alert Sent! Emergency notified.', 'error'); }
 
@@ -592,7 +649,7 @@ let chatChannel = null;
 function initRealtimeChat() {
   if (chatChannel) return;
 
-  chatChannel = supabase
+  chatChannel = sb
     .channel('messages')
     .on('postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'messages' },
@@ -613,12 +670,12 @@ async function sendChatMessage() {
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
 
-    const { data, error } = await supabase.storage
+    const { data, error } = await sb.storage
       .from('chat-files')
       .upload(`chat/${Date.now()}_${file.name}`, file);
 
     if (!error) {
-      fileUrl = supabase.storage
+      fileUrl = sb.storage
         .from('chat-files')
         .getPublicUrl(data.path).data.publicUrl;
     }
@@ -633,7 +690,7 @@ async function sendChatMessage() {
 if (!input.value && !fileInput.files.length) {
   return;
 }
-const { error } = await supabase.from('messages').insert({
+const { error } = await sb.from('messages').insert({
   user_id: currentUser.id,
   message: input.value,
   file_url: fileUrl,
@@ -667,7 +724,7 @@ function displayMessage(msg) {
 }
 //=============load messages========
 async function loadMessages() {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from('messages')
     .select('*')
     .order('created_at', { ascending: true });
@@ -691,7 +748,7 @@ async function submitReview() {
     return showToast("Rate first", "error");
   }
 
-  await supabase.from('reviews').insert({
+  await sb.from('reviews').insert({
     user_id: currentUser.id,
     rating,
     comment
@@ -703,7 +760,7 @@ async function submitReview() {
 }
 //=============load reviews==========
 async function loadUserReviews() {
-  const { data } = await supabase
+  const { data } = await sb
     .from('reviews')
     .select('*')
     .eq('user_id', currentUser.id);
@@ -718,7 +775,7 @@ async function loadUserReviews() {
   `).join("");
 }
 //==========auto refreshing========
-supabase.auth.onAuthStateChange((event, session) => {
+sb.auth.onAuthStateChange((event, session) => {
   if (!session) {
     redirectToLogin();
   } else {
@@ -735,7 +792,7 @@ window.trackBus = trackBus;
 window.sendParcel = sendParcel;
 window.redeemReward = redeemReward;
 window.sendChatMessage = sendChatMessage;
-window.updateProfile = updateProfile;
+window.saveProfile = saveProfile;
 window.triggerSOS = triggerSOS;
 window.handleLogout = handleLogout;
 window.submitReview = submitReview;
