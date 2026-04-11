@@ -5,16 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#FFFFFF"/>
 <title>Admin Dashboard - Rayan Coach</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
+
 <body class="light-mode">
 
 <div class="dashboard-wrapper">
+
   <!-- Sidebar -->
   <aside class="dashboard-sidebar" id="sidebar">
+    
     <div class="sidebar-header">
       <div class="sidebar-logo-icon">Rc</div>
       <div>
@@ -22,53 +26,119 @@
         <div class="sidebar-role-badge">ADMIN PORTAL</div>
       </div>
     </div>
+
     <nav class="sidebar-nav">
-      <a href="#" class="sidebar-nav-item active" data-page="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="tracking"><i class="fas fa-map-marked-alt"></i><span>Live Tracking</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="drivers"><i class="fas fa-users"></i><span>Drivers</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="fleet"><i class="fas fa-bus"></i><span>Fleet</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="dispatch"><i class="fas fa-tasks"></i><span>Dispatch</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="payments"><i class="fas fa-credit-card"></i><span>Payments</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="compliance"><i class="fas fa-file-alt"></i><span>Compliance</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="analytics"><i class="fas fa-chart-pie"></i><span>Analytics</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="audit"><i class="fas fa-history"></i><span>Audit Logs</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
-      <a href="#" class="sidebar-nav-item" data-page="reviews"><i class="fas fa-star"></i><span>Reviews</span></a>
-   
+
+      <a href="#" class="sidebar-nav-item active"
+         onclick="event.preventDefault(); navigateTo('dashboard')">
+        <i class="fas fa-home"></i><span>Dashboard</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('tracking')">
+        <i class="fas fa-map-marked-alt"></i><span>Live Tracking</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('drivers')">
+        <i class="fas fa-users"></i><span>Drivers</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('fleet')">
+        <i class="fas fa-bus"></i><span>Fleet</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('dispatch')">
+        <i class="fas fa-tasks"></i><span>Dispatch</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('payments')">
+        <i class="fas fa-credit-card"></i><span>Payments</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('compliance')">
+        <i class="fas fa-file-alt"></i><span>Compliance</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('analytics')">
+        <i class="fas fa-chart-pie"></i><span>Analytics</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('audit')">
+        <i class="fas fa-history"></i><span>Audit Logs</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('settings')">
+        <i class="fas fa-cog"></i><span>Settings</span>
+      </a>
+
+      <a href="#" class="sidebar-nav-item"
+         onclick="event.preventDefault(); navigateTo('reviews')">
+        <i class="fas fa-star"></i><span>Reviews</span>
+      </a>
+
     </nav>
-    <li onclick="navigateAdmin('tracking')">Live Tracking</li>
-<li onclick="navigateAdmin('drivers')">Drivers</li>
+
+    <!-- Footer -->
     <div class="sidebar-footer">
-      <a href="#" class="sidebar-nav-item logout-btn" onclick="handleAdminLogout()">
+      <a href="#" class="sidebar-nav-item logout-btn"
+         onclick="event.preventDefault(); handleAdminLogout()">
         <i class="fas fa-sign-out-alt"></i><span>Logout</span>
       </a>
     </div>
-  </aside>
-<div id="map" style="width:100%; height:400px;"></div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+  </aside>
+
   <!-- Main Content -->
   <main class="dashboard-main">
+
     <header class="dashboard-topbar">
-      <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+
       <h3 class="page-title" id="pageTitle">Admin Dashboard</h3>
+
       <div class="topbar-right">
-        <div class="notification-bell" onclick="showToast('You have 5 new notifications','info')"><i class="fas fa-bell"></i><span class="notification-dot"></span></div>
-        <div class="theme-toggle-small" onclick="toggleTheme()"><i class="fas fa-moon"></i></div>
+        <div class="notification-bell"
+             onclick="showToast('You have 5 new notifications','info')">
+          <i class="fas fa-bell"></i>
+          <span class="notification-dot"></span>
+        </div>
+
+        <div class="theme-toggle-small" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
+        </div>
+
         <div class="user-profile" onclick="navigateTo('profile')">
           <div class="user-avatar" id="userAvatar">AR</div>
-          <span class="user-name" id="userName">Admin Rayan</span>
+          <span class="user-name" id="userName">Admin</span>
         </div>
       </div>
     </header>
+
     <div class="dashboard-content" id="pageContent"></div>
+
   </main>
 </div>
 
+<!-- Google Maps -->
+<div id="map" style="width:100%; height:400px;"></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="app.js"></script>
 <script src="auth.js"></script>
 <script src="admin.js"></script>
+
 </body>
 </html>
