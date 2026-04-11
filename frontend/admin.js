@@ -1,22 +1,3 @@
-// ================= AUTH CHECK =================
-(async () => {
-    const user = await getCurrentUser();
-
-    if (!user) {
-        showToast("❌ Please log in first", "error");
-        window.location.href = "auth.html";
-        return;
-    }
-
-    if (user.role !== "admin") {
-        showToast("❌ Access denied. You are not an admin.", "error");
-        await logoutUser();
-        return;
-    }
-
-    console.log(`✅ Welcome ${user.name}, role: ${user.role}`);
-})();
-
 
 // ================= GLOBAL STATE =================
 let currentPage = 'dashboard';
@@ -28,28 +9,32 @@ let userProfile = null;
 (async function() {
     const { data: { user } } = await sb.auth.getUser();
 
-    if (!storedUser) {
-        window.location.href = 'role-selection.html';
+    if (!user) {
+        window.location.href = 'auth.html';
         return;
     }
 
-    const userData = JSON.parse(storedUser);
+    const { data: profile } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (userData.role !== 'admin') {
-        showToast('Access denied. Admin privileges required.', 'error');
-        window.location.href = 'role-selection.html';
+    if (!profile || profile.role !== 'admin') {
+        showToast('Access denied. Admin only.', 'error');
+        await sb.auth.signOut();
         return;
     }
 
-    currentUser = userData;
-    userProfile = userData;
+    currentUser = user;
+    userProfile = profile;
 
-    document.getElementById('userName').textContent = userData.name || userData.email;
-    document.getElementById('userAvatar').textContent = (userData.name || userData.email).charAt(0);
+    document.getElementById('userName').textContent = profile.name || user.email;
+    document.getElementById('userAvatar').textContent =
+        (profile.name || user.email).charAt(0);
 
     loadPageContent('dashboard');
 })();
-
 
 // ================= NAVIGATION =================
 function toggleSidebar() {
@@ -211,12 +196,17 @@ async function congratulateDriver(id) {
 
 // ================= MESSAGING =================
 async function sendMessage(receiver_id, text, file_url = null) {
-    await window.supabase.from('messages').insert({
+    const { error } = await window.supabase.from('messages').insert({
         sender_id: currentUser.id,
         receiver_id,
         message: text,
         file_url
     });
+
+    if (error) {
+        console.error(error);
+        showToast("Failed to send message", "error");
+    }
 }
 
 async function loadAllMessages() {
@@ -224,7 +214,10 @@ async function loadAllMessages() {
 
     console.log(data);
 }
-
+if (!selectedUserId) {
+  showToast("Select a user first", "error");
+  return;
+}
 // REALTIME
 function initRealtimeMessages() {
     window.supabase.channel('messages')
@@ -249,26 +242,21 @@ async function uploadFile(file) {
 }
 //============load users=======
 async function loadUsers() {
-const { data } = await sb
-  .from('messages')
-  .select('*')
-  .or(`
-    and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),
-    and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})
-  `)
-  .order('created_at', { ascending: true });
+  const { data } = await sb
+    .from('messages')
+    .select('*');
 
-  const uniqueUsers = [...new Set(data.map(m => m.user_id))];
-const users = new Set();
+  const users = new Set();
 
-data.forEach(m => {
-  if (m.sender_id !== currentUser.id) users.add(m.sender_id);
-  if (m.receiver_id !== currentUser.id) users.add(m.receiver_id);
-});
+  data.forEach(m => {
+    if (m.sender_id !== currentUser.id) users.add(m.sender_id);
+    if (m.receiver_id !== currentUser.id) users.add(m.receiver_id);
+  });
+
   const list = document.getElementById("userList");
   list.innerHTML = "";
 
-  uniqueUsers.forEach(id => {
+  users.forEach(id => {
     const div = document.createElement("div");
     div.textContent = id;
     div.onclick = () => loadAdminChat(id);
@@ -284,7 +272,10 @@ async function loadAdminChat(userId) {
   const { data } = await sb
     .from('messages')
     .select('*')
-    .eq('user_id', userId)
+    .or(`
+      and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),
+      and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})
+    `)
     .order('created_at', { ascending: true });
 
   const chatBox = document.getElementById("adminChat");
@@ -292,11 +283,15 @@ async function loadAdminChat(userId) {
 
   data.forEach(msg => {
     const div = document.createElement("div");
+
+    const isAdmin = msg.sender_id === currentUser.id;
+
     div.innerHTML = `
-      <strong>${msg.role === 'admin' ? 'Admin' : 'User'}:</strong>
+      <strong>${isAdmin ? 'Admin' : 'User'}:</strong>
       ${msg.message || ''}
       ${msg.file_url ? `<br><img src="${msg.file_url}" width="120">` : ''}
     `;
+
     chatBox.appendChild(div);
   });
 }
@@ -429,46 +424,7 @@ window.supabase
 })
 .subscribe();
 
-// ========== REALTIME CHAT ==========
-function subscribeChat() {
-    chatRealtimeSubscription = window.supabase
-        .channel('chat')
-        .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'driver_admin_chat'
-        }, payload => {
-            appendChatMessage(payload.new);
-        })
-        .subscribe();
-}
-//=======realtime chats======
-function appendChatMessage(msg) {
-    const box = document.getElementById('chatMessages');
 
-    const isAdmin = msg.sender === 'admin';
-
-    const div = document.createElement('div');
-    div.style.textAlign = isAdmin ? 'right' : 'left';
-
-    div.innerHTML = `
-        <div style="
-            display:inline-block;
-            background:${isAdmin ? '#F5B041' : '#1F2937'};
-            color:${isAdmin ? '#000' : '#fff'};
-            padding:10px;
-            border-radius:10px;
-            margin:5px;
-            max-width:70%;
-        ">
-            ${msg.message}
-            ${msg.file_url ? `<br><a href="${msg.file_url}" target="_blank">📎 File</a>` : ''}
-        </div>
-    `;
-
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-}
 //==========live maps====
 let map;
 let markers = {};
@@ -542,12 +498,30 @@ async function changeAdminPassword() {
         showToast("✅ Password changed successfully", "success");
     }
 }
+
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
     initRealtimeMessages();
 });
 
+let messageChannel;
 
+function initRealtimeMessages() {
+  if (messageChannel) return;
+
+  messageChannel = window.supabase
+    .channel('messages')
+    .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages'
+    }, payload => {
+        if (selectedUserId) {
+            loadAdminChat(selectedUserId);
+        }
+    })
+    .subscribe();
+}
 // ================= GLOBAL EXPORT =================
 window.navigateTo = navigateTo;
 window.addDriver = addDriver;
