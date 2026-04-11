@@ -1,31 +1,39 @@
-
+const sb = window.supabase;
 // ================= GLOBAL STATE =================
 let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
 
+function showLoader() {
+  document.getElementById("loader")?.classList.add("active");
+}
 
+function hideLoader() {
+  document.getElementById("loader")?.classList.remove("active");
+}
 // ================= SESSION CHECK =================
 (async function() {
+    showLoader();
     const { data: { user } } = await sb.auth.getUser();
 
     if (!user) {
+        hideLoader();
         window.location.href = 'auth.html';
         return;
     }
 
-    const { data: profile } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+const { data: profile, error } = await sb
+  .from('profiles')
+  .select('*')
+  .eq('id', user.id)
+  .single();
 
-    if (!profile || profile.role !== 'admin') {
-        showToast('Access denied. Admin only.', 'error');
-        await sb.auth.signOut();
-        return;
-    }
-
+if (error || !profile || profile.role !== 'admin') {
+    hideLoader();
+    showToast('Access denied. Admin only.', 'error');
+    await sb.auth.signOut();
+    return;
+}
     currentUser = user;
     userProfile = profile;
 
@@ -34,6 +42,7 @@ let userProfile = null;
         (profile.name || user.email).charAt(0);
 
     loadPageContent('dashboard');
+    hideLoader();
 })();
 
 // ================= NAVIGATION =================
@@ -50,28 +59,7 @@ function navigateTo(page) {
 
     loadPageContent(page);
 }
-function navigateAdmin(page) {
-  const content = document.getElementById("adminContent");
 
-  if (!content) return;
-
-  const pages = {
-    tracking: "<h2>Live Tracking</h2>",
-    drivers: "<h2>Drivers</h2>",
-    fleet: "<h2>Fleet</h2>",
-    dispatch: "<h2>Dispatch</h2>",
-    payments: "<h2>Payments</h2>",
-    compliance: "<h2>Compliance</h2>",
-    analytics: "<h2>Analytics</h2>",
-    logs: "<h2>Audit Logs</h2>",
-    settings: "<h2>Settings</h2>",
-    reviews: "<h2>Reviews</h2>"
-  };
-
-  content.innerHTML = pages[page] || "<h2>Dashboard</h2>";
-}
-
-window.navigateAdmin = navigateAdmin;
 
 // ================= PAGE LOADER =================
 function loadPageContent(page) {
@@ -80,6 +68,11 @@ function loadPageContent(page) {
     const pages = {
         dashboard: `<h2>Welcome ${userProfile?.name}</h2>`,
         
+            tracking: `
+        <h3>Live Tracking</h3>
+        <div id="trackingList">Loading...</div>
+    `,
+
         drivers: `
             <button onclick="openAddDriverModal()">+ Add Driver</button>
             <div id="driversList">Loading...</div>
@@ -106,6 +99,7 @@ function loadPageContent(page) {
 
     if (page === 'drivers') loadDrivers();
     if (page === 'reviews') loadAllReviews();
+    if (page === 'tracking') loadLiveLocations();
 }
 
 
@@ -137,13 +131,19 @@ function closeAddDriverModal() {
 }
 
 async function addDriver() {
+    showLoader();
     const name = document.getElementById('driverName').value;
     const email = document.getElementById('driverEmail').value;
+   if (!name || !email) {
+    hideLoader(); // ✅ add this
+    showToast("Name and email required", "error");
+    return;
+}
     const salary = document.getElementById('driverSalary')?.value || 0;
 
     const code = generateDriverCode();
 
-    const { error } = await window.supabase.from('profiles').insert({
+    const { error } = await sb.from('profiles').insert({
         name,
         email,
         role: 'driver',
@@ -152,18 +152,29 @@ async function addDriver() {
         status: 'active'
     });
 
-    if (!error) {
-        showToast(`Driver created. Code: ${code}`, 'success');
-        loadDrivers();
-    }
+ if (error) {
+    showToast("Failed to add driver", "error");
+} else {
+    showToast(`Driver created. Code: ${code}`, 'success');
+    loadDrivers();
+}
+    
+    hideLoader();
 }
 
 async function loadDrivers() {
-    const { data } = await window.supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'driver');
+    showLoader();
+   const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('role', 'driver');
 
+if (error) {
+    console.error(error);
+    showToast("Failed to load drivers", "error");
+    hideLoader();
+    return;
+}
     document.getElementById('driversList').innerHTML = `
         ${data.map(d => `
             <div>
@@ -174,6 +185,7 @@ async function loadDrivers() {
             </div>
         `).join('')}
     `;
+hideLoader();    
 }
 
 async function suspendDriver(id) {
@@ -185,7 +197,7 @@ async function fireDriver(id) {
 }
 
 async function updateDriverStatus(id, status) {
-    await window.supabase.from('profiles').update({ status }).eq('id', id);
+    await sb.from('profiles').update({ status }).eq('id', id);
     loadDrivers();
 }
 
@@ -196,39 +208,27 @@ async function congratulateDriver(id) {
 
 // ================= MESSAGING =================
 async function sendMessage(receiver_id, text, file_url = null) {
-    const { error } = await window.supabase.from('messages').insert({
-        sender_id: currentUser.id,
-        receiver_id,
-        message: text,
-        file_url
-    });
+  const { error } = await sb.from('messages').insert({
+    sender_id: currentUser.id,
+    receiver_id,
+    message: text,
+    file_url
+  });
 
-    if (error) {
-        console.error(error);
-        showToast("Failed to send message", "error");
-    }
+  if (error) {
+    console.error(error);
+    showToast("Failed to send message", "error");
+  }
 }
 
 async function loadAllMessages() {
-    const { data } = await window.supabase.from('messages').select('*');
+const { data, error } = await sb.from('messages').select('*');
 
-    console.log(data);
+if (error) {
+    console.error(error);
+    showToast("Failed to load drivers", "error");
+    return;
 }
-if (!selectedUserId) {
-  showToast("Select a user first", "error");
-  return;
-}
-// REALTIME
-function initRealtimeMessages() {
-    window.supabase.channel('messages')
-        .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages'
-        }, payload => {
-            console.log('New message', payload.new);
-        })
-        .subscribe();
 }
 
 
@@ -236,9 +236,9 @@ function initRealtimeMessages() {
 async function uploadFile(file) {
     const name = Date.now() + file.name;
 
-    await window.supabase.storage.from('chat-files').upload(name, file);
+    await sb.storage.from('chat-files').upload(name, file);
 
-    return window.supabase.storage.from('chat-files').getPublicUrl(name).data.publicUrl;
+    return sb.storage.from('chat-files').getPublicUrl(name).data.publicUrl;
 }
 //============load users=======
 async function loadUsers() {
@@ -268,82 +268,126 @@ let selectedUserId = null;
 
 async function loadAdminChat(userId) {
   selectedUserId = userId;
+  showLoader();
 
-  const { data } = await sb
-    .from('messages')
-    .select('*')
-    .or(`
-      and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),
-      and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})
-    `)
-    .order('created_at', { ascending: true });
+  try {
+    const { data } = await sb
+      .from('messages')
+      .select('sender_id, receiver_id, message, file_url, created_at')
+      .or(`
+        and(sender_id.eq.${currentUser.id},receiver_id.eq.${userId}),
+        and(sender_id.eq.${userId},receiver_id.eq.${currentUser.id})
+      `)
+      .order('created_at', { ascending: true });
 
-  const chatBox = document.getElementById("adminChat");
-  chatBox.innerHTML = "";
+    const chatBox = document.getElementById("adminChat");
+    chatBox.innerHTML = "";
 
-  data.forEach(msg => {
-    const div = document.createElement("div");
-
-    const isAdmin = msg.sender_id === currentUser.id;
-
-    div.innerHTML = `
-      <strong>${isAdmin ? 'Admin' : 'User'}:</strong>
-      ${msg.message || ''}
-      ${msg.file_url ? `<br><img src="${msg.file_url}" width="120">` : ''}
-    `;
-
-    chatBox.appendChild(div);
-  });
+   if (!data || data.length === 0) {
+    chatBox.innerHTML = "No messages yet";
+    return;
 }
+
+    data.forEach(msg => {
+      const div = document.createElement("div");
+      const isAdmin = msg.sender_id === currentUser.id;
+
+      div.textContent = `${isAdmin ? 'Admin' : 'User'}: ${msg.message || ''}`;
+      chatBox.appendChild(div);
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    hideLoader(); // ✅ ONLY here
+  }
+}
+ 
 //============admin send message=======
 async function sendAdminMessage() {
-  const input = document.getElementById("adminInput");
-  const fileInput = document.getElementById("adminFile");
-
-  let fileUrl = null;
-
-  if (fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-
-    const { data } = await sb.storage
-      .from('chat-files')
-      .upload(`admin/${Date.now()}_${file.name}`, file);
-
-    fileUrl = sb.storage
-      .from('chat-files')
-      .getPublicUrl(data.path).data.publicUrl;
+  if (!selectedUserId) {
+    showToast("Select a user first", "error");
+    return;
   }
 
-await sb.from('messages').insert({
-  sender_id: currentUser.id,
-  receiver_id: selectedUserId,
-  message: input.value,
-  file_url: fileUrl
-});
+  showLoader();
 
-  input.value = "";
-  fileInput.value = "";
+  try {
+    const input = document.getElementById("adminInput");
+    const fileInput = document.getElementById("adminFile");
 
-  loadAdminChat(selectedUserId);
+    let fileUrl = null;
+
+    if (fileInput && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+
+      const { data } = await sb.storage
+        .from('chat-files')
+        .upload(`admin/${Date.now()}_${file.name}`, file);
+
+      fileUrl = sb.storage
+        .from('chat-files')
+        .getPublicUrl(data.path).data.publicUrl;
+    }
+
+    if (!input.value && !fileUrl) {
+      showToast("Message is empty", "error");
+      hideLoader();
+      return;
+    }
+
+    const { error } = await sb.from('messages').insert({
+      sender_id: currentUser.id,
+      receiver_id: selectedUserId,
+      message: input.value,
+      file_url: fileUrl
+    });
+
+    if (error) throw error;
+
+    input.value = "";
+    fileInput.value = "";
+
+    loadAdminChat(selectedUserId);
+
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to send", "error");
+  } finally {
+    hideLoader(); // ✅ correct
+  }
 }
 // ================= BUSES =================
 async function addBus() {
-    const name = document.getElementById('busName').value;
-    const category = document.getElementById('busCategory').value;
-    const services = document.getElementById('busServices').value;
-    const file = document.getElementById('busImage').files[0];
+    showLoader();
+    try {
+        const name = document.getElementById('busName').value;
+        const category = document.getElementById('busCategory').value;
+        const services = document.getElementById('busServices').value;
+        const file = document.getElementById('busImage').files[0];
 
-    let image_url = null;
-    if (file) image_url = await uploadFile(file);
+        let image_url = null;
+        if (file) image_url = await uploadFile(file);
 
-    await window.supabase.from('buses').insert({
-        name,
-        category,
-        services,
-        image_url
-    });
+        const { error } = await sb.from('buses').insert({
+            name,
+            category,
+            services,
+            image_url
+        });
 
-    showToast('Bus added', 'success');
+        if (error) throw error;
+
+        showToast('Bus added', 'success');
+
+    } catch (err) {
+        console.error(err);
+        showToast("Failed to add bus", "error");
+    } finally {
+        hideLoader(); // ✅ ALWAYS runs
+    }
 }
 
 // ========== FUEL & TRIP CALCULATOR ==========
@@ -397,10 +441,15 @@ function openLiveTracking() {
 }
 
 async function loadLiveLocations() {
-    const { data } = await window.supabase
-        .from('driver_locations')
-        .select('*');
+    showLoader();
+   const { data, error } = await sb.from('driver_locations').select('*');
 
+if (error) {
+    hideLoader(); 
+  console.error(error);
+  showToast("Failed to load locations", "error");
+  return;
+}
     const container = document.getElementById('trackingList');
 
     container.innerHTML = data.map(d => `
@@ -410,19 +459,8 @@ async function loadLiveLocations() {
             Updated: ${new Date(d.updated_at).toLocaleTimeString()}
         </div>
     `).join('');
+    hideLoader(); 
 }
-
-// REALTIME
-window.supabase
-.channel('locations')
-.on('postgres_changes', {
-    event: 'UPDATE',
-    schema: 'public',
-    table: 'driver_locations'
-}, payload => {
-    loadLiveLocations();
-})
-.subscribe();
 
 
 //==========live maps====
@@ -439,7 +477,7 @@ function initMap() {
 }
 
 async function loadDriverLocationsOnMap() {
-    const { data } = await window.supabase
+    const { data } = await sb
         .from('driver_locations')
         .select('*');
 
@@ -462,7 +500,7 @@ async function loadDriverLocationsOnMap() {
 }
 
 // REALTIME UPDATE
-window.supabase
+sb
 .channel('map-tracking')
 .on('postgres_changes', {
     event: 'UPDATE',
@@ -474,7 +512,7 @@ window.supabase
 .subscribe();
 // ================= REVIEWS =================
 async function loadAllReviews() {
-    const { data } = await window.supabase.from('reviews').select('*');
+    const { data } = await sb.from('reviews').select('*');
 
     document.getElementById('allReviewsList').innerHTML =
         data.map(r => `<div>${r.comment || 'No comment'}</div>`).join('');
@@ -488,7 +526,7 @@ async function changeAdminPassword() {
         return;
     }
 
-    const { error } = await window.supabase.auth.updateUser({
+    const { error } = await sb.auth.updateUser({
         password: newPassword
     });
 
@@ -502,14 +540,30 @@ async function changeAdminPassword() {
 // ================= INIT =================
 document.addEventListener('DOMContentLoaded', () => {
     initRealtimeMessages();
+       initLocationRealtime();
+
 });
+let locationChannel;
+
+function initLocationRealtime() {
+  if (locationChannel) return;
+
+  locationChannel = sb
+    .channel('locations')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'driver_locations'
+    }, () => loadLiveLocations())
+    .subscribe();
+}
 
 let messageChannel;
 
 function initRealtimeMessages() {
   if (messageChannel) return;
 
-  messageChannel = window.supabase
+  messageChannel = sb
     .channel('messages')
     .on('postgres_changes', {
         event: 'INSERT',
