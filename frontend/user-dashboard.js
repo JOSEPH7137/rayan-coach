@@ -744,17 +744,12 @@ async function loadMessages() {
   const { data, error } = await sb
     .from('messages')
     .select('*')
-    .or(`
-      and(sender_id.eq.${currentUser.id},receiver_id.eq.${adminId}),
-      and(sender_id.eq.${adminId},receiver_id.eq.${currentUser.id})
-    `)
+    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${currentUser.id})`)
     .order('created_at', { ascending: true });
 
   if (error) return console.error(error);
 
   const chatBox = document.getElementById("chatMessages");
-  if (!chatBox) return;
-
   chatBox.innerHTML = "";
   data.forEach(displayMessage);
 }

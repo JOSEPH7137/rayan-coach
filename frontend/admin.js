@@ -158,16 +158,16 @@ async function addDriver() {
 
     // 🔍 CHECK IF DRIVER EXISTS
     const { data: existing } = await sb
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single();
+  .from('profiles')
+  .select('id')
+  .eq('email', email)
+  .single();
 
-    if (existing) {
-        hideLoader();
-        showToast("Driver already exists", "error");
-        return;
-    }
+if (existing) {
+  showToast("Driver already exists", "error");
+  hideLoader();
+  return;
+}
 
     const { error } = await sb.from('profiles').insert({
     id: crypto.randomUUID(), // ✅ REQUIRED
@@ -190,7 +190,7 @@ async function addDriver() {
                 <strong>Login Code: ${code}</strong>
             </div>`;
 
-        showToast(`Driver code: ${code}`, 'success');
+        showToast(`Driver Code: ${code}`, 'success');
         loadDrivers();
     }
 
