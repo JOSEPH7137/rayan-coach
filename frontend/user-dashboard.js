@@ -142,18 +142,14 @@ async function loadAdminId() {
     .from('profiles')
     .select('id')
     .eq('role', 'admin')
-    .limit(1);
+    .single();
 
-  if (error) {
-    console.error(error);
+  if (error || !data) {
+    console.error("No admin found!", error);
     return;
   }
 
-  if (data && data.length > 0) {
-    adminId = data[0].id;
-  } else {
-    console.error("No admin found!");
-  }
+  adminId = data.id;
 }
 // Locations list (same as trips)
 const locations = [
@@ -701,6 +697,10 @@ async function sendChatMessage() {
         .from('chat-files')
         .getPublicUrl(data.path).data.publicUrl;
     }
+    if (!adminId) {
+  showToast("Admin not available", "error");
+  return;
+}
   }
 
   // ✅ Save message
@@ -720,7 +720,8 @@ const { error } = await sb.from('messages').insert([
     sender_id: currentUser.id,
     receiver_id: adminId,
     message: input.value || '',
-    file_url: fileUrl || null
+    file_url: fileUrl || null,
+    role: "client"
   }
 ]);
 
@@ -753,14 +754,21 @@ function displayMessage(msg) {
 }
 //=============load messages========
 async function loadMessages() {
-  const { data, error } = await sb
-    .from('messages')
-    .select('*')
-    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${adminId}),and(sender_id.eq.${adminId},receiver_id.eq.${currentUser.id})`)
-    .order('created_at', { ascending: true });
+const { data, error } = await sb
+  .from('messages')
+  .select('*')
+  .or(`
+    and(sender_id.eq.${currentUser.id},receiver_id.eq.${adminId}),
+    and(sender_id.eq.${adminId},receiver_id.eq.${currentUser.id})
+  `)
+  .order('created_at', { ascending: true });
 
   if (error) return console.error(error);
-
+  
+if (!adminId) {
+  console.warn("Admin not ready, skipping messages load");
+  return;
+}
   const chatBox = document.getElementById("chatMessages");
   chatBox.innerHTML = "";
   data.forEach(displayMessage);
