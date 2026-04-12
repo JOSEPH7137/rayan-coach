@@ -138,18 +138,22 @@ let userProfile = null;
 let adminId = null;
 
 async function loadAdminId() {
-  const { data, error } = await sb
-    .from('profiles')
-    .select('id')
-    .eq('role', 'admin')
-    .single();
+ const { data, error } = await sb
+  .from('profiles')
+  .select('id')
+  .eq('role', 'admin');
 
-  if (error || !data) {
-    console.error("No admin found!", error);
-    return;
-  }
+if (error) {
+  console.error(error);
+  return;
+}
 
-  adminId = data.id;
+if (!data || data.length === 0) {
+  console.error("No admin found!");
+  return;
+}
+
+adminId = data[0].id; // ✅ pick first admin
 }
 // Locations list (same as trips)
 const locations = [
