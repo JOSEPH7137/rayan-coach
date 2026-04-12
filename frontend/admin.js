@@ -119,9 +119,7 @@ settings: `<h3>Settings Panel Coming Soon</h3>`,
 
 
 // ================= DRIVER MANAGEMENT =================
-function generateDriverCode() {
-    return Math.floor(1000 + Math.random() * 9000).toString();
-}
+
 function openAddDriverModal() {
     const modal = document.getElementById('addDriverModal');
     const overlay = document.getElementById('modalOverlay');
@@ -154,17 +152,23 @@ async function addDriver() {
         return;
     }
 
-    const code = generateDriverCode();
+    const code = document.getElementById('driverCode').value;
+
+if (!code) {
+  showToast("Driver code required", "error");
+  hideLoader();
+  return;
+}
 
     // 🔍 CHECK IF DRIVER EXISTS
-    const { data: existing } = await sb
+  const { data: existingCode } = await sb
   .from('profiles')
   .select('id')
-  .eq('email', email)
+  .eq('driver_code', code)
   .single();
 
-if (existing) {
-  showToast("Driver already exists", "error");
+if (existingCode) {
+  showToast("Driver code already exists", "error");
   hideLoader();
   return;
 }

@@ -138,13 +138,22 @@ let userProfile = null;
 let adminId = null;
 
 async function loadAdminId() {
-    const { data } = await sb
-  .from('profiles')
-  .select('id')
-  .eq('role', 'admin')
-  .single();
+  const { data, error } = await sb
+    .from('profiles')
+    .select('id')
+    .eq('role', 'admin')
+    .limit(1);
 
-if (data) adminId = data.id;
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    adminId = data[0].id;
+  } else {
+    console.error("No admin found!");
+  }
 }
 // Locations list (same as trips)
 const locations = [
@@ -699,7 +708,10 @@ async function sendChatMessage() {
   showToast("User session not ready", "error");
   return;
 }
-
+if (!adminId) {
+  showToast("Admin not loaded yet", "error");
+  return;
+}
 if (!input.value && !fileInput.files.length) {
   return;
 }
