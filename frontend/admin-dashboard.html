@@ -128,7 +128,19 @@
 
   </main>
 </div>
+<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
 
+<div id="addDriverModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:20px; z-index:1000;">
+    
+    <h3>Add Driver</h3>
+
+    <input id="driverName" placeholder="Name"><br><br>
+    <input id="driverEmail" placeholder="Email"><br><br>
+
+    <button onclick="addDriver()">Save</button>
+    <button onclick="closeAddDriverModal()">Cancel</button>
+
+</div>
 <!-- Google Maps -->
 <div id="map" style="width:100%; height:400px;"></div>
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>

@@ -87,10 +87,13 @@ function loadPageContent(page) {
             <button onclick="addBus()">Add Bus</button>
         `,
 
-        messages: `
-            <h3>Messages</h3>
-            <div id="messagesBox"></div>
-        `,
+      messages: `
+  <h3>Messages</h3>
+  <div id="userList"></div>
+  <div id="adminChat"></div>
+  <input id="adminInput" placeholder="Type message">
+  <button onclick="sendAdminMessage()">Send</button>
+`,
 
         reviews: `<div id="allReviewsList">Loading reviews...</div>`
     };
@@ -442,7 +445,7 @@ function openLiveTracking() {
 
 async function loadLiveLocations() {
     showLoader();
-   const { data, error } = await sb.from('driver_locations').select('*');
+   const { data, error } = await sb.from('driver_earnings').select('*');
 
 if (error) {
     hideLoader(); 
@@ -478,7 +481,7 @@ function initMap() {
 
 async function loadDriverLocationsOnMap() {
     const { data } = await sb
-        .from('driver_locations')
+        .from('driver_earnings')
         .select('*');
 
     data.forEach(driver => {
@@ -505,7 +508,7 @@ sb
 .on('postgres_changes', {
     event: 'UPDATE',
     schema: 'public',
-    table: 'driver_locations'
+    table: 'driver_earnings'
 }, payload => {
     loadDriverLocationsOnMap();
 })
@@ -553,7 +556,7 @@ function initLocationRealtime() {
     .on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
-      table: 'driver_locations'
+      table: 'driver_earnings'
     }, () => loadLiveLocations())
     .subscribe();
 }
