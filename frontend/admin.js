@@ -143,37 +143,59 @@ function closeAddDriverModal() {
 
 async function addDriver() {
     showLoader();
+
     const name = document.getElementById('driverName').value;
     const email = document.getElementById('driverEmail').value;
-   if (!name || !email) {
-    hideLoader(); // ✅ add this
-    showToast("Name and email required", "error");
-    return;
-}
     const salary = document.getElementById('driverSalary')?.value || 0;
+
+    if (!name || !email) {
+        hideLoader();
+        showToast("Name and email required", "error");
+        return;
+    }
 
     const code = generateDriverCode();
 
-    const { error } = await sb.from('profiles').insert({
-         id: crypto.randomUUID(),
-        name,
-        email,
-        role: 'driver',
-        driver_code: code,
-        salary,
-        status: 'active'
-    });
+    // 🔍 CHECK IF DRIVER EXISTS
+    const { data: existing } = await sb
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
 
- if (error) {
-    showToast("Failed to add driver", "error");
-} else {
-    showToast(`Driver created. Code: ${code}`, 'success');
-    loadDrivers();
-}
-    console.log("Generated Code:", code);
+    if (existing) {
+        hideLoader();
+        showToast("Driver already exists", "error");
+        return;
+    }
+
+    const { error } = await sb.from('profiles').insert({
+    id: crypto.randomUUID(), // ✅ REQUIRED
+    name,
+    email,
+    role: 'driver',
+    driver_code: code,
+    salary,
+    status: 'active'
+});
+
+    if (error) {
+        console.error(error);
+        showToast("Failed to add driver", "error");
+    } else {
+        // ✅ SHOW CODE IN UI (NOT CONSOLE)
+        document.getElementById('driversList').innerHTML =
+            `<div class="success-box">
+                Driver Created ✅<br>
+                <strong>Login Code: ${code}</strong>
+            </div>`;
+
+        showToast(`Driver code: ${code}`, 'success');
+        loadDrivers();
+    }
+
     hideLoader();
 }
-
 async function loadDrivers() {
     showLoader();
 
@@ -537,15 +559,7 @@ sb
 async function loadAllReviews() {
  const { data, error } = await sb
     .from('reviews')
-    .select(`
-        comment,
-        rating,
-        buses (
-            name,
-            category,
-            services
-        )
-    `);
+ .select('*')
 
     if (error) {
         console.error(error);

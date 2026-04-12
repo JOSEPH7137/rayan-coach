@@ -5,7 +5,7 @@ if (!sb) {
 }
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
-
+ await loadAdminId();
   try {
     const { data, error } = await sb.auth.getSession();
 
@@ -135,7 +135,17 @@ async function loadProfile() {
 let currentPage = 'dashboard';
 let currentUser = null;
 let userProfile = null;
+let adminId = null;
 
+async function loadAdminId() {
+    const { data } = await sb
+  .from('profiles')
+  .select('id')
+  .eq('role', 'admin')
+  .single();
+
+if (data) adminId = data.id;
+}
 // Locations list (same as trips)
 const locations = [
     'BANGAL', 'GARISSA', 'KANYONYO', 'KITHIMANI', 'KITHYOKA', 
@@ -651,16 +661,13 @@ function initRealtimeChat() {
 
 chatChannel = sb
   .channel('messages')
-  .on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `user_id=eq.${currentUser.id}`
-    },
-    payload => displayMessage(payload.new)
-  )
+ .on('postgres_changes', {
+  event: 'INSERT',
+  schema: 'public',
+  table: 'messages'
+}, payload => {
+  loadMessages();
+})
   .subscribe();
 }
 //=============send message=========
@@ -698,11 +705,10 @@ if (!input.value && !fileInput.files.length) {
 }
 const { error } = await sb.from('messages').insert([
   {
-    user_id: currentUser.id,
+    sender_id: currentUser.id,
     receiver_id: adminId,
     message: input.value || '',
-    file_url: fileUrl || null,
-    role: "client"
+    file_url: fileUrl || null
   }
 ]);
 
@@ -735,19 +741,21 @@ function displayMessage(msg) {
 }
 //=============load messages========
 async function loadMessages() {
-const { data, error } = await sb
-  .from('messages')
-  .select('*')
-  .eq('user_id', currentUser.id)
-  .order('created_at', { ascending: true });
-  
+  const { data, error } = await sb
+    .from('messages')
+    .select('*')
+    .or(`
+      and(sender_id.eq.${currentUser.id},receiver_id.eq.${adminId}),
+      and(sender_id.eq.${adminId},receiver_id.eq.${currentUser.id})
+    `)
+    .order('created_at', { ascending: true });
+
   if (error) return console.error(error);
 
   const chatBox = document.getElementById("chatMessages");
   if (!chatBox) return;
 
   chatBox.innerHTML = "";
-
   data.forEach(displayMessage);
 }
 
