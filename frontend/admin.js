@@ -120,12 +120,8 @@ settings: `<h3>Settings Panel Coming Soon</h3>`,
 
 // ================= DRIVER MANAGEMENT =================
 function generateDriverCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    return Array.from({ length: 8 }, () =>
-        chars[Math.floor(Math.random() * chars.length)]
-    ).join('');
+    return Math.floor(1000 + Math.random() * 9000).toString();
 }
-
 function openAddDriverModal() {
     const modal = document.getElementById('addDriverModal');
     const overlay = document.getElementById('modalOverlay');
@@ -159,6 +155,7 @@ async function addDriver() {
     const code = generateDriverCode();
 
     const { error } = await sb.from('profiles').insert({
+         id: crypto.randomUUID(),
         name,
         email,
         role: 'driver',
@@ -360,7 +357,10 @@ async function sendAdminMessage() {
       hideLoader();
       return;
     }
-
+if (error) {
+    console.error("MESSAGE ERROR:", error);
+    showToast("Failed to send", "error");
+}
     const { error } = await sb.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: selectedUserId,
@@ -535,13 +535,17 @@ sb
 .subscribe();
 // ================= REVIEWS =================
 async function loadAllReviews() {
-    const { data, error } = await sb
-        .from('reviews')
-      .select(`
-    comment,
-    rating,
-    buses(name, category, services)
-`);
+ const { data, error } = await sb
+    .from('reviews')
+    .select(`
+        comment,
+        rating,
+        buses (
+            name,
+            category,
+            services
+        )
+    `);
 
     if (error) {
         console.error(error);
