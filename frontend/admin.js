@@ -170,7 +170,7 @@ async function addDriver() {
     showToast(`Driver created. Code: ${code}`, 'success');
     loadDrivers();
 }
-    
+    console.log("Generated Code:", code);
     hideLoader();
 }
 
