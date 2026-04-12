@@ -14,7 +14,14 @@ function hideLoader() {
 // ================= SESSION CHECK =================
 (async function() {
     showLoader();
-    const { data: { user } } = await sb.auth.getUser();
+    const { data: { session } } = await sb.auth.getSession();
+
+if (!session) {
+    window.location.href = 'auth.html';
+    return;
+}
+
+const user = session.user;
 
     if (!user) {
         hideLoader();
@@ -66,8 +73,14 @@ function loadPageContent(page) {
     const content = document.getElementById('pageContent');
 
     const pages = {
-        dashboard: `<h2>Welcome ${userProfile?.name}</h2>`,
-        
+        dashboard: `<h2>Welcome ${userProfile?.name || 'Admin'}</h2>`,
+              messages: `
+  <h3>Messages</h3>
+  <div id="userList"></div>
+  <div id="adminChat"></div>
+  <input id="adminInput" placeholder="Type message">
+  <button onclick="sendAdminMessage()">Send</button>
+`,
             tracking: `
         <h3>Live Tracking</h3>
         <div id="trackingList">Loading...</div>
@@ -87,13 +100,12 @@ function loadPageContent(page) {
             <button onclick="addBus()">Add Bus</button>
         `,
 
-      messages: `
-  <h3>Messages</h3>
-  <div id="userList"></div>
-  <div id="adminChat"></div>
-  <input id="adminInput" placeholder="Type message">
-  <button onclick="sendAdminMessage()">Send</button>
-`,
+dispatch: `<h3>Dispatch Module Coming Soon</h3>`,
+payments: `<h3>Payments Module Coming Soon</h3>`,
+compliance: `<h3>Compliance Module Coming Soon</h3>`,
+analytics: `<h3>Analytics Dashboard Coming Soon</h3>`,
+audit: `<h3>Audit Logs Coming Soon</h3>`,
+settings: `<h3>Settings Panel Coming Soon</h3>`,
 
         reviews: `<div id="allReviewsList">Loading reviews...</div>`
     };
@@ -167,28 +179,36 @@ async function addDriver() {
 
 async function loadDrivers() {
     showLoader();
-   const { data, error } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('role', 'driver');
 
-if (error) {
-    console.error(error);
-    showToast("Failed to load drivers", "error");
+    const container = document.getElementById('driversList');
+    if (!container) {
+        console.warn("driversList not found");
+        hideLoader();
+        return;
+    }
+
+    const { data, error } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('role', 'driver');
+
+    if (error) {
+        console.error(error);
+        showToast("Failed to load drivers", "error");
+        hideLoader();
+        return;
+    }
+
+    container.innerHTML = data.map(d => `
+        <div class="card">
+            <strong>${d.name}</strong><br>
+            Code: ${d.driver_code}<br>
+            Salary: KES ${d.salary}<br>
+            Status: ${d.status}
+        </div>
+    `).join('');
+
     hideLoader();
-    return;
-}
-    document.getElementById('driversList').innerHTML = `
-        ${data.map(d => `
-            <div>
-                ${d.name} | ${d.driver_code} | KES ${d.salary}
-                <button onclick="suspendDriver('${d.id}')">Suspend</button>
-                <button onclick="fireDriver('${d.id}')">Fire</button>
-                <button onclick="congratulateDriver('${d.id}')">👏</button>
-            </div>
-        `).join('')}
-    `;
-hideLoader();    
 }
 
 async function suspendDriver(id) {
@@ -515,10 +535,27 @@ sb
 .subscribe();
 // ================= REVIEWS =================
 async function loadAllReviews() {
-    const { data } = await sb.from('reviews').select('*');
+    const { data, error } = await sb
+        .from('reviews')
+      .select(`
+    comment,
+    rating,
+    buses(name, category, services)
+`);
+
+    if (error) {
+        console.error(error);
+        return;
+    }
 
     document.getElementById('allReviewsList').innerHTML =
-        data.map(r => `<div>${r.comment || 'No comment'}</div>`).join('');
+        data.map(r => `
+            <div class="card">
+                <strong>${r.buses?.name || 'Bus'}</strong> (${r.buses?.category})<br>
+                ⭐ ${'⭐'.repeat(r.rating || 0)}<br>
+                ${r.comment}
+            </div>
+        `).join('');
 }
 //===============admin password change========
 async function changeAdminPassword() {
